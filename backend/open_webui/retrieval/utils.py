@@ -1,6 +1,7 @@
 #25.5.21 upstage solar llm으로 교체
 #25.5.27 기존 버전에 6.11에서 추가된 BM25 변수 추가
 #25.5.29 gemini 2.5 flash 모델로 수정
+#25.5.30 test
 import logging
 import os
 import re  # 정규표현식 모듈 추가
