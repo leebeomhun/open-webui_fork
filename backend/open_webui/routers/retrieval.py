@@ -1,3 +1,5 @@
+#25.5.29 save_docs_to_vector_db와 _split_qa_pairs 추가, 사용시 qa_chunk: bool = True로 설정해야함
+#25.5.30 업데이트된 0.6.13 버전에 save docs sqlit qa pairs추가
 import json
 import logging
 import mimetypes
@@ -1057,171 +1059,166 @@ async def update_rag_config(
 ####################################
 
 
+def _split_qa_pairs(docs: List[Document]) -> List[Document]:
+    """
+    [질문]…[답변] 구조를 하나의 문서 덩어리로 분리합니다.
+    """
+    pattern = re.compile(r'\[질문\](.*?)\[답변\](.*?)(?=(?:\[질문\])|\Z)', re.DOTALL)
+    new_docs = []
+    for doc in docs:
+        text = doc.page_content
+        for match in pattern.finditer(text):
+            question = match.group(1).strip()
+            answer = match.group(2).strip()
+            combined = f"[질문] {question}\n[답변] {answer}"
+            # 메타데이터는 원본 문서와 동일하게 유지
+            new_docs.append(Document(page_content=combined, metadata=doc.metadata.copy()))
+    return new_docs
+    
+    # """
+    # "--- 페이지 구분선 ---" 을 기준으로 하나의 문서 덩어리로 분리합니다.
+    # """
+    # delimiter = "--- 페이지 구분선 ---"
+    # new_docs: List[Document] = []
+
+    # for doc in docs:
+    #     # 페이지 구분선을 기준으로 분할
+    #     parts = doc.page_content.split(delimiter)
+    #     for part in parts:
+    #         content = part.strip()
+    #         if not content:
+    #             continue
+    #         # 메타데이터는 원본과 동일하게 유지
+    #         new_docs.append(Document(page_content=content, metadata=doc.metadata.copy()))
+
+    # return new_docs
+
 def save_docs_to_vector_db(
     request: Request,
-    docs,
-    collection_name,
+    docs: List[Document],
+    collection_name: str,
     metadata: Optional[dict] = None,
     overwrite: bool = False,
     split: bool = True,
     add: bool = False,
     user=None,
+    qa_chunk: bool = False,   # QA 페어 단위 청크 여부
 ) -> bool:
-    def _get_docs_info(docs: list[Document]) -> str:
-        docs_info = set()
+    def _get_docs_info(docs: List[Document]) -> str:
+        infos = set()
+        for d in docs:
+            md = getattr(d, "metadata", {}) or {}
+            name = md.get("name") or md.get("title") or md.get("source", "")
+            if name:
+                infos.add(name)
+        return ", ".join(infos)
 
-        # Trying to select relevant metadata identifying the document.
-        for doc in docs:
-            metadata = getattr(doc, "metadata", {})
-            doc_name = metadata.get("name", "")
-            if not doc_name:
-                doc_name = metadata.get("title", "")
-            if not doc_name:
-                doc_name = metadata.get("source", "")
-            if doc_name:
-                docs_info.add(doc_name)
+    log = logging.getLogger(__name__)
+    log.info(f"save_docs_to_vector_db: document {_get_docs_info(docs)} {collection_name}")
 
-        return ", ".join(docs_info)
-
-    log.info(
-        f"save_docs_to_vector_db: document {_get_docs_info(docs)} {collection_name}"
-    )
-
-    # Check if entries with the same hash (metadata.hash) already exist
+    # 중복 해시 검사
     if metadata and "hash" in metadata:
-        result = VECTOR_DB_CLIENT.query(
+        res = VECTOR_DB_CLIENT.query(
             collection_name=collection_name,
             filter={"hash": metadata["hash"]},
         )
+        if res is not None and res.ids and res.ids[0]:
+            log.info(f"Document with hash {metadata['hash']} already exists")
+            raise ValueError(ERROR_MESSAGES.DUPLICATE_CONTENT)
 
-        if result is not None:
-            existing_doc_ids = result.ids[0]
-            if existing_doc_ids:
-                log.info(f"Document with hash {metadata['hash']} already exists")
-                raise ValueError(ERROR_MESSAGES.DUPLICATE_CONTENT)
-
+    # 문서 분할
     if split:
-        if request.app.state.config.TEXT_SPLITTER in ["", "character"]:
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=request.app.state.config.CHUNK_SIZE,
-                chunk_overlap=request.app.state.config.CHUNK_OVERLAP,
-                add_start_index=True,
-            )
-        elif request.app.state.config.TEXT_SPLITTER == "token":
-            log.info(
-                f"Using token text splitter: {request.app.state.config.TIKTOKEN_ENCODING_NAME}"
-            )
-
-            tiktoken.get_encoding(str(request.app.state.config.TIKTOKEN_ENCODING_NAME))
-            text_splitter = TokenTextSplitter(
-                encoding_name=str(request.app.state.config.TIKTOKEN_ENCODING_NAME),
-                chunk_size=request.app.state.config.CHUNK_SIZE,
-                chunk_overlap=request.app.state.config.CHUNK_OVERLAP,
-                add_start_index=True,
-            )
+        if qa_chunk:
+            docs = _split_qa_pairs(docs)
         else:
-            raise ValueError(ERROR_MESSAGES.DEFAULT("Invalid text splitter"))
+            splitter_type = request.app.state.config.TEXT_SPLITTER
+            if splitter_type in ["", "character"]:
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=request.app.state.config.CHUNK_SIZE,
+                    chunk_overlap=request.app.state.config.CHUNK_OVERLAP,
+                    add_start_index=True,
+                )
+            elif splitter_type == "token":
+                tiktoken.get_encoding(str(request.app.state.config.TIKTOKEN_ENCODING_NAME))
+                text_splitter = TokenTextSplitter(
+                    encoding_name=str(request.app.state.config.TIKTOKEN_ENCODING_NAME),
+                    chunk_size=request.app.state.config.CHUNK_SIZE,
+                    chunk_overlap=request.app.state.config.CHUNK_OVERLAP,
+                    add_start_index=True,
+                )
+            else:
+                raise ValueError(ERROR_MESSAGES.DEFAULT("Invalid text splitter"))
+            docs = text_splitter.split_documents(docs)
 
-        docs = text_splitter.split_documents(docs)
-
-    if len(docs) == 0:
+    if not docs:
         raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
 
     texts = [doc.page_content for doc in docs]
-    metadatas = [
-        {
-            **doc.metadata,
-            **(metadata if metadata else {}),
-            "embedding_config": json.dumps(
-                {
-                    "engine": request.app.state.config.RAG_EMBEDDING_ENGINE,
-                    "model": request.app.state.config.RAG_EMBEDDING_MODEL,
-                }
-            ),
-        }
-        for doc in docs
-    ]
-
-    # ChromaDB does not like datetime formats
-    # for meta-data so convert them to string.
-    for metadata in metadatas:
-        for key, value in metadata.items():
-            if (
-                isinstance(value, datetime)
-                or isinstance(value, list)
-                or isinstance(value, dict)
-            ):
-                metadata[key] = str(value)
+    metadatas = []
+    for doc in docs:
+        md = {**(doc.metadata or {}), **(metadata or {})}
+        md["embedding_config"] = json.dumps({
+            "engine": request.app.state.config.RAG_EMBEDDING_ENGINE,
+            "model": request.app.state.config.RAG_EMBEDDING_MODEL,
+        })
+        # datetime, list, dict 타입은 문자열로 변환
+        for k, v in list(md.items()):
+            if isinstance(v, (datetime, list, dict)):
+                md[k] = str(v)
+        metadatas.append(md)
 
     try:
+        # 컬렉션 존재 처리
         if VECTOR_DB_CLIENT.has_collection(collection_name=collection_name):
             log.info(f"collection {collection_name} already exists")
-
             if overwrite:
                 VECTOR_DB_CLIENT.delete_collection(collection_name=collection_name)
-                log.info(f"deleting existing collection {collection_name}")
-            elif add is False:
-                log.info(
-                    f"collection {collection_name} already exists, overwrite is False and add is False"
-                )
+                log.info(f"deleted existing collection {collection_name}")
+            elif not add:
+                log.info("overwrite=False and add=False => skipping insert")
                 return True
 
-        log.info(f"adding to collection {collection_name}")
-        embedding_function = get_embedding_function(
+        # 임베딩 함수 생성
+        embedding_fn = get_embedding_function(
             request.app.state.config.RAG_EMBEDDING_ENGINE,
             request.app.state.config.RAG_EMBEDDING_MODEL,
             request.app.state.ef,
-            (
-                request.app.state.config.RAG_OPENAI_API_BASE_URL
-                if request.app.state.config.RAG_EMBEDDING_ENGINE == "openai"
-                else (
-                    request.app.state.config.RAG_OLLAMA_BASE_URL
-                    if request.app.state.config.RAG_EMBEDDING_ENGINE == "ollama"
-                    else request.app.state.config.RAG_AZURE_OPENAI_BASE_URL
-                )
-            ),
-            (
-                request.app.state.config.RAG_OPENAI_API_KEY
-                if request.app.state.config.RAG_EMBEDDING_ENGINE == "openai"
-                else (
-                    request.app.state.config.RAG_OLLAMA_API_KEY
-                    if request.app.state.config.RAG_EMBEDDING_ENGINE == "ollama"
-                    else request.app.state.config.RAG_AZURE_OPENAI_API_KEY
-                )
-            ),
+            request.app.state.config.RAG_OPENAI_API_BASE_URL
+            if request.app.state.config.RAG_EMBEDDING_ENGINE == "openai"
+            else request.app.state.config.RAG_OLLAMA_BASE_URL,
+            request.app.state.config.RAG_OPENAI_API_KEY
+            if request.app.state.config.RAG_EMBEDDING_ENGINE == "openai"
+            else request.app.state.config.RAG_OLLAMA_API_KEY,
             request.app.state.config.RAG_EMBEDDING_BATCH_SIZE,
-            azure_api_version=(
-                request.app.state.config.RAG_AZURE_OPENAI_API_VERSION
-                if request.app.state.config.RAG_EMBEDDING_ENGINE == "azure_openai"
-                else None
-            ),
         )
 
-        embeddings = embedding_function(
-            list(map(lambda x: x.replace("\n", " "), texts)),
+        # 텍스트 전처리 및 임베딩
+        cleaned = [t.replace("\n", " ") for t in texts]
+        embeddings = embedding_fn(
+            cleaned,
             prefix=RAG_EMBEDDING_CONTENT_PREFIX,
             user=user,
         )
 
-        items = [
-            {
+        # 항목 생성 및 삽입
+        items = []
+        for idx, text in enumerate(texts):
+            items.append({
                 "id": str(uuid.uuid4()),
                 "text": text,
                 "vector": embeddings[idx],
                 "metadata": metadatas[idx],
-            }
-            for idx, text in enumerate(texts)
-        ]
+            })
 
         VECTOR_DB_CLIENT.insert(
             collection_name=collection_name,
             items=items,
         )
-
         return True
+
     except Exception as e:
         log.exception(e)
-        raise e
+        raise
 
 
 class ProcessFileForm(BaseModel):

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>KCD Assistant</title>
+    <link>https://kcdassistant.duckdns.org</link>
+    <description>AI 기반 KCD Assistant가 KCD에 대한 정보를 알려줍니다</description>
+    <language>ko-kr</language>
+    <lastBuildDate>Thu, 25 Jan 2024 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://kcdassistant.duckdns.org/feed.xml" rel="self" type="application/rss+xml"/>
+    
+    <item>
+        <title>KCD Assistant 소개</title>
+        <link>https://kcdassistant.duckdns.org/</link>
+        <description>KCD Assistant는 한국질병분류(KCD)에 대한 정보를 쉽게 찾고 이해할 수 있도록 도와주는 AI 기반 도우미입니다.</description>
+        <pubDate>Thu, 25 Jan 2024 00:00:00 GMT</pubDate>
+        <guid>https://kcdassistant.duckdns.org</guid>
+    </item>
+
+    <item>
+        <title>KCD Assistant 채팅</title>
+        <link>https://kcdassistant.duckdns.org</link>
+        <description>AI와 대화하면서 KCD 관련 정보를 쉽게 찾아보세요.</description>
+        <pubDate>Thu, 25 Jan 2024 00:00:00 GMT</pubDate>
+        <guid>https://kcdassistant.duckdns.org</guid>
+    </item>
+</channel>
+</rss> 
