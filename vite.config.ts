@@ -39,5 +39,9 @@ export default defineConfig({
 	},
 	worker: {
 		format: 'es'
+	},
+	server: {
+		host: true,
+		allowedHosts: ['kcdassistant.duckdns.org']
 	}
 });
