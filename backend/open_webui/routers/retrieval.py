@@ -72,8 +72,14 @@ from open_webui.retrieval.utils import (
     get_model_path,
     query_collection,
     query_collection_with_hybrid_search,
-    query_doc,
-    query_doc_with_hybrid_search,
+    # query_doc, # Replaced by query_doc_with_langgraph
+    # query_doc_with_hybrid_search, # Replaced by query_doc_with_langgraph
+    # query_collection, # Replaced by query_collection_with_langgraph
+    # query_collection_with_hybrid_search, # Replaced by query_collection_with_langgraph
+)
+from open_webui.retrieval.langgraph_utils import (
+    query_doc_with_langgraph,
+    query_collection_with_langgraph,
 )
 from open_webui.utils.misc import (
     calculate_sha256_string,
@@ -1922,46 +1928,66 @@ def query_doc_handler(
     user=Depends(get_verified_user),
 ):
     try:
-        if request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
-            collection_results = {}
-            collection_results[form_data.collection_name] = VECTOR_DB_CLIENT.get(
-                collection_name=form_data.collection_name
-            )
-            return query_doc_with_hybrid_search(
-                collection_name=form_data.collection_name,
-                collection_result=collection_results[form_data.collection_name],
-                query=form_data.query,
-                embedding_function=lambda query, prefix: request.app.state.EMBEDDING_FUNCTION(
-                    query, prefix=prefix, user=user
-                ),
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
-                reranking_function=request.app.state.rf,
-                k_reranker=form_data.k_reranker
-                or request.app.state.config.TOP_K_RERANKER,
-                r=(
-                    form_data.r
-                    if form_data.r
-                    else request.app.state.config.RELEVANCE_THRESHOLD
-                ),
-                hybrid_bm25_weight=(
-                    form_data.hybrid_bm25_weight
-                    if form_data.hybrid_bm25_weight
-                    else request.app.state.config.HYBRID_BM25_WEIGHT
-                ),
-                user=user,
-            )
-        else:
-            return query_doc(
-                collection_name=form_data.collection_name,
-                query_embedding=request.app.state.EMBEDDING_FUNCTION(
-                    form_data.query, prefix=RAG_EMBEDDING_QUERY_PREFIX, user=user
-                ),
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
-                user=user,
-            )
+        # Determine hybrid search weight based on ENABLE_RAG_HYBRID_SEARCH and form_data
+        # LangGraph function expects hybrid_bm25_weight directly.
+        # If ENABLE_RAG_HYBRID_SEARCH is false, legacy code effectively used vector search only.
+        # We can achieve this by setting hybrid_bm25_weight to 0.0.
+        # If form_data.hybrid is explicitly False, also use 0.0 (or 1.0 for BM25 only, if that was an option).
+        # For simplicity, we'll rely on the config's hybrid_bm25_weight if hybrid search is enabled.
+
+        hybrid_bm25_weight_to_use = request.app.state.config.HYBRID_BM25_WEIGHT
+        if not request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
+            # If hybrid search is disabled globally, force vector-only or BM25-only based on some logic.
+            # Assuming vector-only is the fallback for "not hybrid".
+            # Or, if form_data.hybrid is False, it implies not using BM25 part of hybrid.
+            # The LangGraph RAGState will handle weights like 0.0 (vector only) or 1.0 (BM25 only).
+             hybrid_bm25_weight_to_use = 0.0 # Default to vector only if hybrid is off
+
+        # If form_data provides a specific hybrid_bm25_weight, it could override the default from config.
+        # However, QueryDocForm does not have hybrid_bm25_weight. It has `hybrid: Optional[bool]`.
+        # Let's assume if form_data.hybrid is False, it means pure vector search (weight=0).
+        # If form_data.hybrid is True or None, use the configured weight.
+        if form_data.hybrid is False: # Explicitly requesting non-hybrid (vector only)
+            hybrid_bm25_weight_to_use = 0.0
+        elif form_data.hybrid is True and not request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
+            # If user wants hybrid but it's disabled, log a warning and proceed with vector only.
+            log.warning("User requested hybrid search, but ENABLE_RAG_HYBRID_SEARCH is false. Proceeding with vector-only search.")
+            hybrid_bm25_weight_to_use = 0.0
+
+
+        result = query_doc_with_langgraph(
+            collection_name=form_data.collection_name,
+            query=form_data.query,
+            embedding_function=request.app.state.EMBEDDING_FUNCTION,
+            k=form_data.k if form_data.k is not None else request.app.state.config.TOP_K,
+            reranking_function=request.app.state.rf,
+            k_reranker=form_data.k_reranker if form_data.k_reranker is not None else request.app.state.config.TOP_K_RERANKER,
+            r_score_threshold=form_data.r if form_data.r is not None else request.app.state.config.RELEVANCE_THRESHOLD,
+            hybrid_bm25_weight=hybrid_bm25_weight_to_use,
+            user=user,
+            request_context=request,
+            # raw_documents_for_bm25_override can be passed if needed for specific scenarios, else None
+        )
+        # The langgraph function now returns the expected dict structure or raises an exception.
+        # We can remove the "logs" from the client response if it was added.
+        if "logs" in result:
+            log.info(f"LangGraph RAG logs for query '{form_data.query}' on '{form_data.collection_name}':\n{json.dumps(result['logs'], indent=2)}")
+            del result["logs"]
+        return result
+
     except Exception as e:
-        log.exception(e)
+        log.exception(f"Error in query_doc_handler with LangGraph: {e}")
+        # If e.args[0] contains the full log, it might be too verbose for client.
+        # Consider logging the full error (including potential logs from LangGraph) here
+        # and returning a more generic or structured error to the client.
+        error_detail = str(e)
+        if "Logs:" in error_detail: # Avoid sending full internal logs to client
+            error_detail = error_detail.split("Logs:")[0].strip()
+
         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, # Or 500 if it's a server-side LangGraph config issue
+            detail=ERROR_MESSAGES.DEFAULT(error_detail),
+        )
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.DEFAULT(e),
         )
@@ -1984,41 +2010,51 @@ def query_collection_handler(
     user=Depends(get_verified_user),
 ):
     try:
-        if request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
-            return query_collection_with_hybrid_search(
-                collection_names=form_data.collection_names,
-                queries=[form_data.query],
-                embedding_function=lambda query, prefix: request.app.state.EMBEDDING_FUNCTION(
-                    query, prefix=prefix, user=user
-                ),
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
-                reranking_function=request.app.state.rf,
-                k_reranker=form_data.k_reranker
-                or request.app.state.config.TOP_K_RERANKER,
-                r=(
-                    form_data.r
-                    if form_data.r
-                    else request.app.state.config.RELEVANCE_THRESHOLD
-                ),
-                hybrid_bm25_weight=(
-                    form_data.hybrid_bm25_weight
-                    if form_data.hybrid_bm25_weight
-                    else request.app.state.config.HYBRID_BM25_WEIGHT
-                ),
-            )
-        else:
-            return query_collection(
-                collection_names=form_data.collection_names,
-                queries=[form_data.query],
-                embedding_function=lambda query, prefix: request.app.state.EMBEDDING_FUNCTION(
-                    query, prefix=prefix, user=user
-                ),
-                k=form_data.k if form_data.k else request.app.state.config.TOP_K,
-            )
+        hybrid_bm25_weight_to_use = request.app.state.config.HYBRID_BM25_WEIGHT
+        if not request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
+            hybrid_bm25_weight_to_use = 0.0
+
+        # Check if form_data.hybrid or form_data.hybrid_bm25_weight can override this
+        if form_data.hybrid is False: # Explicitly vector only
+             hybrid_bm25_weight_to_use = 0.0
+        elif form_data.hybrid_bm25_weight is not None: # User provided specific weight
+             hybrid_bm25_weight_to_use = form_data.hybrid_bm25_weight
+        elif form_data.hybrid is True and not request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
+            log.warning("User requested hybrid search for collection, but ENABLE_RAG_HYBRID_SEARCH is false. Proceeding with vector-only search logic.")
+            hybrid_bm25_weight_to_use = 0.0
+
+
+        result = query_collection_with_langgraph(
+            collection_names=form_data.collection_names,
+            queries=[form_data.query], # LangGraph function currently takes one query for all collections
+            embedding_function=request.app.state.EMBEDDING_FUNCTION,
+            k=form_data.k if form_data.k is not None else request.app.state.config.TOP_K,
+            reranking_function=request.app.state.rf,
+            k_reranker=form_data.k_reranker if form_data.k_reranker is not None else request.app.state.config.TOP_K_RERANKER,
+            r_score_threshold=form_data.r if form_data.r is not None else request.app.state.config.RELEVANCE_THRESHOLD,
+            hybrid_bm25_weight=hybrid_bm25_weight_to_use,
+            user=user,
+            request_context=request,
+        )
+        # Log individual collection logs if needed, then remove from client response
+        if "logs_by_collection" in result:
+            log.info(f"LangGraph RAG logs for multi-collection query '{form_data.query}':\n{json.dumps(result['logs_by_collection'], indent=2)}")
+            del result["logs_by_collection"]
+        return result
 
     except Exception as e:
-        log.exception(e)
+        log.exception(f"Error in query_collection_handler with LangGraph: {e}")
+        error_detail = str(e)
+        if "Logs:" in error_detail: # Avoid sending full internal logs to client
+            error_detail = error_detail.split("Logs:")[0].strip()
+        elif "logs_by_collection" in error_detail: # Also check for this if it gets into exception string
+             error_detail = error_detail.split("logs_by_collection")[0].strip()
+
+
         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, # Or 500
+            detail=ERROR_MESSAGES.DEFAULT(error_detail),
+        )
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.DEFAULT(e),
         )
