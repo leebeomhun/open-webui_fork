@@ -53,6 +53,7 @@ dependencies = [
 
     "langchain==0.3.24",
     "langchain-community==0.3.23",
+    "langgraph", # Added LangGraph dependency
 
     "fake-useragent==2.1.0",
     "chromadb==0.6.3",
