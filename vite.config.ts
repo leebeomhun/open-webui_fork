@@ -42,5 +42,9 @@ export default defineConfig({
 	},
 	esbuild: {
 		pure: ['console.log', 'console.debug']
+	},
+	server: {
+		host: true,
+		allowedHosts: ['kcdassistant.duckdns.org']
 	}
 });
