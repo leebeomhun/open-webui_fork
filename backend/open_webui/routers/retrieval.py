@@ -1242,6 +1242,40 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
 ####################################
 
 
+# QA marker constants
+QUESTION_MARKER = "[질문]"
+ANSWER_MARKER = "[답변]"
+
+
+def _split_qa_pairs(docs: List[Document]) -> Iterator[Document]:
+    """
+    [질문]…[답변] 구조를 하나의 문서 덩어리로 분리합니다.
+    메모리 효율성을 위해 제너레이터를 사용합니다.
+    """
+    qa_pattern = re.compile(
+        r"\[질문\]\s*(.*?)\s*\[답변\]\s*(.*?)(?=\[질문\]|$)", re.DOTALL
+    )
+
+    for doc in docs:
+        if not doc or not doc.page_content:
+            continue
+
+        text = doc.page_content.strip()
+        if not text:
+            continue
+
+        matches = qa_pattern.findall(text)
+        for question, answer in matches:
+            question = question.strip()
+            answer = answer.strip()
+
+            if not question or not answer:
+                continue
+
+            combined = f"{QUESTION_MARKER}\n{question}\n\n{ANSWER_MARKER}\n{answer}"
+            yield Document(page_content=combined, metadata=doc.metadata.copy())
+
+
 def can_merge_chunks(a: Document, b: Document) -> bool:
     if a.metadata.get('source') != b.metadata.get('source'):
         return False
@@ -1418,6 +1452,9 @@ def save_docs_to_vector_db(
                 add_start_index=True,
             )
             docs = text_splitter.split_documents(docs)
+        elif request.app.state.config.TEXT_SPLITTER == "QA":
+            log.info("Using QA pairs text splitter")
+            docs = list(_split_qa_pairs(docs))
         else:
             raise ValueError(ERROR_MESSAGES.DEFAULT('Invalid text splitter'))
 

@@ -776,6 +776,7 @@
 								>
 									<option value="">{$i18n.t('Default')} ({$i18n.t('Character')})</option>
 									<option value="token">{$i18n.t('Token')} ({$i18n.t('Tiktoken')})</option>
+									<option value="QA">{$i18n.t('QA')}</option>
 								</select>
 							</div>
 						</div>
