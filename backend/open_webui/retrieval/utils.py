@@ -3,6 +3,7 @@
 #25.5.29 gemini 2.5 flash 모델로 수정
 #25.5.30 test
 #25.5.30 0.6.13 업데이트내용 추가
+#25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
 import logging
 import os
 import re  # 정규표현식 모듈 추가
@@ -51,7 +52,8 @@ from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.retrievers import BaseRetriever
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("upstageapikey", "AIzaSyCbqxkKfTCtZib1RbHjFbH9S0jJu56GgyQ")
+OPENAI_API_KEY = os.getenv("GEMINIAPIKEY", "")
+apikeyopenai = os.getenv("OPENAI_API_KEY", "")
 
 async def process_queries_async(queries: List[str], openai_key: Optional[str] = None) -> List[str]:
     """여러 쿼리를 병렬로 처리하는 비동기 함수"""
@@ -1398,31 +1400,151 @@ def get_hybrid_search_results_without_reranking(
     except Exception as e:
         raise e
 
+def parse_and_rerank(
+    llm_output: str,
+    document_objects: List[Document],
+    reranking_query_context: str,
+    k: int,
+    log
+) -> Dict[str, Any]:
+    reranked_docs = []
+    parsed_rankings = []
+
+    # 줄 단위로 분리하고 패턴 매칭
+    for line in llm_output.split('\n'):
+        match = re.match(r'(\d+)[.,]\s*(\d+)[.,]\s*(\d+\.?\d*)[.,]?(.*)', line)
+        if match:
+            rank, doc_num, llm_score, reason = match.groups()
+            parsed_rankings.append({
+                'rank': int(rank),
+                'doc_num': int(doc_num),
+                'score': float(llm_score),
+                'reason': reason.strip()
+            })
+
+    # 파싱 실패 시 대체 패턴 시도
+    if not parsed_rankings:
+        doc_nums = re.findall(r'(?:^|\D)(\d+)(?:\D|$)', llm_output)
+        if doc_nums:
+            seen = set()
+            for num in doc_nums:
+                num = int(num)
+                if 1 <= num <= len(document_objects) and num not in seen:
+                    seen.add(num)
+                    parsed_rankings.append({
+                        'rank': len(parsed_rankings) + 1,
+                        'doc_num': num,
+                        'score': 10.0 - (len(parsed_rankings) * 0.5),  # 임의 점수 부여
+                        'reason': "LLM이 선택한 문서"
+                    })
+
+    # 파싱된 결과로 문서 재정렬
+    if parsed_rankings:
+        for ranking in sorted(parsed_rankings, key=lambda x: x['rank']):
+            doc_idx = ranking['doc_num'] - 1
+            if 0 <= doc_idx < len(document_objects):
+                doc = document_objects[doc_idx]
+                original_index = doc.metadata.get('original_index', 0)
+                llm_rank = ranking['rank']
+                rank_diff = abs(original_index + 1 - llm_rank)
+                base_score = min(ranking['score'] / 10.0, 1.0)
+                penalty_factor = min(0.5, rank_diff * 0.03)
+                adjusted_score = base_score * (1.0 - penalty_factor)
+                if doc.metadata is None:
+                    doc.metadata = {}
+                doc.metadata['score'] = adjusted_score
+                doc.metadata['base_score'] = base_score
+                doc.metadata['rank_penalty'] = penalty_factor
+                doc.metadata['llm_reason'] = ranking['reason']
+                doc.metadata['llm_rank'] = ranking['rank']
+                reranked_docs.append(doc)
+
+        mentioned_indices = set(r['doc_num'] - 1 for r in parsed_rankings)
+        for i, doc in enumerate(document_objects):
+            if i not in mentioned_indices:
+                if doc.metadata is None:
+                    doc.metadata = {}
+                doc.metadata['score'] = 0.3
+                doc.metadata['llm_reason'] = "LLM이 관련성이 낮다고 판단한 문서"
+                reranked_docs.append(doc)
+
+        if len(reranked_docs) < 5 and len(document_objects) > len(reranked_docs):
+            added_indices = set(mentioned_indices)
+            for i, doc in enumerate(document_objects):
+                if i not in added_indices and len(reranked_docs) < 5:
+                    if doc.metadata is None:
+                        doc.metadata = {}
+                    doc.metadata['score'] = 0.2
+                    doc.metadata['llm_reason'] = "추가된 문서"
+                    reranked_docs.append(doc)
+
+        total_reranked_docs = len(reranked_docs)
+        if len(reranked_docs) > 5:
+            log.info(f"리랭킹된 전체 문서 {len(reranked_docs)}개 중 상위 5개만 반환합니다.")
+            reranked_docs = reranked_docs[:5]
+
+        rerank_details = []
+        for i, doc in enumerate(reranked_docs):
+            content_preview = doc.page_content[:30].replace('\n', ' ')
+            if len(doc.page_content) > 30:
+                content_preview += "..."
+            score = doc.metadata.get("score", "N/A")
+            base_score = doc.metadata.get("base_score", score)
+            rank_penalty = doc.metadata.get("rank_penalty", 0)
+            llm_rank = doc.metadata.get("llm_rank", "N/A")
+            llm_reason = doc.metadata.get("llm_reason", "N/A")
+            original_index = doc.metadata.get("original_index", "N/A")
+            query_info = f" (쿼리 컨텍스트: {reranking_query_context[:30]}...)" if reranking_query_context else ""
+            score_info = f"{f'{score:.2f}' if isinstance(score, float) else score}"
+            if isinstance(base_score, float) and isinstance(rank_penalty, float) and rank_penalty > 0:
+                score_info += f" (원래: {base_score:.2f}, 패널티: {rank_penalty:.2f})"
+            rerank_details.append(
+                f"\n  {i+1}. [원래순위: {original_index + 1 if isinstance(original_index, int) else original_index}, "
+                f"LLM순위: {llm_rank}, 점수: {score_info}]{query_info}\n"
+                f"     내용: {content_preview}\n"
+                f"     이유: {llm_reason[:80] + '...' if len(llm_reason) > 80 else llm_reason}"
+            )
+
+        result = {
+            "distances": [[d.metadata.get("score", 0.5) for d in reranked_docs]],
+            "documents": [[d.page_content for d in reranked_docs]],
+            "metadatas": [[d.metadata for d in reranked_docs]],
+        }
+
+        log.info(f"LLM 리랭킹 완료: 총 {total_reranked_docs}개 문서 중 {len(reranked_docs)}개 반환 - {''.join(rerank_details)}")
+        return result
+    else:
+        # 파싱 실패 시 원본 결과 반환 (혹은 적절한 fallback)
+        log.warning("LLM 파싱 실패: 원본 결과 반환")
+        return None
+
 def perform_llm_reranking(
     combined_results: dict,
-    original_query: list[str],
+    original_query: list,
     k: int,
     r: float,
     openai_key: str,
+    log=None,  # log 인자 추가 (기본값 None)
 ) -> dict:
     """통합된 검색 결과에 대해 LLM 기반 리랭킹 수행"""
     try:
+        if log is None:
+            import logging
+            log = logging.getLogger("llm_rerank")
+
         # 필요한 데이터 추출
         docs = combined_results["documents"][0]
         metas = combined_results["metadatas"][0]
-        
-        # 최대 문서 수 제한 (LLM 컨텍스트 길이 제한)
-        # k 값을 사용하되, LLM 컨텍스트 길이 제한을 고려한 안전한 최대값(20)도 함께 적용
-        SAFE_MAX_DOCS = 20  # LLM 컨텍스트 길이를 고려한 안전한 최대값
+
+        SAFE_MAX_DOCS = 20
         max_docs_for_reranking = min(SAFE_MAX_DOCS, k*3, len(docs))
         log.info(f"리랭킹을 위한 문서 수: {max_docs_for_reranking}개 (요청: {k}, 안전 최대값: {SAFE_MAX_DOCS})")
         selected_docs = docs[:max_docs_for_reranking]
         selected_metas = metas[:max_docs_for_reranking]
-        
+
         # Document 객체 생성
         document_objects = []
         for i, (doc_content, meta) in enumerate(zip(selected_docs, selected_metas)):
-            # 원래 인덱스를 메타데이터에 저장
             if meta is None:
                 meta = {}
             meta['original_index'] = i
@@ -1432,12 +1554,7 @@ def perform_llm_reranking(
                     metadata=meta
                 )
             )
-        
-        # 임베딩 기반 유사도 계산 없이 직접 LLM 재랭킹 수행
-        # OpenAI API 호출 준비
-        log.info(f"통합된 {len(document_objects)}개 문서에 대해 LLM 리랭킹 시작")
-        
-        # 시스템 프롬프트 설정
+
         system_prompt = """역할: 당신은 사용자의 질병명 또는 암 관련 정보 쿼리에 대해 검색된 문서가 KCD 코드(한국표준질병사인분류) 또는 **암등록 관련 정보(T코드, M코드, 분화도, 편측성, SEER 코드 등)**를 얼마나 정확하고 유용하게 제공하는지 판단하는 전문가입니다.
         
 목표: 주어진 쿼리(질병명, 암 관련 설명 등)와 검색 결과 문서들을 분석하여, 쿼리의 의도(특정 KCD 코드 또는 암등록 정보 획득)에 가장 부합하는 문서를 관련성 높은 순서대로 번호를 나열하고 평가합니다.
@@ -1483,206 +1600,73 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
 4,2,2.0,유사 질병명에 대한 정보만 포함하고 있으며, 쿼리에 대한 직접적인 KCD 코드 정보 없음.
 """
 
-        # 사용자 프롬프트 준비
         reranking_query_context = " | ".join(original_query)
         user_prompt = f"쿼리: {reranking_query_context}\n\n"
-        
-        # 쿼리의 주요 키워드 추출
+
         query_keywords = [word for q in original_query if isinstance(q, str) for word in q.lower().split() if len(word) > 2]
-        
-        # 문서 내용 포함
+
         for i, doc in enumerate(document_objects):
-            # 문서 내용 전처리 (너무 길면 잘라내기)
             content = doc.page_content
             if len(content) > 500:
                 content = content[:500] + "..."
-                
             user_prompt += f"문서 {i+1}:\n{content}\n\n"
-        
         user_prompt += "위 문서들을 쿼리와의 관련성에 따라 재평가하고 순위를 매겨주세요."
-        
+
+        llm_output = None
+
+        # Gemini 우선 시도
         try:
-            # OpenAI API 호출
             response = requests.post(
                 "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {openai_key}"
-                },
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_key}"},
                 json={
-                    "model": "gemini-2.5-flash-preview-05-20",  # 더 가벼운 모델 사용
+                    "model": "gemini-2.5-flash-preview-05-20",
                     "reasoning_effort": "none",
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    "temperature": 0,  # 일관된 결과를 위해 temperature 0
+                    "temperature": 0,
                 }
             )
-            
             response.raise_for_status()
-            result = response.json()["choices"][0]["message"]["content"].strip()
-            log.debug(f"LLM 응답: {result[:200]}...")
-            
-            # 응답 파싱 및 재정렬
-            import re
-            
-            reranked_docs = []
-            parsed_rankings = []
-            
-            # 줄 단위로 분리하고 패턴 매칭
-            for line in result.split('\n'):
-                # 순위,문서번호,점수,이유 패턴 찾기
-                match = re.match(r'(\d+)[.,]\s*(\d+)[.,]\s*(\d+\.?\d*)[.,]?(.*)', line)
-                if match:
-                    rank, doc_num, llm_score, reason = match.groups()
-                    parsed_rankings.append({
-                        'rank': int(rank),
-                        'doc_num': int(doc_num),
-                        'score': float(llm_score),
-                        'reason': reason.strip()
-                    })
-            
-            # 파싱 실패 시 대체 패턴 시도
-            if not parsed_rankings:
-                # 문서 번호만 추출 시도
-                doc_nums = re.findall(r'(?:^|\D)(\d+)(?:\D|$)', result)
-                if doc_nums:
-                    seen = set()
-                    for num in doc_nums:
-                        num = int(num)
-                        if 1 <= num <= len(document_objects) and num not in seen:
-                            seen.add(num)
-                            parsed_rankings.append({
-                                'rank': len(parsed_rankings) + 1,
-                                'doc_num': num,
-                                'score': 10.0 - (len(parsed_rankings) * 0.5),  # 임의 점수 부여
-                                'reason': "LLM이 선택한 문서"
-                            })
-            
-            # 파싱된 결과로 문서 재정렬
-            log.info(f"파싱된 LLM 평가 결과: {len(parsed_rankings)}개")
-            if parsed_rankings:
-                # 새 점수 계산 및 문서 재정렬
-                for ranking in sorted(parsed_rankings, key=lambda x: x['rank']):
-                    doc_idx = ranking['doc_num'] - 1
-                    if 0 <= doc_idx < len(document_objects):
-                        doc = document_objects[doc_idx]
-                        
-                        # 원래 순위와 LLM 순위 차이 계산
-                        original_index = doc.metadata.get('original_index', 0)
-                        llm_rank = ranking['rank']
-                        rank_diff = abs(original_index + 1 - llm_rank)  # original_index는 0-based이므로 +1
-                        
-                        # 새 점수: LLM 점수를 0-1 범위로 정규화
-                        base_score = min(ranking['score'] / 10.0, 1.0)
-                        
-                        # 순위 차이에 따른 패널티 계산
-                        # 차이가 클수록 더 큰 패널티 적용 (최대 70%까지 감소)
-                        penalty_factor = min(0.5, rank_diff * 0.03)  # 차이 1당 3% 감소, 최대 50%
-                        
-                        # 패널티 적용된 최종 점수 계산
-                        adjusted_score = base_score * (1.0 - penalty_factor)
-                        
-                        # 로그에 점수 조정 정보 기록
-                        log.debug(f"순위 차이에 따른 점수 조정: 원래순위={original_index+1}, LLM순위={llm_rank}, "
-                                 f"차이={rank_diff}, 원래점수={base_score:.2f}, 패널티={penalty_factor:.2f}, "
-                                 f"조정점수={adjusted_score:.2f}")
-                        
-                        # 메타데이터에 LLM 평가 이유 추가
-                        if doc.metadata is None:
-                            doc.metadata = {}
-                        doc.metadata['score'] = adjusted_score
-                        doc.metadata['base_score'] = base_score  # 원래 LLM 점수도 저장
-                        doc.metadata['rank_penalty'] = penalty_factor  # 패널티 정보 저장
-                        doc.metadata['llm_reason'] = ranking['reason']
-                        doc.metadata['llm_rank'] = ranking['rank']
-                        reranked_docs.append(doc)
-                
-                # LLM이 언급하지 않은 문서들 처리
-                mentioned_indices = set(r['doc_num'] - 1 for r in parsed_rankings)
-                for i, doc in enumerate(document_objects):
-                    if i not in mentioned_indices:
-                        # LLM이 언급하지 않은 문서는 원래 점수의 절반으로 감소시키고 맨 뒤로
-                        if doc.metadata is None:
-                            doc.metadata = {}
-                        doc.metadata['score'] = 0.3  # 낮은 점수 부여
-                        doc.metadata['llm_reason'] = "LLM이 관련성이 낮다고 판단한 문서"
-                        reranked_docs.append(doc)
-                
-                # 결과가 k보다 적으면 원본 문서에서 추가
-                if len(reranked_docs) < 5 and len(document_objects) > len(reranked_docs):
-                    added_indices = set(mentioned_indices)
-                    for i, doc in enumerate(document_objects):
-                        if i not in added_indices and len(reranked_docs) < 5:
-                            if doc.metadata is None:
-                                doc.metadata = {}
-                            doc.metadata['score'] = 0.2
-                            doc.metadata['llm_reason'] = "추가된 문서"
-                            reranked_docs.append(doc)
-                
-                # 전체 문서 수 기록 (로깅용)
-                total_reranked_docs = len(reranked_docs)
-                
-                # 최종 결과를 k개로 제한 (요청된 k 값에 따라)
-                if len(reranked_docs) > 5:
-                    log.info(f"리랭킹된 전체 문서 {len(reranked_docs)}개 중 상위 5개만 반환합니다.")
-                    reranked_docs = reranked_docs[:5]
-                
-                # 로깅 상세화: 각 문서에 대한 리랭킹 결과 출력 (k개로 제한된 후)
-                rerank_details = []
-                for i, doc in enumerate(reranked_docs):
-                    # 문서 내용 짧게 요약 (첫 30자와 마지막 20자)
-                    content_preview = doc.page_content[:30].replace('\n', ' ')
-                    if len(doc.page_content) > 30:
-                        content_preview += "..."
-                    
-                    # 메타데이터에서 필요한 정보 추출
-                    score = doc.metadata.get("score", "N/A")
-                    base_score = doc.metadata.get("base_score", score)
-                    rank_penalty = doc.metadata.get("rank_penalty", 0)
-                    llm_rank = doc.metadata.get("llm_rank", "N/A")
-                    llm_reason = doc.metadata.get("llm_reason", "N/A")
-                    original_index = doc.metadata.get("original_index", "N/A")
-                    
-                    # 원본 쿼리 정보 (있으면 포함)
-                    # original_query = doc.metadata.get("original_query", "")
-                    query_info = f" (쿼리 컨텍스트: {reranking_query_context[:30]}...)" if reranking_query_context else ""
-                    
-                    # 점수 조정 정보 추가
-                    score_info = f"{f'{score:.2f}' if isinstance(score, float) else score}"
-                    if isinstance(base_score, float) and isinstance(rank_penalty, float) and rank_penalty > 0:
-                        score_info += f" (원래: {base_score:.2f}, 패널티: {rank_penalty:.2f})"
-                    
-                    # 문서 상세 정보 추가 (원래순위는 0부터 시작하므로 +1)
-                    rerank_details.append(
-                        f"\n  {i+1}. [원래순위: {original_index + 1 if isinstance(original_index, int) else original_index}, "
-                        f"LLM순위: {llm_rank}, 점수: {score_info}]{query_info}\n"
-                        f"     내용: {content_preview}\n"
-                        f"     이유: {llm_reason[:80] + '...' if len(llm_reason) > 80 else llm_reason}"
-                    )
-                
-                # 결과 변환
-                result = {
-                    "distances": [[d.metadata.get("score", 0.5) for d in reranked_docs]],
-                    "documents": [[d.page_content for d in reranked_docs]],
-                    "metadatas": [[d.metadata for d in reranked_docs]],
-                }
-                
-                # 상세 로그 출력
-                log.info(f"LLM 리랭킹 완료: 총 {total_reranked_docs}개 문서 중 {len(reranked_docs)}개 반환 - {''.join(rerank_details)}")
-                return result
+            llm_output = response.json()["choices"][0]["message"]["content"].strip()
+            log.debug(f"Gemini 응답 수신 성공")
         except Exception as e:
-            log.error(f"OpenAI API 호출 오류: {e}")
-            # OpenAI API 오류 시 원본 결과 반환
-            raise e
-            
-        # 모든 처리가 실패한 경우 원본 결과 반환
-        return combined_results
-        
+            log.warning(f"Gemini 호출 실패 ({e}), OpenAI로 폴백 시도")
+            try:
+                response = requests.post(
+                    "https://api.openai.com/v1/responses",
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {apikeyopenai}"
+                    },
+                    json={
+                        "model": "gpt-4.1-mini",
+                        "input": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        "temperature": 0,
+                    }
+                )
+                response.raise_for_status()
+                llm_output = response.json()["output"][0]["content"][0]["text"].strip()
+                log.debug(f"OpenAI 응답 수신 성공")
+            except Exception as e2:
+                log.error(f"OpenAI API 호출 오류: {e2}")
+                return combined_results
+
+        # 공통 파싱/리랭킹/로그출력
+        result = parse_and_rerank(llm_output, document_objects, reranking_query_context, k, log)
+        if result is not None:
+            return result
+        else:
+            return combined_results
+
     except Exception as e:
-        log.error(f"LLM 리랭킹 오류: {e}")
-        # 오류 발생 시 원본 결과 반환
+        if log:
+            log.error(f"LLM 리랭킹 오류: {e}")
         return combined_results
 
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
