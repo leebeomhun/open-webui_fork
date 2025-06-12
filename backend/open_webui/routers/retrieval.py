@@ -4,6 +4,7 @@ import mimetypes
 import os
 import shutil
 import asyncio
+import re
 
 import re
 import uuid
