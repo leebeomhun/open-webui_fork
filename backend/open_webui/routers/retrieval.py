@@ -1,12 +1,14 @@
 #25.5.29 save_docs_to_vector_db와 _split_qa_pairs 추가, 사용시 qa_chunk: bool = True로 설정해야함
 #25.5.30 업데이트된 0.6.13 버전에 save docs sqlit qa pairs추가
 #25.6.11 업데이트된 0.6.14 버전에 추가
+#25.6.12 import re 추가
 import json
 import logging
 import mimetypes
 import os
 import shutil
 import asyncio
+import re
 
 
 import uuid
@@ -1131,7 +1133,7 @@ def save_docs_to_vector_db(
     split: bool = True,
     add: bool = False,
     user=None,
-    qa_chunk: bool = False,   # QA 페어 단위 청크 여부
+    qa_chunk: bool = False,   # QA 페어 단위 청크 여부 True로 설정시 qa_chunk로 저장장
 ) -> bool:
     def _get_docs_info(docs: List[Document]) -> str:
         infos = set()
