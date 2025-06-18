@@ -4,6 +4,7 @@
 #25.5.30 test
 #25.5.30 0.6.13 업데이트내용 추가
 #25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
+#25.6.18 gemini model 쿼리확장 -gemini-2.5-flash-lite-preview-06-17 변경, 리랭킹 gemini-2.5-flash로 변경
 import logging
 import os
 import re
@@ -262,7 +263,7 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
                 "Authorization": f"Bearer {api_key}"
             },
             json={
-                "model": "gemini-2.5-flash-preview-05-20",
+                "model": "gemini-2.5-flash-lite-preview-06-17",
                 "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": """당신은 한국표준질병사인분류(KCD, Korean Classification of Diseases) 진단 코드 및 의학용어(의학약어) 전문가입니다.
@@ -360,7 +361,7 @@ async def enhance_query(query: str, openai_key: Optional[str] = None) -> list[st
                 "Authorization": f"Bearer {api_key}"
             },
             json={
-                "model": "gemini-2.5-flash-preview-05-20",
+                "model": "gemini-2.5-flash-lite-preview-06-17",
                 "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": """당신은 의학 및 일반 검색 쿼리 향상 전문가입니다.
@@ -2276,7 +2277,7 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
                 "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
                 headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_key}"},
                 json={
-                    "model": "gemini-2.5-flash-preview-05-20",
+                    "model": "gemini-2.5-flash",
                     "reasoning_effort": "none",
                     "messages": [
                         {"role": "system", "content": system_prompt},
