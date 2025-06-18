@@ -1057,7 +1057,7 @@
 	"Read Aloud": "읽어주기",
 	"Reason": "",
 	"Reasoning Effort": "추론 난이도",
-	"Record": "녹음음",
+	"Record": "녹음",
 	"Record voice": "음성 녹음",
 	"Redirecting you to Open WebUI Community": "OpenWebUI 커뮤니티로 리디렉션 중",
 	"Reduces the probability of generating nonsense. A higher value (e.g. 100) will give more diverse answers, while a lower value (e.g. 10) will be more conservative.": "넌센스를 생성할 확률을 줄입니다. 값이 높을수록(예: 100) 더 다양한 답변을 제공하는 반면, 값이 낮을수록(예: 10) 더 보수적입니다.",
