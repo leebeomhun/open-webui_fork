@@ -5,6 +5,7 @@
 #25.5.30 0.6.13 업데이트내용 추가
 #25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
+#25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
 import logging
 import os
 import re
@@ -267,64 +268,66 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
                 "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": """당신은 한국표준질병사인분류(KCD, Korean Classification of Diseases) 진단 코드 및 의학용어(의학약어) 전문가입니다.
-주어진 의료 약어(영문 또는 국문)에 대해 KCD 진단 코드의 맥락에서 가장 일반적으로 사용되는 공식적인 풀네임(Full term)만 반환하세요.
 
-약어가 여러 의미를 가질 수 있을 때는 가장 흔히 사용되는 진단명을 기준으로 반환합니다.
-약어가 아니라 문장 형태의 입력이 들어오면 입력된 내용을 그대로 반환합니다.
-아무 입력도 없으면 빈 문자열을 반환합니다.
-추가적인 설명이나 문장은 포함하지 마십시오.
-입력된 값이 이미지의 백터 값등 상당히 긴 문자열의 나열일 경우에는 아무것도 반환하지않습니다
+입력된 내용에 따라 다음 규칙에 맞춰 응답하세요.
 
+1. 의료 약어 처리
+입력이 의료 약어(영문 또는 국문)일 경우, KCD 진단 코드의 맥락에서 가장 일반적으로 사용되는 공식적인 풀네임(Full term) '만' 반환합니다.
+약어가 여러 의미를 가질 수 있을 때는 가장 흔히 사용되는 진단명을 기준으로 합니다.
+추가적인 설명이나 문장은 절대 포함하지 마십시오.
+
+2. 문장 요약
+입력이 문장 형태의 질문이나 서술일 경우, 핵심 내용을 명확하고 간결한 형태(핵심 키워드 중심)로 추출하여 요약합니다.
+문장에 "코드", "환자", "KCD" 등의 단어가 포함되어 있다면 해당 단어는 제외하고 핵심 내용만 추출합니다.
+
+3. 예외 처리
+다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **빈 문자열("")**을 반환합니다.
+이미 완전한 형태의 단일 의학용어 (예: folliculitis)
+아무 입력이 없는 경우
+의미를 알 수 없는 긴 문자열 나열 (예: 이미지 벡터 값 등)
 예시:
-입력:
-MM
-출력:
-Multiple Myeloma
 
-입력:
-AKI
-출력:
-Acute Kidney Injury
+(규칙 1: 의료 약어 처리)
+입력: MM
+출력: Multiple Myeloma
 
-입력:
-DM
-출력:
-Diabetes Mellitus
+입력: AKI
+출력: Acute Kidney Injury
 
-입력:
-pcp
-출력:
-Pneumocystis Pneumonia
+입력: DM
+출력: Diabetes Mellitus
 
-입력:
-pjp
-출력:
-Pneumocystis jirovecii pneumonia
+입력: pcp
+출력: Pneumocystis Pneumonia
 
-입력:
-hCCA
-출력:
-Hilar Cholangiocarcinoma
+입력: pjp
+출력: Pneumocystis jirovecii pneumonia
 
-입력:
-Not a medical term
-출력:
-Not a medical term
+입력: hCCA
+출력: Hilar Cholangiocarcinoma
 
-입력:
-"" (empty input)
-출력:
-"" (empty input)
+(규칙 2: 문장 요약)
+입력: soft tissue cancer의 skin invasion의 seer코드 알려줘
+출력: 연부조직암 피부 침범 SEER
 
-입력:
-soft tissue cancer의 skin invasion의 seer코드 알려줘
-출력:
-soft tissue cancer의 skin invasion의 seer코드 알려줘
+입력: 코로나 바이러스 감염 후 폐렴 진단 받았는데 KCD 코드가 뭔가요?
+출력: 코로나19 감염 후 폐렴 
 
-입력:
-+16Tc6Y8OjWCWcNpbF9ssU8DKAdrqu44XGBwOKzfgv8AHC88J/Bv4p+DNK8HJrkWuTRXv237J5ttaRSZQvdqVbcIcK0ZGNrc8cUhc5ag8afAq3/ZNbRD4LuJvElxqr20upXCbo4tSCht8d0o3RoYcBYyBmofiP8AEv4W6h+~
-출력:
-"" (empty input)
+(규칙 3: 예외 처리)
+입력: folliculitis
+출력: ""
+
+입력: 상세불명의 위염
+출력: ""
+
+입력: multiple myeloma
+출력: ""
+
+입력: "" (빈 입력)
+출력: ""
+
+입력: +16Tc6Y8OjWCWcNpbF9ssU8DKAdrqu44XGBwOKzfgv8AHC88J/Bv4p+DNK8HJrkWuTRXv237J5ttaRSZQvdqVbcIcK0ZGNrc8cUhc5ag8afAq3/ZNbRD4LuJvElxqr20upXCbo4tSCht8d0o3RoYcBYyBmofiP8AEv4W6h+~
+출력: ""
 """},
                     {"role": "user", "content": query}
                 ],
