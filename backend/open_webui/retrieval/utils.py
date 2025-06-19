@@ -273,10 +273,12 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
 입력이 문장 형태의 질문이나 서술일 경우, 핵심 내용을 명확하고 간결한 형태(핵심 키워드 중심)로 추출하여 요약합니다.
 문장에 "코드", "환자", "KCD" 등의 단어가 포함되어 있다면 해당 단어는 제외하고 핵심 내용만 추출합니다.
 
-3. 예외 처리
-다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **빈 문자열("")**을 반환합니다.
+3. 예외 처리 1
+다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **원본 문자열을 그대로** 반환합니다.
 이미 완전한 형태의 단일 의학용어 (예: folliculitis)
-아무 입력이 없는 경우
+
+예외 처리 2
+다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **빈 문자열("")**을 반환합니다.
 의미를 알 수 없는 긴 문자열 나열 (예: 이미지 벡터 값 등)
 예시:
 
@@ -308,16 +310,19 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
 
 (규칙 3: 예외 처리)
 입력: folliculitis
-출력: ""
+출력: folliculitis
 
 입력: 상세불명의 위염
-출력: ""
+출력: 상세불명의 위염
 
 입력: multiple myeloma
-출력: ""
+출력: multiple myeloma
 
-입력: "" (빈 입력)
-출력: ""
+입력: Multiple myeloma
+출력: Multiple myeloma
+
+입력: Diabetes Mellitus
+출력: Diabetes Mellitus
 
 입력: +16Tc6Y8OjWCWcNpbF9ssU8DKAdrqu44XGBwOKzfgv8AHC88J/Bv4p+DNK8HJrkWuTRXv237J5ttaRSZQvdqVbcIcK0ZGNrc8cUhc5ag8afAq3/ZNbRD4LuJvElxqr20upXCbo4tSCht8d0o3RoYcBYyBmofiP8AEv4W6h+~
 출력: ""
