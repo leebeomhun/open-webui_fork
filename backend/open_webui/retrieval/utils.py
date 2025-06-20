@@ -6,32 +6,32 @@
 #25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
-import logging
-import os
-import re
-import json
-from typing import Any, Awaitable, Dict, List, Optional, Tuple, Union
-
-import asyncio
-import requests
-import aiohttp
+#25.6.22 쿼리향상, 리랭킹 api 호출로 변경
+#25.6.26 임베딩 생략을 통한 직접 파일 업로드 최적화, v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용)
+import httpx
 import asyncio
 import hashlib
-from concurrent.futures import ThreadPoolExecutor
-from dotenv import load_dotenv
+import json
+import logging
+import os
+import operator
+import re
+import requests
 import time
-from functools import wraps
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from functools import wraps
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Awaitable
 
 from urllib.parse import quote
+from dotenv import load_dotenv
 from huggingface_hub import snapshot_download
+
 from langchain_classic.retrievers import (
     ContextualCompressionRetriever,
     EnsembleRetriever,
 )
 from langchain_community.retrievers import BM25Retriever
-from langchain_core.documents import Document
-
 from open_webui.config import VECTOR_DB
 from open_webui.retrieval.vector.factory import VECTOR_DB_CLIENT
 
@@ -52,49 +52,47 @@ from open_webui.utils.misc import get_message_list
 from open_webui.retrieval.web.utils import get_web_loader
 from open_webui.retrieval.loaders.youtube import YoutubeLoader
 
+from langchain_core.callbacks import (
+    CallbackManagerForRetrieverRun,
+    Callbacks,
+)
+from langchain_core.documents import BaseDocumentCompressor, Document
+from langchain_core.retrievers import BaseRetriever
 
+from open_webui.config import (
+    RAG_EMBEDDING_QUERY_PREFIX,
+    RAG_EMBEDDING_CONTENT_PREFIX,
+    RAG_EMBEDDING_PREFIX_FIELD_NAME,
+)
 from open_webui.env import (
     AIOHTTP_CLIENT_TIMEOUT,
     OFFLINE_MODE,
     ENABLE_FORWARD_USER_INFO_HEADERS,
     AIOHTTP_CLIENT_SESSION_SSL,
 )
-from open_webui.config import (
-    RAG_EMBEDDING_QUERY_PREFIX,
-    RAG_EMBEDDING_CONTENT_PREFIX,
-    RAG_EMBEDDING_PREFIX_FIELD_NAME,
-)
 
 log = logging.getLogger(__name__)
 
-
-from typing import Any, Dict, List, Tuple
-
-from langchain_core.callbacks import CallbackManagerForRetrieverRun
-from langchain_core.retrievers import BaseRetriever
-
 load_dotenv()
+QUERY_EXPANSION_API_URL = os.getenv("QUERY_EXPANSION_API_URL", "http://localhost:8001/process-query")
+RERANK_API_URL = os.getenv("RERANK_API_URL", "http://localhost:8002/rerank")
 GEMINI_API_KEY = os.getenv("GEMINIAPIKEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Configuration constants
-GEMINI_MODEL = "gemini-2.5-flash"
-OPENAI_MODEL = "gpt-4.1-mini"
-API_TEMPERATURE = 0
-SAFE_MAX_DOCS_FOR_RERANKING = 20
-TOP_K_PER_QUERY = 3
-DEFAULT_BM25_WEIGHT = 0.3
-DEFAULT_VECTOR_WEIGHT = 0.7
-ASYNC_TIMEOUT_SECONDS = 30
-MAX_CONTENT_PREVIEW_LENGTH = 500
-MMR_DIVERSITY_THRESHOLD = 0.8
+TOP_K_PER_QUERY = int(os.getenv("TOP_K_PER_QUERY", "3"))
+DEFAULT_BM25_WEIGHT = float(os.getenv("DEFAULT_BM25_WEIGHT", "0.3"))
+DEFAULT_VECTOR_WEIGHT = float(os.getenv("DEFAULT_VECTOR_WEIGHT", "0.7"))
+ASYNC_TIMEOUT_SECONDS = int(os.getenv("ASYNC_TIMEOUT_SECONDS", "30"))
+MMR_DIVERSITY_THRESHOLD = float(os.getenv("MMR_DIVERSITY_THRESHOLD", "0.8"))
+CANDIDATE_MULTIPLIER_LOW_K = 2.0
+CANDIDATE_MULTIPLIER_HIGH_K = 1.5
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
-CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
-CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600)))    # 7 days
-CACHE_TTL_LLM_RERANK = int(os.getenv("CACHE_TTL_LLM_RERANK", str(7 * 24 * 3600)))              # 7 days
-MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
+CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 24 hours
+MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "1000"))
+MAX_CANDIDATE_MULTIPLIER = float(os.getenv("MAX_CANDIDATE_MULTIPLIER", "3.0"))
 
 # Simple in-memory cache with TTL support
 class SimpleCache:
@@ -145,9 +143,7 @@ class SimpleCache:
         return len(self.cache)
 
 # Global cache instances
-medical_abbrev_cache = SimpleCache()
-query_enhance_cache = SimpleCache()
-llm_rerank_cache = SimpleCache()
+bm25_retriever_cache = SimpleCache() # BM25 캐시 추가
 
 def cache_key_hash(data: str) -> str:
     """Generate a consistent hash for cache keys"""
@@ -201,61 +197,83 @@ def sync_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
         return wrapper
     return decorator
 
+# RAG 코드에서
+async def call_query_expansion_api(query: str) -> List[str]:
+    """
+    쿼리 확장 API 서버를 호출하여 확장된 쿼리 목록을 가져옵니다.
+    API 서버 자체에서 캐싱을 처리합니다.
+    """
+    log.info(f"Calling Query Expansion API for: '{query}'")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                QUERY_EXPANSION_API_URL,
+                json={"query": query},
+                timeout=10.0
+            )
+        
+        response.raise_for_status()
+        data = response.json()
+        
+        expanded_terms = data.get("expanded_terms")
+        if expanded_terms and isinstance(expanded_terms, list):
+            log.info(f"Successfully expanded '{query}' to: {expanded_terms}")
+            return expanded_terms
+        else:
+            log.warning(f"API response for '{query}' is malformed. Using original query.")
+            return [query]
+            
+    except httpx.RequestError as e:
+        log.error(f"Network error calling Query Expansion API: {e}. Using original query.")
+        return [query]
+    except Exception as e:
+        log.error(f"An unexpected error occurred during query expansion: {e}. Using original query.", exc_info=True)
+        return [query]
+
+# `process_queries_async` 함수를 API를 사용하도록 대폭 수정합니다.
 async def process_queries_async(queries: List[str], openai_key: Optional[str] = None) -> List[str]:
-    """여러 쿼리를 병렬로 처리하는 비동기 함수"""
-    api_key = openai_key or GEMINI_API_KEY
+    """
+    여러 쿼리를 병렬로 처리하는 비동기 함수.
+    내부적으로 쿼리 확장 API를 호출합니다.
+    """
+    # openai_key는 이제 사용되지 않지만, 함수 시그니처 유지를 위해 남겨둡니다.
+    if not queries:
+        return []
+
+    # 각 쿼리에 대해 API 호출 태스크를 생성
+    tasks = [call_query_expansion_api(query) for query in queries]
     
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 처리를 건너뜁니다.")
-        return queries
-    
-    # 모든 비동기 작업을 모아서 한 번에 실행
-    async def process_single_query(query: str) -> Tuple[str, List[str]]:
-        # 1. 의학 약어 확장
-        expanded_query = await expand_medical_abbreviation(query, api_key)
-        
-        # 2. 쿼리 향상
-        enhanced_queries = await enhance_query(expanded_query, api_key)
-        
-        return expanded_query, enhanced_queries
-    
-    # 모든 쿼리에 대한 작업 생성
-    tasks = [process_single_query(query) for query in queries]
-    
-    # 모든 작업 병렬 실행
-    results = await asyncio.gather(*tasks)
-    
-    # 결과 처리
+    try:
+        # 모든 API 호출을 병렬로 실행
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+    except Exception as e:
+        log.error(f"쿼리 확장 API 병렬 처리 중 심각한 오류 발생: {e}")
+        return queries # 실패 시 원본 쿼리 반환
+
     all_queries = []
     for i, result in enumerate(results):
-        original_query = queries[i] # 해당 결과에 대한 원본 쿼리 가져오기
-
-        # 원본 쿼리 추가
+        original_query = queries[i]
+        
+        # 원본 쿼리는 항상 포함
         all_queries.append(original_query)
 
         if isinstance(result, Exception):
-            # gather에서 예외가 발생한 경우 로그 기록 (이미 process_single_query에서 처리했을 수 있음)
-            log.error(f"Task for query '{original_query}' failed with exception: {result}")
-            # 실패한 경우 향상된 쿼리는 추가하지 않음
-        elif result:
-            # 성공적인 결과 처리 (expanded_query는 사용하지 않음)
-            _, enhanced_queries = result
-            # 향상된 쿼리들 추가
-            all_queries.extend(enhanced_queries)
+            log.error(f"쿼리 '{original_query}' 처리 중 예외 발생: {result}")
+        elif isinstance(result, list):
+            # API로부터 받은 확장된 쿼리들을 추가 (중복 방지를 위해 set 사용)
+            all_queries.extend(result)
         else:
-             # 결과가 비어있는 예외적인 경우 (process_single_query에서 빈 결과를 반환한 경우)
-             log.warning(f"No results returned for query '{original_query}'")
+            log.warning(f"쿼리 '{original_query}'에 대한 API 결과가 비정상적입니다: {result}")
 
-
-    # 중복 제거 (선택 사항): 원본 쿼리가 향상된 쿼리 결과와 동일할 수 있음
-    # 순서를 유지하면서 중복 제거
+    # 최종적으로 순서를 유지하며 중복을 제거
     seen = set()
     unique_queries = []
     for q in all_queries:
         if q not in seen:
             unique_queries.append(q)
             seen.add(q)
-
+            
+    log.info(f"최종 확장 쿼리 목록: {unique_queries}")
     return unique_queries
 
 def is_youtube_url(url: str) -> bool:
@@ -285,6 +303,39 @@ def get_content_from_url(request, url: str) -> str:
     content = ' '.join([doc.page_content for doc in docs])
     return content, docs
 
+async def call_rerank_api_async(
+    combined_results: dict,
+    original_query: list,
+    k: int,
+    r: float,
+    api_key: str,
+) -> dict:
+    """새로운 리랭킹 API를 비동기적으로 호출합니다."""
+    log.info(f"LLM 리랭킹을 위해 API 호출: {RERANK_API_URL}")
+    
+    payload = {
+        "combined_results": combined_results,
+        "original_query": original_query,
+        "k": k,
+        "r": r,
+        "api_key": api_key,
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(RERANK_API_URL, json=payload)
+            response.raise_for_status() # 오류가 있으면 예외 발생
+            log.info("리랭킹 API로부터 성공적으로 응답 받음.")
+            return response.json()
+    except httpx.RequestError as e:
+        log.error(f"리랭킹 API 호출 중 네트워크 오류 발생: {e}. 리랭킹 없이 진행합니다.")
+        return combined_results # 실패 시 원본 결과 반환
+    except httpx.HTTPStatusError as e:
+        log.error(f"리랭킹 API가 오류를 반환했습니다 (상태 코드: {e.response.status_code}): {e.response.text}. 리랭킹 없이 진행합니다.")
+        return combined_results # 실패 시 원본 결과 반환
+    except Exception as e:
+        log.error(f"리랭킹 API 호출 중 예상치 못한 오류 발생: {e}", exc_info=True)
+        return combined_results # 실패 시 원본 결과 반환
 
 CHUNK_HASH_KEY = '_chunk_hash'
 
@@ -295,32 +346,19 @@ def _content_hash(text: str) -> str:
 
 
 class VectorSearchRetriever(BaseRetriever):
-    collection_name: Any
+    collection_name: str
     embedding_function: Any
     top_k: int
 
-    def _get_relevant_documents(self, query: str, *, run_manager: CallbackManagerForRetrieverRun) -> list[Document]:
-        """Get documents relevant to a query.
-
-        Args:
-            query: String to find relevant documents for.
-            run_manager: The callback handler to use.
-
-        Returns:
-            List of relevant documents.
-        """
-        return []
-
-    async def _aget_relevant_documents(
+    def _get_relevant_documents(
         self,
         query: str,
         *,
         run_manager: CallbackManagerForRetrieverRun,
     ) -> list[Document]:
-        embedding = await self.embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)
         result = VECTOR_DB_CLIENT.search(
             collection_name=self.collection_name,
-            vectors=[embedding],
+            vectors=[self.embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)],
             limit=self.top_k,
         )
 
@@ -342,7 +380,10 @@ class VectorSearchRetriever(BaseRetriever):
 
 
 def query_doc(
-    collection_name: str, query_embedding: List[float], k: int, user: Optional[UserModel] = None
+    collection_name: str, 
+    query_embedding: List[float], 
+    k: int, 
+    user: Optional[UserModel] = None
 ) -> Any:
     try:
         log.debug(f'query_doc:doc {collection_name}')
@@ -361,7 +402,10 @@ def query_doc(
         raise e
 
 
-def get_doc(collection_name: str, user: Optional[UserModel] = None) -> Any:
+def get_doc(
+    collection_name: str, 
+    user: Optional[UserModel] = None
+) -> Any:
     try:
         log.debug(f'get_doc:doc {collection_name}')
         result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
@@ -374,206 +418,87 @@ def get_doc(collection_name: str, user: Optional[UserModel] = None) -> Any:
         log.exception(f'Error getting doc {collection_name}: {e}')
         raise e
 
-@async_cached(medical_abbrev_cache, CACHE_TTL_MEDICAL_ABBREV, "med_abbrev")
-async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = None) -> str:
-    """의학 약어를 full term으로 변환하는 함수"""
-    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or GEMINI_API_KEY
-    
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 의학 약어 확장을 건너뜁니다.")
-        return query
-        
-    try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            },
-            json={
-                "model": GEMINI_MODEL,
-                "reasoning_effort": "none",
-                "messages": [
-                    {"role": "system", "content": """당신은 한국표준질병사인분류(KCD, Korean Classification of Diseases) 진단 코드 및 의학용어(의학약어) 전문가입니다.
 
-입력된 내용에 따라 다음 규칙에 맞춰 응답하세요.
+def get_enriched_texts(collection_result: GetResult) -> List[str]:
+    """Build enriched BM25 texts by combining document content and metadata."""
 
-1. 의료 약어 처리
-입력이 의료 약어(영문 또는 국문)일 경우, KCD 진단 코드의 맥락에서 가장 일반적으로 사용되는 공식적인 풀네임(Full term) '만' 반환합니다.
-약어가 여러 의미를 가질 수 있을 때는 가장 흔히 사용되는 진단명을 기준으로 합니다.
-추가적인 설명이나 문장은 절대 포함하지 마십시오.
+    def _normalize_enriched_value(raw: Any) -> str:
+        if isinstance(raw, str):
+            return raw.strip()
+        if isinstance(raw, list):
+            return " ".join(
+                str(item).strip()
+                for item in raw
+                if isinstance(item, (str, int, float)) and str(item).strip()
+            ).strip()
+        if isinstance(raw, dict):
+            return " ".join(
+                str(value).strip()
+                for value in raw.values()
+                if isinstance(value, (str, int, float)) and str(value).strip()
+            ).strip()
+        return ""
 
-2. 문장 요약
-입력이 문장 형태의 질문이나 서술일 경우, 핵심 내용을 명확하고 간결한 형태(핵심 키워드 중심)로 추출하여 요약합니다.
-문장에 "코드", "환자", "KCD" 등의 단어가 포함되어 있다면 해당 단어는 제외하고 핵심 내용만 추출합니다.
+    if (
+        not collection_result
+        or not getattr(collection_result, "documents", None)
+        or not collection_result.documents
+    ):
+        return []
 
-3. 예외 처리 1
-다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **원본 문자열을 그대로** 반환합니다.
-이미 완전한 형태의 단일 의학용어 (예: folliculitis)
+    documents = collection_result.documents[0] or []
+    metadata_rows = (
+        collection_result.metadatas[0]
+        if getattr(collection_result, "metadatas", None)
+        else None
+    )
+    if not metadata_rows:
+        metadata_rows = [{} for _ in range(len(documents))]
 
-예외 처리 2
-다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **빈 문자열("")**을 반환합니다.
-의미를 알 수 없는 긴 문자열 나열 (예: 이미지 벡터 값 등)
-예시:
+    enriched_texts: List[str] = []
+    for idx, text in enumerate(documents):
+        metadata = metadata_rows[idx] if idx < len(metadata_rows) else {}
+        metadata = metadata or {}
+        metadata_parts: List[str] = []
 
-(규칙 1: 의료 약어 처리)
-입력: MM
-출력: Multiple Myeloma
+        enriched_value = metadata.get("enriched_text") or metadata.get("enriched_texts")
+        normalized_enriched = _normalize_enriched_value(enriched_value)
+        if normalized_enriched:
+            metadata_parts.append(normalized_enriched)
 
-입력: AKI
-출력: Acute Kidney Injury
+        if isinstance(text, str) and text.strip():
+            metadata_parts.append(text)
 
-입력: DM
-출력: Diabetes Mellitus
+        filename = metadata.get("name")
+        if isinstance(filename, str) and filename.strip():
+            filename_tokens = filename.replace("_", " ").replace("-", " ").replace(".", " ")
+            metadata_parts.append(
+                f"Filename: {filename} {filename_tokens} {filename_tokens}"
+            )
 
-입력: pcp
-출력: Pneumocystis Pneumonia
+        title = metadata.get("title")
+        if isinstance(title, str) and title.strip():
+            metadata_parts.append(f"Title: {title}")
 
-입력: pjp
-출력: Pneumocystis jirovecii pneumonia
+        headings = metadata.get("headings")
+        if isinstance(headings, list) and headings:
+            heading_text = " > ".join(str(h) for h in headings if str(h).strip())
+            if heading_text:
+                metadata_parts.append(f"Section: {heading_text}")
 
-입력: hCCA
-출력: Hilar Cholangiocarcinoma
+        source = metadata.get("source")
+        if isinstance(source, str) and source.strip():
+            metadata_parts.append(f"Source: {source}")
 
-(규칙 2: 문장 요약)
-입력: soft tissue cancer의 skin invasion의 seer코드 알려줘
-출력: 연부조직암 피부 침범 SEER
+        snippet = metadata.get("snippet")
+        if isinstance(snippet, str) and snippet.strip():
+            metadata_parts.append(f"Snippet: {snippet}")
 
-입력: 코로나 바이러스 감염 후 폐렴 진단 받았는데 KCD 코드가 뭔가요?
-출력: 코로나19 감염 후 폐렴 
-
-(규칙 3: 예외 처리)
-입력: folliculitis
-출력: folliculitis
-
-입력: 상세불명의 위염
-출력: 상세불명의 위염
-
-입력: multiple myeloma
-출력: multiple myeloma
-
-입력: Multiple myeloma
-출력: Multiple myeloma
-
-입력: Diabetes Mellitus
-출력: Diabetes Mellitus
-
-입력: +16Tc6Y8OjWCWcNpbF9ssU8DKAdrqu44XGBwOKzfgv8AHC88J/Bv4p+DNK8HJrkWuTRXv237J5ttaRSZQvdqVbcIcK0ZGNrc8cUhc5ag8afAq3/ZNbRD4LuJvElxqr20upXCbo4tSCht8d0o3RoYcBYyBmofiP8AEv4W6h+~
-출력: ""
-"""},
-                    {"role": "user", "content": query}
-                ],
-                "temperature": API_TEMPERATURE
-            }
-        )
-        response.raise_for_status()
-        expanded_term = response.json()["choices"][0]["message"]["content"].strip()
-        log.info(f"Medical abbreviation expansion completed for query: '{query[:20]}...'")
-        return expanded_term
-    except Exception as e:
-        log.error(f"Error expanding medical abbreviation: {e}")
-        return query
-
-
-@async_cached(query_enhance_cache, CACHE_TTL_QUERY_ENHANCE, "query_enhance")
-async def enhance_query(query: str, openai_key: Optional[str] = None) -> List[str]:
-    """쿼리를 분석하고 확장하여 더 정확한 검색 결과를 얻기 위한 함수
-    
-    1. 원본 쿼리 유지
-    2. 동의어/유사어 추가
-    """
-    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or GEMINI_API_KEY
-    
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
-        return [query]
-        
-    try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            },
-            json={
-                "model": GEMINI_MODEL,
-                "reasoning_effort": "none",
-                "messages": [
-                    {"role": "system", "content": """당신은 의학 및 일반 검색 쿼리 향상 전문가입니다.
-주어진 검색 쿼리를 분석하여 검색 성능을 높이기 위한 다양한 변형 쿼리를 생성하세요.
-다음 2가지 타입의 쿼리를 반환하세요:
-1. original: 원본 쿼리 그대로
-2. synonyms: 동의어나 유사어를 포함한 쿼리를 1개만 생성(원본쿼리가 한국어라면 영어로 동의어나 유사어, 원본쿼리가 영어라면 한국어로 동의어나 유사어 생성, 원본쿼리에 의학약어가 있다면 full term으로 변환 후 생성)
-
-예시:
-입력: "Acute Kidney Injury"
-출력:
-{
-  "original": "Acute Kidney Injury",
-  "synonyms": "급성신손상"
-}
-"""},
-                    {"role": "user", "content": query}
-                ],
-                "temperature": API_TEMPERATURE
-            }
-        )
-        response.raise_for_status()
-        content_from_api = response.json()["choices"][0]["message"]["content"]
-        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", content_from_api, re.DOTALL)
-        if match:
-            json_string = match.group(1)
-        else:
-            json_string = content_from_api
-        result = json_string.strip()
-        parsed_result = json.loads(result)
-        enhanced_queries = [
-            parsed_result["original"],
-            parsed_result["synonyms"]
-        ]
-        log.info(f"Enhanced queries: {enhanced_queries}")
-        return enhanced_queries
-    except Exception as e:
-        log.error(f"Error enhancing query: {e}")
-        return [query]  # 오류 발생 시 원본 쿼리만 반환
-
-def get_enriched_texts(collection_result: GetResult) -> list[str]:
-    enriched_texts = []
-    for idx, text in enumerate(collection_result.documents[0]):
-        metadata = collection_result.metadatas[0][idx]
-        metadata_parts = [text]
-
-        # Add filename (repeat twice for extra weight in BM25 scoring)
-        if metadata.get('name'):
-            filename = metadata['name']
-            filename_tokens = filename.replace('_', ' ').replace('-', ' ').replace('.', ' ')
-            metadata_parts.append(f'Filename: {filename} {filename_tokens} {filename_tokens}')
-
-        # Add title if available
-        if metadata.get('title'):
-            metadata_parts.append(f'Title: {metadata["title"]}')
-
-        # Add document section headings if available (from markdown splitter)
-        if metadata.get('headings') and isinstance(metadata['headings'], list):
-            headings = ' > '.join(str(h) for h in metadata['headings'])
-            metadata_parts.append(f'Section: {headings}')
-
-        # Add source URL/path if available
-        if metadata.get('source'):
-            metadata_parts.append(f'Source: {metadata["source"]}')
-
-        # Add snippet for web search results
-        if metadata.get('snippet'):
-            metadata_parts.append(f'Snippet: {metadata["snippet"]}')
-
-        enriched_texts.append(' '.join(metadata_parts))
+        enriched_texts.append(" ".join(part for part in metadata_parts if part))
 
     return enriched_texts
 
-
-async def query_doc_with_hybrid_search(
+def query_doc_with_hybrid_search(
     collection_name: str,
     collection_result: GetResult,
     query: str,
@@ -582,35 +507,32 @@ async def query_doc_with_hybrid_search(
     reranking_function,
     k_reranker: int,
     r: float,
-    hybrid_bm25_weight: float,
-    enable_enriched_texts: bool = False,
+    hybrid_bm25_weight: Optional[float] = None,
     openai_key: Optional[str] = None,
     bm25_weight: float = 0.3,
     vector_weight: float = 0.7,
+    enable_enriched_texts: bool = False,
 ) -> dict:
-    
-    api_key = openai_key or GEMINI_API_KEY
-    
     try:
-        # First check if collection_result has the required attributes
         if (
             not collection_result
-            or not hasattr(collection_result, 'documents')
-            or not hasattr(collection_result, 'metadatas')
-        ):
-            log.warning(f'query_doc_with_hybrid_search:no_docs {collection_name}')
-            return {'documents': [], 'metadatas': [], 'distances': []}
-
-        # Now safely check the documents content after confirming attributes exist
-        if (
-            not collection_result.documents
+            or not hasattr(collection_result, "documents")
+            or not hasattr(collection_result, "metadatas")
+            or not collection_result.documents
             or len(collection_result.documents) == 0
             or not collection_result.documents[0]
         ):
             log.warning(f'query_doc_with_hybrid_search:no_docs {collection_name}')
             return {'documents': [], 'metadatas': [], 'distances': []}
 
-        log.debug(f'query_doc_with_hybrid_search:doc {collection_name}')
+        log.debug(f"query_doc_with_hybrid_search:doc {collection_name}")
+        bm25_base_weight = bm25_weight
+        vector_base_weight = vector_weight
+        if hybrid_bm25_weight is not None:
+            bm25_base_weight = max(0.0, min(1.0, hybrid_bm25_weight))
+            vector_base_weight = 1.0 - bm25_base_weight
+
+        adjusted_weights = adjust_search_weights(query, bm25_base_weight, vector_base_weight)
 
         original_texts = collection_result.documents[0]
         bm25_metadatas = [
@@ -618,9 +540,13 @@ async def query_doc_with_hybrid_search(
             for idx, meta in enumerate(collection_result.metadatas[0])
         ]
 
-        bm25_texts = get_enriched_texts(collection_result) if enable_enriched_texts else original_texts
-
-        adjusted_weights = adjust_search_weights(query, bm25_weight, vector_weight)
+        bm25_texts = (
+            get_enriched_texts(collection_result)
+            if enable_enriched_texts
+            else original_texts
+        )
+        if not bm25_texts:
+            bm25_texts = collection_result.documents[0]
         
         bm25_retriever = BM25Retriever.from_texts(
             texts=bm25_texts,
@@ -634,24 +560,34 @@ async def query_doc_with_hybrid_search(
             top_k=k,
         )
 
-        ensemble_retriever = EnsembleRetriever(
-            retrievers=[bm25_retriever, vector_search_retriever], 
-            weights=[adjusted_weights["bm25"], adjusted_weights["vector"]]
-        )
+        bm25_final = adjusted_weights["bm25"]
+        vector_final = adjusted_weights["vector"]
+
+        if bm25_final <= 0:
+            ensemble_retriever = EnsembleRetriever(
+                retrievers=[vector_search_retriever], weights=[1.0]
+            )
+        elif vector_final <= 0:
+            ensemble_retriever = EnsembleRetriever(
+                retrievers=[bm25_retriever], weights=[1.0]
+            )
+        else:
+            ensemble_retriever = EnsembleRetriever(
+                retrievers=[bm25_retriever, vector_search_retriever],
+                weights=[bm25_final, vector_final],
+            )
         compressor = RerankCompressor(
             embedding_function=embedding_function,
             top_n=k_reranker,
-            reranking_function=None,
+            reranking_function=reranking_function,
             r_score=r,
-            openai_key=api_key,
-            use_llm_reranking=True,
         )
 
         compression_retriever = ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=ensemble_retriever
         )
 
-        result = await compression_retriever.ainvoke(query)
+        result = compression_retriever.invoke(query)
 
         distances = [d.metadata.get('score') for d in result]
         documents = [d.page_content for d in result]
@@ -679,7 +615,11 @@ async def query_doc_with_hybrid_search(
         log.exception(f'Error querying doc {collection_name} with hybrid search: {e}')
         raise e
 
-def adjust_search_weights(query: str, default_bm25_weight: float, default_vector_weight: float) -> Dict[str, float]:
+def adjust_search_weights(
+    query: str, 
+    default_bm25_weight: float, 
+    default_vector_weight: float
+) -> Dict[str, float]:
     """쿼리 특성에 따라 검색 가중치를 동적으로 조정하는 함수"""
     # 기본 가중치
     weights = {
@@ -717,7 +657,7 @@ def adjust_search_weights(query: str, default_bm25_weight: float, default_vector
     log.info(f"Adjusted search weights for query '{query}': {weights}")
     return weights
 
-def merge_get_results(get_results: List[Dict]) -> Dict:
+def merge_get_results(get_results: List[Dict[str, Any]]) -> Dict[str, Any]:
     # Initialize lists to store combined data
     combined_documents = []
     combined_metadatas = []
@@ -738,7 +678,11 @@ def merge_get_results(get_results: List[Dict]) -> Dict:
     return result
 
 
-def merge_and_sort_query_results(query_results: List[Dict], k: int, diversity_threshold: float = MMR_DIVERSITY_THRESHOLD) -> Dict:
+def merge_and_sort_query_results(
+    query_results: List[Dict[str, Any]], 
+    k: int, 
+    diversity_threshold: float = MMR_DIVERSITY_THRESHOLD
+) -> Dict[str, Any]:
     # Initialize lists to store combined data
     combined = dict()  # To store documents with unique document hashes
 
@@ -796,10 +740,10 @@ def merge_and_sort_query_results(query_results: List[Dict], k: int, diversity_th
     return result
 
 def apply_maximal_marginal_relevance(
-    combined_results: List[Tuple], 
+    combined_results: List[Tuple[float, str, Dict[str, Any]]], 
     k: int, 
     diversity_threshold: float = MMR_DIVERSITY_THRESHOLD
-) -> List[Tuple]:
+) -> List[Tuple[float, str, Dict[str, Any]]]:
     """
     결과의 다양성을 높이기 위해 개선된 Maximal Marginal Relevance 알고리즘 적용
     
@@ -940,7 +884,9 @@ def apply_maximal_marginal_relevance(
             
     return selected_results
 
-def get_all_items_from_collections(collection_names: list[str]) -> dict:
+def get_all_items_from_collections(
+    collection_names: List[str]
+) -> Dict[str, Any]:
     results = []
 
     for collection_name in collection_names:
@@ -957,35 +903,12 @@ def get_all_items_from_collections(collection_names: list[str]) -> dict:
     return merge_get_results(results)
 
 
-async def query_collection(
-    request,
-    collection_names: list[str],
-    queries: list[str],
-    embedding_function,
+def query_collection(
+    collection_names: List[str],
+    queries: List[str],
+    embedding_function: Any,
     k: int,
-) -> dict:
-    # When request is provided, try hybrid search + reranking if enabled
-    if request and request.app.state.config.ENABLE_RAG_HYBRID_SEARCH:
-        try:
-            reranking_function = (
-                (lambda query, documents: request.app.state.RERANKING_FUNCTION(query, documents))
-                if request.app.state.RERANKING_FUNCTION
-                else None
-            )
-            return await query_collection_with_hybrid_search(
-                collection_names=collection_names,
-                queries=queries,
-                embedding_function=embedding_function,
-                k=k,
-                reranking_function=reranking_function,
-                k_reranker=request.app.state.config.TOP_K_RERANKER,
-                r=request.app.state.config.RELEVANCE_THRESHOLD,
-                hybrid_bm25_weight=request.app.state.config.HYBRID_BM25_WEIGHT,
-                enable_enriched_texts=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH_ENRICHED_TEXTS,
-            )
-        except Exception as e:
-            log.debug(f'Hybrid search failed, falling back to vector search: {e}')
-
+) -> Dict[str, Any]:
     results = []
     error = False
 
@@ -1005,16 +928,31 @@ async def query_collection(
             return None, e
 
     # Generate all query embeddings (in one call)
-    query_embeddings = await embedding_function(queries, prefix=RAG_EMBEDDING_QUERY_PREFIX)
-    log.debug(f'query_collection: processing {len(queries)} queries across {len(collection_names)} collections')
+    query_embeddings = embedding_function(queries, prefix=RAG_EMBEDDING_QUERY_PREFIX)
+    log.debug(
+        f"query_collection: processing {len(queries)} queries across {len(collection_names)} collections"
+    )
 
-    with ThreadPoolExecutor() as executor:
-        future_results = []
+    with ThreadPoolExecutor(max_workers=min(len(collection_names) * len(query_embeddings), 10)) as executor:
+        # Submit all tasks
+        future_to_params = {}
         for query_embedding in query_embeddings:
             for collection_name in collection_names:
-                result = executor.submit(process_query_collection, collection_name, query_embedding)
-                future_results.append(result)
-        task_results = [future.result() for future in future_results]
+                future = executor.submit(process_query_collection, collection_name, query_embedding)
+                future_to_params[future] = (collection_name, query_embedding)
+        
+        # Collect results as they complete
+        task_results = []
+        from concurrent.futures import as_completed
+        
+        for future in as_completed(future_to_params):
+            try:
+                result, err = future.result(timeout=30)  # 30초 타임아웃
+                task_results.append((result, err))
+            except Exception as e:
+                collection_name, _ = future_to_params[future]
+                log.error(f"Task failed for collection {collection_name}: {e}")
+                task_results.append((None, e))
 
     for result, err in task_results:
         if err is not None:
@@ -1028,20 +966,21 @@ async def query_collection(
     return merge_and_sort_query_results(results, k=k)
 
 
-async def query_collection_with_hybrid_search(
-    collection_names: list[str],
-    queries: list[str],
-    embedding_function,
+def query_collection_with_hybrid_search(
+    collection_names: List[str],
+    queries: List[str],
+    embedding_function: Any,
     k: int,
-    reranking_function,
+    reranking_function: Any,
     k_reranker: int,
     r: float,
     hybrid_bm25_weight: float,
-    enable_enriched_texts: bool = False,
     openai_key: Optional[str] = None,
-) -> dict:
+    enable_enriched_texts: Optional[bool] = None,
+) -> Dict[str, Any]:
     results = []
     error = False
+    use_enriched_texts = bool(enable_enriched_texts)
     # Fetch collection data once per collection sequentially
     # Avoid fetching the same data multiple times later
     collection_results = {}
@@ -1055,9 +994,9 @@ async def query_collection_with_hybrid_search(
 
     log.info(f'Starting hybrid search for {len(queries)} queries in {len(collection_names)} collections...')
 
-    async def process_query(collection_name, query):
+    def process_query(collection_name, query):
         try:
-            result = await query_doc_with_hybrid_search(
+            result = query_doc_with_hybrid_search(
                 collection_name=collection_name,
                 collection_result=collection_results[collection_name],
                 query=query,
@@ -1067,7 +1006,7 @@ async def query_collection_with_hybrid_search(
                 k_reranker=k_reranker,
                 r=r,
                 hybrid_bm25_weight=hybrid_bm25_weight,
-                enable_enriched_texts=enable_enriched_texts,
+                enable_enriched_texts=use_enriched_texts,
             )
             return result, None
         except Exception as e:
@@ -1103,6 +1042,22 @@ async def query_collection_with_hybrid_search(
             expanded_queries = queries
             
         log.info(f"Final expanded queries: {expanded_queries}")
+
+        # Generate embeddings for all queries
+        query_embeddings = []
+        if expanded_queries:
+            async def get_embeddings():
+                return await embedding_function(expanded_queries, RAG_EMBEDDING_QUERY_PREFIX)
+
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    future = asyncio.run_coroutine_threadsafe(get_embeddings(), loop)
+                    query_embeddings = future.result(timeout=ASYNC_TIMEOUT_SECONDS)
+                else:
+                    query_embeddings = loop.run_until_complete(get_embeddings())
+            except RuntimeError:
+                query_embeddings = asyncio.run(get_embeddings())
         
         # 각 쿼리의 결과를 모두 수집
         all_results = []
@@ -1112,50 +1067,20 @@ async def query_collection_with_hybrid_search(
                      f"query_collection_with_hybrid_search:VECTOR_DB_CLIENT.get:collection {collection_name}"
                 )
                 collection_result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
-                for query in expanded_queries:
+                for i, query in enumerate(expanded_queries):
                     result = get_hybrid_search_results_without_reranking(
                         collection_name=collection_name,
                         collection_result=collection_result,
                         query=query,
-                        embedding_function=embedding_function,
+                        query_embedding=query_embeddings[i],
                         k=k,
-                        reranking_function=reranking_function,
-                        k_reranker=k_reranker,
-                        r=r,
-                        hybrid_bm25_weight=hybrid_bm25_weight,
-                        openai_key=api_key,
-                        bm25_weight=0.3,
-                        vector_weight=0.7,
+                        enable_enriched_texts=use_enriched_texts,
                     )
                     all_results.append(result)
             except Exception as e:
                 log.exception(f"Error when querying the collection with hybrid_search: {e}")
                 error = True
 
-<<<<<<< HEAD
-    # Prepare tasks for all collections and queries
-    # Avoid running any tasks for collections that failed to fetch data (have assigned None)
-    tasks = [
-        (collection_name, query)
-        for collection_name in collection_names
-        if collection_results[collection_name] is not None
-        for query in queries
-    ]
-
-    # Run all queries in parallel using asyncio.gather
-    task_results = await asyncio.gather(*[process_query(collection_name, query) for collection_name, query in tasks])
-
-    for result, err in task_results:
-        if err is not None:
-            error = True
-        elif result is not None:
-            results.append(result)
-
-    if error and not results:
-        raise Exception('Hybrid search failed for all collections. Using Non-hybrid search as fallback.')
-
-    return merge_and_sort_query_results(results, k=k)
-=======
         if error and not all_results:
             raise Exception(
                 "Hybrid search failed for all collections. Using Non-hybrid search as fallback."
@@ -1164,19 +1089,37 @@ async def query_collection_with_hybrid_search(
         # 중복 제거 및 결과 통합 (모든 쿼리 결과를 병합)
         combined_results = merge_and_deduplicate_results(all_results)
         
-        # 모든 통합된 결과에 대해 한 번만 LLM 리랭킹 수행
+        # LLM 리랭킹 수행 부분을 API 호출로 변경
         if api_key and combined_results and combined_results["documents"][0]:
-            log.info(f"한 번에 LLM 기반 리랭킹 수행: 문서 수={len(combined_results['documents'][0])}")
-            final_results = perform_llm_reranking(
-                combined_results=combined_results,
-                original_query=expanded_queries,  # 원본 쿼리 사용
-                k=k,
-                r=r,
-                openai_key=api_key,
-            )
-            results = [final_results]
+            log.info(f"API를 통해 LLM 기반 리랭킹 수행: 문서 수={len(combined_results['documents'][0])}")
+            
+            # ############################################################### #
+            # ##               여기가 수정된 핵심 부분입니다                ## #
+            # ############################################################### #
+            
+            try:
+                # 동기 스레드 컨텍스트에서 비동기 API 호출을 위한 가장 간단하고 안전한 방법
+                final_results = asyncio.run(
+                    call_rerank_api_async(
+                        combined_results=combined_results,
+                        original_query=expanded_queries,
+                        k=k,
+                        r=r,
+                        api_key=api_key,
+                    )
+                )
+                results = [final_results]
+            except Exception as e:
+                # asyncio.run()은 이미 실행 중인 루프에서 호출되면 RuntimeError를 발생시킬 수 있습니다.
+                # 이는 이 함수가 다른 비동기 컨텍스트에서 호출될 경우에 대한 안전장치입니다.
+                if "cannot run event loop while another loop is running" in str(e):
+                    log.warning("리랭킹을 중첩된 이벤트 루프에서 호출하려고 시도했습니다. 이 시나리오는 현재 지원되지 않습니다.")
+                
+                log.error(f"리랭킹 API 호출 중 오류 발생: {e}. 리랭킹 없이 진행합니다.", exc_info=True)
+                results = [combined_results] # 실패 시 리랭킹 전 결과 사용
+
         else:
-            # API 키가 없거나 결과가 없으면 통합 결과 그대로 사용
+            log.info("리랭킹을 건너뜁니다 (API 키 또는 문서 없음).")
             results = [combined_results]
 
         if VECTOR_DB == "chroma":
@@ -1185,8 +1128,6 @@ async def query_collection_with_hybrid_search(
             return merge_and_sort_query_results(results, k=k)
     except Exception as e:
         raise e
->>>>>>> 2f21592f0 ('0.6.14 버전에 맞게 파일 수정, 불필요한파일 삭제)
-
 
 def generate_openai_batch_embeddings(
     model: str,
@@ -1396,26 +1337,25 @@ async def agenerate_ollama_batch_embeddings(
     if ENABLE_FORWARD_USER_INFO_HEADERS and user:
         headers = include_user_info_headers(headers, user)
 
-    async with aiohttp.ClientSession(
-        trust_env=True, timeout=aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT)
-    ) as session:
-        async with session.post(
-            f'{url}/api/embed',
-            headers=headers,
-            json=form_data,
-            ssl=AIOHTTP_CLIENT_SESSION_SSL,
-        ) as r:
-            if r.status != 200:
-                error_data = await r.json()
-                error_detail = error_data.get('error', str(error_data))
-                raise Exception(f'Ollama embed error ({r.status}): {error_detail}')
-            data = await r.json()
-            if 'embeddings' in data:
-                return data['embeddings']
-            else:
-                raise ValueError("Unexpected Ollama embeddings response: missing 'embeddings' key")
-
-
+        async with aiohttp.ClientSession(
+            trust_env=True, timeout=aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT)
+        ) as session:
+            async with session.post(
+                f"{url}/api/embed",
+                headers=headers,
+                json=form_data,
+                ssl=AIOHTTP_CLIENT_SESSION_SSL,
+            ) as r:
+                r.raise_for_status()
+                data = await r.json()
+                if "embeddings" in data:
+                    return data["embeddings"]
+                else:
+                    raise Exception("Something went wrong :/")
+    except Exception as e:
+        log.exception(f"Error generating ollama batch embeddings: {e}")
+        return None
+    
 def get_embedding_function(
     embedding_engine,
     embedding_model,
@@ -1428,7 +1368,6 @@ def get_embedding_function(
     concurrent_requests=0,
 ) -> Awaitable:
     if embedding_engine == "":
-<<<<<<< HEAD
         # Sentence transformers: CPU-bound sync operation
         async def async_embedding_function(query, prefix=None, user=None):
             return await asyncio.to_thread(
@@ -1444,11 +1383,6 @@ def get_embedding_function(
             )
 
         return async_embedding_function
-=======
-        return lambda query, prefix=None, user=None: embedding_function.encode(
-            query, prompt=prefix if prefix else None
-        ).tolist()
->>>>>>> 2f21592f0 ('0.6.14 버전에 맞게 파일 수정, 불필요한파일 삭제)
     elif embedding_engine in ["ollama", "openai", "azure_openai"]:
         embedding_function = lambda query, prefix=None, user=None: generate_embeddings(
             engine=embedding_engine,
@@ -1505,7 +1439,6 @@ def get_embedding_function(
     else:
         raise ValueError(f'Unknown embedding engine: {embedding_engine}')
 
-
 async def generate_embeddings(
     engine: str,
     model: str,
@@ -1558,19 +1491,16 @@ async def generate_embeddings(
         if embeddings is None:
             return None
         return embeddings[0] if isinstance(text, str) else embeddings
-
-
+    
 def get_reranking_function(reranking_engine, reranking_model, reranking_function):
     if reranking_function is None:
         return None
-    if reranking_engine == 'external':
-        return lambda query, documents, user=None: reranking_function.predict(
-            [(query, doc.page_content) for doc in documents], user=user
+    if reranking_engine == "external":
+        return lambda sentences, user=None: reranking_function.predict(
+            sentences, user=user
         )
     else:
-        return lambda query, documents, user=None: reranking_function.predict(
-            [(query, doc.page_content) for doc in documents]
-        )
+        return lambda sentences, user=None: reranking_function.predict(sentences)
 
 
 async def get_sources_from_items(
@@ -1584,7 +1514,7 @@ async def get_sources_from_items(
     r,
     hybrid_bm25_weight,
     hybrid_search,
-    full_context=False,
+    full_context: bool = False,
     user: Optional[UserModel] = None,
 ):
     log.debug(f'items: {items} {queries} {embedding_function} {reranking_function} {full_context}')
@@ -1595,8 +1525,14 @@ async def get_sources_from_items(
     for item in items:
         query_result = None
         collection_names = []
+        item_type = item.get("type")
+        item_full_context = (
+            full_context
+            or item.get("context") == "full"
+            or item_type in ["file", "note", "chat"]
+        )
 
-        if item.get('type') == 'text':
+        if item_type == "text":
             # Raw Text
             # Used during temporary chat file uploads or web page & youtube attachements
 
@@ -1626,9 +1562,9 @@ async def get_sources_from_items(
                         'metadatas': [[{'file_id': item.get('id'), 'name': item.get('name')}]],
                     }
 
-        elif item.get('type') == 'note':
+        elif item_type == "note":
             # Note Attached
-            note = Notes.get_note_by_id(item.get('id'))
+            note = await asyncio.to_thread(Notes.get_note_by_id, item.get("id"))
 
             if note and (
                 user.role == 'admin'
@@ -1646,9 +1582,9 @@ async def get_sources_from_items(
                     'metadatas': [[{'file_id': note.id, 'name': note.title}]],
                 }
 
-        elif item.get('type') == 'chat':
+        elif item_type == "chat":
             # Chat Attached
-            chat = Chats.get_chat_by_id(item.get('id'))
+            chat = await asyncio.to_thread(Chats.get_chat_by_id, item.get("id"))
 
             if chat and (user.role == 'admin' or chat.user_id == user.id):
                 messages_map = chat.chat.get('history', {}).get('messages', {})
@@ -1667,16 +1603,21 @@ async def get_sources_from_items(
                         'metadatas': [[{'file_id': chat.id, 'name': chat.title}]],
                     }
 
-        elif item.get('type') == 'url':
-            content, docs = get_content_from_url(request, item.get('url'))
+        elif item_type == "url":
+            content, docs = await asyncio.to_thread(
+                get_content_from_url, request, item.get("url")
+            )
             if docs:
                 query_result = {
                     'documents': [[content]],
                     'metadatas': [[{'url': item.get('url'), 'name': item.get('url')}]],
                 }
-        elif item.get('type') == 'file':
-            if item.get('context') == 'full' or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
-                if item.get('file', {}).get('data', {}).get('content', ''):
+        elif item_type == "file":
+            if (
+                item_full_context
+                or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
+            ):
+                if item.get("file", {}).get("data", {}).get("content", ""):
                     # Manual Full Mode Toggle
                     # Used from chat file modal, we can assume that the file content will be available from item.get("file").get("data", {}).get("content")
                     query_result = {
@@ -1691,13 +1632,11 @@ async def get_sources_from_items(
                             ]
                         ],
                     }
-                elif item.get('id'):
-                    file_object = Files.get_file_by_id(item.get('id'))
-                    if file_object and (
-                        user.role == 'admin'
-                        or file_object.user_id == user.id
-                        or has_access_to_file(item.get('id'), 'read', user)
-                    ):
+                elif item.get("id"):
+                    file_object = await asyncio.to_thread(
+                        Files.get_file_by_id, item.get("id")
+                    )
+                    if file_object:
                         query_result = {
                             'documents': [[file_object.data.get('content', '')]],
                             'metadatas': [
@@ -1710,16 +1649,18 @@ async def get_sources_from_items(
                                 ]
                             ],
                         }
-            else:
-                # Fallback to collection names
-                if item.get('legacy'):
-                    collection_names.append(f'{item["id"]}')
                 else:
-                    collection_names.append(f'file-{item["id"]}')
+                    # Fallback to collection names
+                    if item.get("legacy"):
+                        collection_names.append(f"{item['id']}")
+                    else:
+                        collection_names.append(f"file-{item['id']}")
 
-        elif item.get('type') == 'collection':
+        elif item_type == "collection":
             # Manual Full Mode Toggle for Collection
-            knowledge_base = Knowledges.get_knowledge_by_id(item.get('id'))
+            knowledge_base = await asyncio.to_thread(
+                Knowledges.get_knowledge_by_id, item.get("id")
+            )
 
             if knowledge_base and (
                 user.role == 'admin'
@@ -1731,7 +1672,10 @@ async def get_sources_from_items(
                     permission='read',
                 )
             ):
-                if item.get('context') == 'full' or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
+                if (
+                    item_full_context
+                    or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
+                ):
                     if knowledge_base and (
                         user.role == 'admin'
                         or knowledge_base.user_id == user.id
@@ -1742,6 +1686,7 @@ async def get_sources_from_items(
                             permission='read',
                         )
                     ):
+
                         files = Knowledges.get_files_by_id(knowledge_base.id)
 
                         documents = []
@@ -1789,16 +1734,42 @@ async def get_sources_from_items(
                 continue
 
             try:
-                if full_context:
-                    query_result = get_all_items_from_collections(collection_names)
-                else:
-                    query_result = await query_collection(
-                        request,
-                        collection_names=collection_names,
-                        queries=queries,
-                        embedding_function=embedding_function,
-                        k=k,
+                if item_full_context:
+                    query_result = await asyncio.to_thread(
+                        get_all_items_from_collections, collection_names
                     )
+                else:
+                    query_result = None  # Initialize to None
+                    if hybrid_search:
+                        try:
+                            query_result = await asyncio.to_thread(
+                                query_collection_with_hybrid_search,
+                                collection_names=collection_names,
+                                queries=queries,
+                                embedding_function=embedding_function,
+                                k=k,
+                                reranking_function=reranking_function,
+                                k_reranker=k_reranker,
+                                r=r,
+                                hybrid_bm25_weight=hybrid_bm25_weight,
+                                enable_enriched_texts=request.app.state.config.ENABLE_RAG_HYBRID_SEARCH_ENRICHED_TEXTS,
+                            )
+                        except Exception as e:
+                            log.debug(
+                                "Error when using hybrid search, using non hybrid search as fallback.",
+                                exc_info=True,
+                            )
+                            query_result = None
+
+                    # fallback to non-hybrid search
+                    if query_result is None:
+                        query_result = await asyncio.to_thread(
+                            query_collection,
+                            collection_names=collection_names,
+                            queries=queries,
+                            embedding_function=embedding_function,
+                            k=k,
+                        )
             except Exception as e:
                 log.exception(e)
 
@@ -1866,219 +1837,14 @@ def get_model_path(model: str, update_model: bool = False):
             raise
         return model
 
-
-<<<<<<< HEAD
-=======
-def generate_openai_batch_embeddings(
-    model: str,
-    texts: list[str],
-    url: str = "https://api.openai.com/v1",
-    key: str = "",
-    prefix: str = None,
-    user: UserModel = None,
-) -> Optional[list[list[float]]]:
-    try:
-        log.debug(
-             f"generate_openai_batch_embeddings:model {model} batch size: {len(texts)}"
-         )
-        json_data = {"input": texts, "model": model}
-        if isinstance(RAG_EMBEDDING_PREFIX_FIELD_NAME, str) and isinstance(prefix, str):
-            json_data[RAG_EMBEDDING_PREFIX_FIELD_NAME] = prefix
-
-        r = requests.post(
-            f"{url}/embeddings",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {key}",
-                **(
-                    {
-                        "X-OpenWebUI-User-Name": quote(user.name, safe=" "),
-                        "X-OpenWebUI-User-Id": user.id,
-                        "X-OpenWebUI-User-Email": user.email,
-                        "X-OpenWebUI-User-Role": user.role,
-                    }
-                    if ENABLE_FORWARD_USER_INFO_HEADERS and user
-                    else {}
-                ),
-            },
-            json=json_data,
-        )
-        r.raise_for_status()
-        data = r.json()
-        if "data" in data:
-            return [elem["embedding"] for elem in data["data"]]
-        else:
-            raise Exception("Something went wrong :/")
-    except Exception as e:
-        log.exception(f"Error generating openai batch embeddings: {e}")
-        return None
-
-def generate_azure_openai_batch_embeddings(
-    model: str,
-    texts: list[str],
-    url: str,
-    key: str = "",
-    version: str = "",
-    prefix: str = None,
-    user: UserModel = None,
-) -> Optional[list[list[float]]]:
-    try:
-        log.debug(
-            f"generate_azure_openai_batch_embeddings:deployment {model} batch size: {len(texts)}"
-        )
-        json_data = {"input": texts}
-        if isinstance(RAG_EMBEDDING_PREFIX_FIELD_NAME, str) and isinstance(prefix, str):
-            json_data[RAG_EMBEDDING_PREFIX_FIELD_NAME] = prefix
-
-        url = f"{url}/openai/deployments/{model}/embeddings?api-version={version}"
-
-        for _ in range(5):
-            r = requests.post(
-                url,
-                headers={
-                    "Content-Type": "application/json",
-                    "api-key": key,
-                    **(
-                        {
-                            "X-OpenWebUI-User-Name": quote(user.name, safe=" "),
-                            "X-OpenWebUI-User-Id": user.id,
-                            "X-OpenWebUI-User-Email": user.email,
-                            "X-OpenWebUI-User-Role": user.role,
-                        }
-                        if ENABLE_FORWARD_USER_INFO_HEADERS and user
-                        else {}
-                    ),
-                },
-                json=json_data,
-            )
-            if r.status_code == 429:
-                retry = float(r.headers.get("Retry-After", "1"))
-                time.sleep(retry)
-                continue
-            r.raise_for_status()
-            data = r.json()
-            if "data" in data:
-                return [elem["embedding"] for elem in data["data"]]
-            else:
-                raise Exception("Something went wrong :/")
-        return None
-    except Exception as e:
-        log.exception(f"Error generating azure openai batch embeddings: {e}")
-        return None
-
-
-def generate_ollama_batch_embeddings(
-    model: str,
-    texts: list[str],
-    url: str,
-    key: str = "",
-    prefix: str = None,
-    user: UserModel = None,
-) -> Optional[list[list[float]]]:
-    try:
-        log.debug(
-             f"generate_ollama_batch_embeddings:model {model} batch size: {len(texts)}"
-         )
-        json_data = {"input": texts, "model": model}
-        if isinstance(RAG_EMBEDDING_PREFIX_FIELD_NAME, str) and isinstance(prefix, str):
-            json_data[RAG_EMBEDDING_PREFIX_FIELD_NAME] = prefix
-
-        r = requests.post(
-            f"{url}/api/embed",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {key}",
-                **(
-                    {
-                        "X-OpenWebUI-User-Name": quote(user.name, safe=" "),
-                        "X-OpenWebUI-User-Id": user.id,
-                        "X-OpenWebUI-User-Email": user.email,
-                        "X-OpenWebUI-User-Role": user.role,
-                    }
-                    if ENABLE_FORWARD_USER_INFO_HEADERS
-                    else {}
-                ),
-            },
-            json=json_data,
-        )
-        r.raise_for_status()
-        data = r.json()
-
-        if "embeddings" in data:
-            return data["embeddings"]
-        else:
-            raise Exception("Something went wrong :/")
-    except Exception as e:
-        log.exception(f"Error generating ollama batch embeddings: {e}")
-        return None
-
-
-def generate_embeddings(
-    engine: str,
-    model: str,
-    text: Union[str, list[str]],
-    prefix: Union[str, None] = None,
-    **kwargs,
-):
-    url = kwargs.get("url", "")
-    key = kwargs.get("key", "")
-    user = kwargs.get("user")
-
-    if prefix is not None and RAG_EMBEDDING_PREFIX_FIELD_NAME is None:
-        if isinstance(text, list):
-            text = [f"{prefix}{text_element}" for text_element in text]
-        else:
-            text = f"{prefix}{text}"
-
-    if engine == "ollama":
-        embeddings = generate_ollama_batch_embeddings(
-            **{
-                "model": model,
-                "texts": text if isinstance(text, list) else [text],
-                "url": url,
-                "key": key,
-                "prefix": prefix,
-                "user": user,
-            }
-        )
-        return embeddings[0] if isinstance(text, str) else embeddings
-    elif engine == "openai":
-        embeddings = generate_openai_batch_embeddings(
-            model, text if isinstance(text, list) else [text], url, key, prefix, user
-        )
-        return embeddings[0] if isinstance(text, str) else embeddings
-    elif engine == "azure_openai":
-        azure_api_version = kwargs.get("azure_api_version", "")
-        embeddings = generate_azure_openai_batch_embeddings(
-            model,
-            text if isinstance(text, list) else [text],
-            url,
-            key,
-            azure_api_version,
-            prefix,
-            user,
-        )
-        return embeddings[0] if isinstance(text, str) else embeddings
-
-
->>>>>>> 2f21592f0 ('0.6.14 버전에 맞게 파일 수정, 불필요한파일 삭제)
-import operator
-from typing import Optional, Sequence
-
-from langchain_core.callbacks import Callbacks
-from langchain_core.documents import BaseDocumentCompressor, Document
-
-
 class RerankCompressor(BaseDocumentCompressor):
     embedding_function: Any
     top_n: int
     reranking_function: Any
     r_score: float
-
     class Config:
         extra = 'forbid'
         arbitrary_types_allowed = True
-
     def compress_documents(
         self,
         documents: Sequence[Document],
@@ -2086,18 +1852,14 @@ class RerankCompressor(BaseDocumentCompressor):
         callbacks: Optional[Callbacks] = None,
     ) -> Sequence[Document]:
         """Compress retrieved documents given the query context.
-
         Args:
             documents: The retrieved documents.
             query: The query context.
             callbacks: Optional callbacks to run during compression.
-
         Returns:
             The compressed documents.
-
         """
         return []
-
     async def acompress_documents(
         self,
         documents: Sequence[Document],
@@ -2117,7 +1879,6 @@ class RerankCompressor(BaseDocumentCompressor):
                 [doc.page_content for doc in documents], RAG_EMBEDDING_CONTENT_PREFIX
             )
             scores = util.cos_sim(query_embedding, document_embedding)[0]
-
         if scores is not None:
             docs_with_scores = list(
                 zip(
@@ -2126,8 +1887,9 @@ class RerankCompressor(BaseDocumentCompressor):
                 )
             )
             if self.r_score:
-                docs_with_scores = [(d, s) for d, s in docs_with_scores if s >= self.r_score]
-
+                docs_with_scores = [
+                    (d, s) for d, s in docs_with_scores if s >= self.r_score
+                ]
             result = sorted(docs_with_scores, key=operator.itemgetter(1), reverse=True)
             final_results = []
             for doc, doc_score in result[: self.top_n]:
@@ -2143,475 +1905,302 @@ class RerankCompressor(BaseDocumentCompressor):
             log.warning('No valid scores found, check your reranking function. Returning original documents.')
             return documents
 
+def _update_rrf_scores(
+    ranked_results: dict,
+    retrieved_docs: list,
+    original_texts: list,
+    rrf_k: int,
+    weight: float,
+    is_bm25: bool = False,
+):
+    """RRF 점수를 계산하고 ranked_results 딕셔너리를 업데이트하는 헬퍼 함수"""
+    for rank, doc in enumerate(retrieved_docs):
+        if is_bm25:
+            original_idx = doc.metadata.get("_original_index")
+            if original_idx is None or original_idx >= len(original_texts):
+                continue
+            content = original_texts[original_idx]
+            metadata = doc.metadata.copy()
+            del metadata["_original_index"]
+        else:
+            # 벡터 검색 결과 (doc은 (content, metadata) 튜플)
+            content, metadata = doc
+
+        # 더 효율적인 해싱을 위해 처음 64자만 사용
+        doc_hash = hashlib.sha256(content[:64].encode("utf-8")).hexdigest()
+        rrf_score = 1 / (rrf_k + rank + 1)
+
+        if doc_hash not in ranked_results:
+            ranked_results[doc_hash] = {
+                "content": content,
+                "metadata": metadata,
+                "score": 0,
+            }
+        ranked_results[doc_hash]["score"] += weight * rrf_score
+
+
 def get_hybrid_search_results_without_reranking(
     collection_name: str,
     collection_result: GetResult,
     query: str,
-    embedding_function,
+    query_embedding: List[float],
     k: int,
-    reranking_function,
-    k_reranker: int,
-    r: float,
-    hybrid_bm25_weight: float,
-    openai_key: Optional[str] = None,
-    bm25_weight: float = 0.3,
-    vector_weight: float = 0.7,
+    rrf_k: int = 60,
+    enable_enriched_texts: bool = False,
 ) -> dict:
-    
-    api_key = openai_key or GEMINI_API_KEY
-    
+    """
+    BM25와 벡터 검색을 사용하여 하이브리드 검색을 수행하고,
+    Reciprocal Rank Fusion (RRF)로 결과를 결합합니다.
+
+    이 함수는 키워드 검색과 의미적 검색을 병렬로 수행하며,
+    캐시된 BM25 검색기를 사용하여 성능을 향상시킵니다.
+    결과는 RRF 알고리즘을 사용하여 최적 순위로 결합됩니다.
+
+    Args:
+        collection_name: 검색할 컬렉션 이름
+        collection_result: 컬렉션의 전체 내용 (문서, 메타데이터)
+        query: 사용자 검색 쿼리
+        query_embedding: 쿼리 임베딩 벡터
+
+        k: 반환할 최종 문서 수
+        rrf_k: RRF 계산에 사용되는 상수 (기본값: 60)
+
+    Returns:
+        거리(점수), 문서, 메타데이터를 포함한 병합된 순위 검색 결과 딕셔너리
+    """
     try:
-        
-        adjusted_weights = adjust_search_weights(query, bm25_weight, vector_weight)
-        log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
-        bm25_retriever = BM25Retriever.from_texts(
-            texts=collection_result.documents[0],
-            metadatas=collection_result.metadatas[0],
-        )
-        bm25_retriever.k = k  # BM25에서는 더 많은 결과를 가져와 다양성 확보
+        log.debug(f"컬렉션 '{collection_name}'에 대한 하이브리드 검색 실행")
 
-        vector_search_retriever = VectorSearchRetriever(
-            collection_name=collection_name,
-            embedding_function=embedding_function,
-            top_k=k,
-        )
-
-        ensemble_retriever = EnsembleRetriever(
-            retrievers=[bm25_retriever, vector_search_retriever], 
-            weights=[adjusted_weights["bm25"], adjusted_weights["vector"]]
-        )
-        
-        # 리랭킹 없이 하이브리드 검색 결과만 반환
-        results = ensemble_retriever.invoke(query)
-        result = {
-            "distances": [[1.0 - i * 0.01 for i in range(len(results))]],  # 임시 점수
-            "documents": [[d.page_content for d in results]],
-            "metadatas": [[d.metadata for d in results]],
-            "query": query,  # 원본 쿼리 정보도 저장
-        }
-        
-        return result
-    except Exception as e:
-        raise e
-
-def parse_and_rerank(
-    llm_output: str,
-    document_objects: List[Document],
-    reranking_query_context: str,
-    k: int,
-    log
-) -> Dict[str, Any]:
-    reranked_docs = []
-    parsed_rankings = []
-
-    # 줄 단위로 분리하고 패턴 매칭
-    for line in llm_output.split('\n'):
-        match = re.match(r'(\d+)[.,]\s*(\d+)[.,]\s*(\d+\.?\d*)[.,]?(.*)', line)
-        if match:
-            rank, doc_num, llm_score, reason = match.groups()
-            parsed_rankings.append({
-                'rank': int(rank),
-                'doc_num': int(doc_num),
-                'score': float(llm_score),
-                'reason': reason.strip()
-            })
-
-    # 파싱 실패 시 대체 패턴 시도
-    if not parsed_rankings:
-        doc_nums = re.findall(r'(?:^|\D)(\d+)(?:\D|$)', llm_output)
-        if doc_nums:
-            seen = set()
-            for num in doc_nums:
-                num = int(num)
-                if 1 <= num <= len(document_objects) and num not in seen:
-                    seen.add(num)
-                    parsed_rankings.append({
-                        'rank': len(parsed_rankings) + 1,
-                        'doc_num': num,
-                        'score': 10.0 - (len(parsed_rankings) * 0.5),  # 임의 점수 부여
-                        'reason': "LLM이 선택한 문서"
-                    })
-
-    # 파싱된 결과로 문서 재정렬
-    if parsed_rankings:
-        for ranking in sorted(parsed_rankings, key=lambda x: x['rank']):
-            doc_idx = ranking['doc_num'] - 1
-            if 0 <= doc_idx < len(document_objects):
-                doc = document_objects[doc_idx]
-                original_index = doc.metadata.get('original_index', 0)
-                llm_rank = ranking['rank']
-                rank_diff = abs(original_index + 1 - llm_rank)
-                base_score = min(ranking['score'] / 10.0, 1.0)
-                penalty_factor = min(0.5, rank_diff * 0.03)
-                adjusted_score = base_score * (1.0 - penalty_factor)
-                if doc.metadata is None:
-                    doc.metadata = {}
-                doc.metadata['score'] = adjusted_score
-                doc.metadata['base_score'] = base_score
-                doc.metadata['rank_penalty'] = penalty_factor
-                doc.metadata['llm_reason'] = ranking['reason']
-                doc.metadata['llm_rank'] = ranking['rank']
-                reranked_docs.append(doc)
-
-        mentioned_indices = set(r['doc_num'] - 1 for r in parsed_rankings)
-        for i, doc in enumerate(document_objects):
-            if i not in mentioned_indices:
-                if doc.metadata is None:
-                    doc.metadata = {}
-                doc.metadata['score'] = 0.3
-                doc.metadata['llm_reason'] = "LLM이 관련성이 낮다고 판단한 문서"
-                reranked_docs.append(doc)
-
-        if len(reranked_docs) < 5 and len(document_objects) > len(reranked_docs):
-            added_indices = set(mentioned_indices)
-            for i, doc in enumerate(document_objects):
-                if i not in added_indices and len(reranked_docs) < 5:
-                    if doc.metadata is None:
-                        doc.metadata = {}
-                    doc.metadata['score'] = 0.2
-                    doc.metadata['llm_reason'] = "추가된 문서"
-                    reranked_docs.append(doc)
-
-        total_reranked_docs = len(reranked_docs)
-        if len(reranked_docs) > 5:
-            log.info(f"리랭킹된 전체 문서 {len(reranked_docs)}개 중 상위 5개만 반환합니다.")
-            reranked_docs = reranked_docs[:5]
-
-        rerank_details = []
-        for i, doc in enumerate(reranked_docs):
-            content_preview = doc.page_content[:30].replace('\n', ' ')
-            if len(doc.page_content) > 30:
-                content_preview += "..."
-            score = doc.metadata.get("score", "N/A")
-            base_score = doc.metadata.get("base_score", score)
-            rank_penalty = doc.metadata.get("rank_penalty", 0)
-            llm_rank = doc.metadata.get("llm_rank", "N/A")
-            llm_reason = doc.metadata.get("llm_reason", "N/A")
-            original_index = doc.metadata.get("original_index", "N/A")
-            query_info = f" (쿼리 컨텍스트: {reranking_query_context[:30]}...)" if reranking_query_context else ""
-            score_info = f"{f'{score:.2f}' if isinstance(score, float) else score}"
-            if isinstance(base_score, float) and isinstance(rank_penalty, float) and rank_penalty > 0:
-                score_info += f" (원래: {base_score:.2f}, 패널티: {rank_penalty:.2f})"
-            rerank_details.append(
-                f"\n  {i+1}. [원래순위: {original_index + 1 if isinstance(original_index, int) else original_index}, "
-                f"LLM순위: {llm_rank}, 점수: {score_info}]{query_info}\n"
-                f"     내용: {content_preview}\n"
-                f"     이유: {llm_reason[:80] + '...' if len(llm_reason) > 80 else llm_reason}"
+        if (
+            not collection_result
+            or not getattr(collection_result, "documents", None)
+            or not collection_result.documents
+            or not collection_result.documents[0]
+        ):
+            log.warning(
+                f"컬렉션 '{collection_name}'에서 검색할 문서를 찾지 못했습니다. 빈 결과를 반환합니다."
             )
+            return {
+                "distances": [[]],
+                "documents": [[]],
+                "metadatas": [[]],
+                "query": query,
+            }
 
-        result = {
-            "distances": [[d.metadata.get("score", 0.5) for d in reranked_docs]],
-            "documents": [[d.page_content for d in reranked_docs]],
-            "metadatas": [[d.metadata for d in reranked_docs]],
-        }
+        # 1. 쿼리 특성에 따른 동적 가중치와 후보 수 계산
+        weights = adjust_search_weights(query, DEFAULT_BM25_WEIGHT, DEFAULT_VECTOR_WEIGHT)
+        candidate_multiplier = min(
+            CANDIDATE_MULTIPLIER_LOW_K if k <= 5 else CANDIDATE_MULTIPLIER_HIGH_K,
+            MAX_CANDIDATE_MULTIPLIER
+        )
+        candidate_k = max(k, min(int(k * candidate_multiplier), k * 5))  # 최대 5배로 제한
 
-        log.info(f"LLM 리랭킹 완료: 총 {total_reranked_docs}개 문서 중 {len(reranked_docs)}개 반환 - {''.join(rerank_details)}")
-        return result
-    else:
-        # 파싱 실패 시 원본 결과 반환 (혹은 적절한 fallback)
-        log.warning("LLM 파싱 실패: 원본 결과 반환")
-        return None
-
-def perform_llm_reranking(
-    combined_results: dict,
-    original_query: list,
-    k: int,
-    r: float,
-    openai_key: str,
-    log=None,  # log 인자 추가 (기본값 None)
-) -> dict:
-    """통합된 검색 결과에 대해 LLM 기반 리랭킹 수행"""
-    try:
-        if log is None:
-            import logging
-            log = logging.getLogger("llm_rerank")
-
-        # 캐싱을 위한 키 생성
-        docs = combined_results["documents"][0]
-        metas = combined_results["metadatas"][0]
-        
-        # 문서 내용의 해시를 생성 (처음 100자씩만 사용해서 키 길이 제한)
-        docs_sample = [doc[:100] for doc in docs[:10]]  # 상위 10개 문서의 처음 100자만
-        cache_data = f"llm_rerank:{str(original_query)}:{str(docs_sample)}:{k}:{r}"
-        cache_key = cache_key_hash(cache_data)
-        
-        # 캐시 확인
-        cached_result = llm_rerank_cache.get(cache_key)
-        if cached_result is not None:
-            log.debug(f"Cache hit for LLM reranking: {cache_key}")
-            return cached_result
-
-        log.debug(f"Cache miss for LLM reranking: {cache_key}")
-        
-        # 필요한 데이터 추출
-
-        max_docs_for_reranking = min(SAFE_MAX_DOCS_FOR_RERANKING, k*3, len(docs))
-        log.info(f"리랭킹을 위한 문서 수: {max_docs_for_reranking}개 (요청: {k}, 안전 최대값: {SAFE_MAX_DOCS_FOR_RERANKING})")
-        selected_docs = docs[:max_docs_for_reranking]
-        selected_metas = metas[:max_docs_for_reranking]
-
-        # Document 객체 생성
-        document_objects = []
-        for i, (doc_content, meta) in enumerate(zip(selected_docs, selected_metas)):
-            if meta is None:
-                meta = {}
-            meta['original_index'] = i
-            document_objects.append(
-                Document(
-                    page_content=doc_content,
-                    metadata=meta
-                )
+        # 2. 설정 가능한 TTL로 캐시된 BM25 검색기 가져오기 또는 생성
+        bm25_cache_key = f"{collection_name}::enriched:{1 if enable_enriched_texts else 0}"
+        bm25_retriever = bm25_retriever_cache.get(bm25_cache_key)
+        if not bm25_retriever:
+            log.info(f"'{collection_name}'에 대한 BM25 캐시 미스. 새 검색기 생성.")
+            original_texts = collection_result.documents[0]
+            metadata_rows = (
+                collection_result.metadatas[0]
+                if getattr(collection_result, "metadatas", None)
+                else None
             )
+            if not metadata_rows:
+                metadata_rows = [{} for _ in range(len(original_texts))]
 
-        system_prompt = """역할: 당신은 사용자의 질병명 또는 암 관련 정보 쿼리에 대해 검색된 문서가 KCD 코드(한국표준질병사인분류) 또는 **암등록 관련 정보(T코드, M코드, 분화도, 편측성, SEER 코드 등)**를 얼마나 정확하고 유용하게 제공하는지 판단하는 전문가입니다.
-        
-목표: 주어진 쿼리(질병명, 암 관련 설명 등)와 검색 결과 문서들을 분석하여, 쿼리의 의도(특정 KCD 코드 또는 암등록 정보 획득)에 가장 부합하는 문서를 관련성 높은 순서대로 번호를 나열하고 평가합니다.
+            bm25_source_texts = original_texts
+            if enable_enriched_texts:
+                enriched_candidates = get_enriched_texts(collection_result)
+                if enriched_candidates:
+                    bm25_source_texts = enriched_candidates
+                    log.debug(
+                        f"'{collection_name}' 컬렉션 문서에 대해 enriched_text 기반 BM25 검색을 사용합니다."
+                    )
 
-평가 기준 (총 10점 만점):
- 질병명/용어 정확도 및 독립성 (최대 4점)
- 문서에 쿼리의 질병명 또는 핵심 용어(예: 암 부위, 조직학명)가 **정확히 일치(Exact match)**하는 형태로 명확하게 제시되는 경우 (3-4점)
- 참고: 정확히 일치하는 용어와 불필요한 수식어가 있는 용어가 함께 존재 시, 정확히 일치하는 용어 자체에 대한 명확성을 기준으로 평가 (최대 3점)
- 문서에 쿼리의 질병명 또는 핵심 용어가 정확히 일치하지만, 관련성이 낮거나 불필요한 다른 정보와 함께 혼재되어 명확성이 떨어지는 경우 (1-2점)
- 정확한 일치 없이, 일부 유사하거나 관련된 표현만 포함된 경우 (0점)
- 
-KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
- KCD: 쿼리된 질병명에 대한 정확한 KCD 코드(들) (필요시 †/*, T/Y 코드 포함)를 명확하게 제공하는가? (0-4점)
- 정확한 코드(들)를 모두 명시적으로 제공 (4점)
- 일부 코드만 제공하거나, 관련 코드를 암시하지만 명확하지 않음 (1-3점)
- 코드 정보 없음 (0점)
- 
- 암등록: 쿼리된 암 정보에 대한 **요구되는 암등록 정보(T코드, M코드, 분화도, 편측성, SEER 코드 등)**를 정확하게 제공하는가? (0-4점)
- 요구되는 핵심 정보(T/M 코드 등)를 정확하고 명확하게 제공 (4점)
- 일부 정보만 제공하거나, 정보가 불명확함 (1-3점)
- 관련 등록 정보 없음 (0점)
- (KCD 또는 암등록 중 쿼리의 의도에 맞는 기준으로 평가)
- 
-최신성 및 신뢰성 (최대 1점)
- 문서가 최신 KCD 버전, 최신 암등록 지침/공지 또는 신뢰할 수 있는 공식 자료(예: 통계청, 암등록본부, 관련 학회 지침)에 기반하여 작성되었는가? (0-1점)
- 특히 암등록 정보는 지침 변경이 잦으므로 최신 공지/지침 반영 여부가 중요
- 
-정보의 구체성 및 완전성 (최대 1점)
- KCD: 필요한 경우 검표(†)/별표(*), T/Y 코드 등 관련 코드를 완전하게 제공하는가? 급성/만성 등 세부 분류가 필요할 때 구체적인 정보를 포함하는가?
- 암등록: T코드, M코드 외 분화도, 편측성, SEER 코드 등 맥락상 필요한 부가 정보를 구체적으로 제공하는가?
- (쿼리 의도에 따라 필요한 정보의 구체성과 완전성을 평가, 0-1점)
- 
-제외 기준:
- 문서가 쿼리된 질병명이나 암 자체에 대한 설명만 장황하게 늘어놓고, 정작 핵심인 KCD 코드나 암등록 세부 정보(T/M 코드 등)를 전혀 포함하지 않는 경우 관련성이 낮다고 판단하여 낮은 점수를 부여하거나 제외 고려.
- 문서가 쿼리의 의도(KCD 코드 찾기, 암등록 정보 찾기)와 본질적으로 다른 내용(예: 일반적인 건강 정보, 치료 후기 등)을 주로 담고 있을 경우 제외합니다.
- 
-출력 형식:
-결과는 다음 형식으로 제공하세요.
-순위,문서번호,점수(0-10),이유
-1,3,9.5,쿼리된 질병명과 정확히 일치하며 최신 지침 기반의 정확한 KCD 코드(†/* 포함)를 명확하고 완전하게 제공함.
-2,1,7.0,쿼리된 암 정보와 정확히 일치하는 T/M 코드를 제공하나, 최신 지침 변경 사항 반영 여부가 불확실하고 SEER 코드 정보가 누락됨.
-3,4,4.0,질병명은 일치하나 KCD 코드를 직접 제공하지 않고 질병 정의만 설명함.
-4,2,2.0,유사 질병명에 대한 정보만 포함하고 있으며, 쿼리에 대한 직접적인 KCD 코드 정보 없음.
-"""
-
-        reranking_query_context = " | ".join(original_query)
-        user_prompt = f"쿼리: {reranking_query_context}\n\n"
-
-        query_keywords = [word for q in original_query if isinstance(q, str) for word in q.lower().split() if len(word) > 2]
-
-        for i, doc in enumerate(document_objects):
-            content = doc.page_content
-            if len(content) > MAX_CONTENT_PREVIEW_LENGTH:
-                content = content[:MAX_CONTENT_PREVIEW_LENGTH] + "..."
-            user_prompt += f"문서 {i+1}:\n{content}\n\n"
-        user_prompt += "위 문서들을 쿼리와의 관련성에 따라 재평가하고 순위를 매겨주세요."
-
-        llm_output = None
-
-        # Gemini 우선 시도
-        try:
-            response = requests.post(
-                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_key}"},
-                json={
-                    "model": GEMINI_MODEL,
-                    "reasoning_effort": "none",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "temperature": API_TEMPERATURE,
-                }
+            lowercase_texts = [str(text).lower() for text in bm25_source_texts]
+            enhanced_metadatas = [
+                {**(metadata_rows[i] if i < len(metadata_rows) else {}), "_original_index": i}
+                for i in range(len(lowercase_texts))
+            ]
+            bm25_retriever = BM25Retriever.from_texts(
+                texts=lowercase_texts, metadatas=enhanced_metadatas
             )
-            response.raise_for_status()
-            llm_output = response.json()["choices"][0]["message"]["content"].strip()
-            log.debug(f"Gemini 응답 수신 성공")
-        except Exception as e:
-            log.warning(f"Gemini 호출 실패 ({e}), OpenAI로 폴백 시도")
-            try:
-                response = requests.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {OPENAI_API_KEY}"
-                    },
-                    json={
-                        "model": OPENAI_MODEL,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        "temperature": API_TEMPERATURE,
-                    }
-                )
-                response.raise_for_status()
-                llm_output = response.json()["choices"][0]["message"]["content"].strip()
-                log.debug(f"OpenAI 응답 수신 성공")
-            except Exception as e2:
-                log.error(f"OpenAI API 호출 오류: {e2}")
-                return combined_results
-
-        # 공통 파싱/리랭킹/로그출력
-        result = parse_and_rerank(llm_output, document_objects, reranking_query_context, k, log)
-        if result is not None:
-            # 성공한 결과를 캐시에 저장
-            llm_rerank_cache.set(cache_key, result, CACHE_TTL_LLM_RERANK)
-            return result
+            bm25_retriever_cache.set(
+                bm25_cache_key, bm25_retriever, ttl_seconds=CACHE_TTL_BM25
+            )
         else:
-            return combined_results
+            log.debug(f"'{collection_name}'에 대한 BM25 캐시 히트.")
+        bm25_retriever.k = candidate_k
+
+        # 3. BM25와 벡터 검색을 병렬로 수행
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            bm25_future = executor.submit(bm25_retriever.invoke, query.lower())
+            vector_future = executor.submit(
+                VECTOR_DB_CLIENT.search,
+                collection_name=collection_name,
+                vectors=[query_embedding],
+                limit=candidate_k,
+            )
+            bm25_results_raw = bm25_future.result()
+            vector_search_results = vector_future.result()
+
+        # 4. Reciprocal Rank Fusion (RRF)로 결과 결합
+        ranked_results = {}
+
+        # BM25 결과 처리
+        _update_rrf_scores(
+            ranked_results,
+            bm25_results_raw,
+            collection_result.documents[0],
+            rrf_k,
+            weight=weights["bm25"],
+            is_bm25=True,
+        )
+
+        # 벡터 검색 결과 처리
+        if vector_search_results and vector_search_results.documents:
+            vector_docs = zip(
+                vector_search_results.documents[0], vector_search_results.metadatas[0]
+            )
+            _update_rrf_scores(
+                ranked_results,
+                list(vector_docs),
+                [],
+                rrf_k,
+                weight=weights["vector"],
+                is_bm25=False,
+            )
+
+        # 5. RRF 점수로 최종 결과 정렬
+        sorted_results = sorted(
+            ranked_results.values(), key=lambda x: x["score"], reverse=True
+        )
+        top_k_results = sorted_results[:k]
+
+        # 6. 결과 포맷팅 및 반환
+        if not top_k_results:
+            return {
+                "distances": [[]],
+                "documents": [[]],
+                "metadatas": [[]],
+                "query": query,
+            }
+
+        scores = [res["score"] for res in top_k_results]
+        documents = [res["content"] for res in top_k_results]
+        metadatas = [res["metadata"] for res in top_k_results]
+
+        result = {
+            "distances": [scores],
+            "documents": [documents],
+            "metadatas": [metadatas],
+            "query": query,
+        }
+
+        log.debug(
+            f"하이브리드 검색 완료: {len(top_k_results)}개 결과. "
+            f"최고 점수: {scores[0] if scores else 'N/A'}. "
+            f"가중치 (BM25/벡터): {weights['bm25']:.2f}/{weights['vector']:.2f}. "
+            f"후보 수: {candidate_k}"
+        )
+        return result
 
     except Exception as e:
-        if log:
-            log.error(f"LLM 리랭킹 오류: {e}")
-        return combined_results
-
+        log.error(
+            f"get_hybrid_search_results_without_reranking에서 오류 발생: {e}", exc_info=True
+        )
+        raise e
+        
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
-    """여러 쿼리의 모든 결과를 병합하고 중복 제거하면서 각 쿼리의 상위 결과 보존"""
+    """
+    여러 쿼리의 모든 결과를 병합하고, 내용 기반으로 중복을 제거하며, 각 문서의 최고 점수를 보존합니다.
+
+    Args:
+        all_results: 각 쿼리에 대한 결과 딕셔너리의 리스트.
+                     각 딕셔너리는 'documents', 'metadatas', 'distances' 키를 포함할 수 있습니다.
+
+    Returns:
+        병합되고 정렬된 결과 딕셔너리.
+    """
     if not all_results:
         return {"distances": [[]], "documents": [[]], "metadatas": [[]]}
-    
-    # 쿼리별 결과 그룹화
-    query_results = {}  # 쿼리별 결과 저장
-    
+
+    # 문서 해시를 키로 사용하여 최고 점수, 문서 내용, 메타데이터를 저장
+    # 형식: {doc_hash: (score, doc_content, metadata)}
+    best_docs = {}
+    total_docs_before = 0
+
     for result in all_results:
-        if "documents" in result and result["documents"] and result["documents"][0]:
-            docs = result["documents"][0]
-            metas = result["metadatas"][0] if "metadatas" in result and result["metadatas"] else [{}] * len(docs)
-            dists = result["distances"][0] if "distances" in result and result["distances"] else [0.5] * len(docs)
-            query = result.get("query", "")
-            
-            if query not in query_results:
-                query_results[query] = {
-                    "docs": [],
-                    "metas": [],
-                    "dists": []
-                }
-            
-            # 문서와 메타데이터, 점수 저장
-            for doc, meta, dist in zip(docs, metas, dists):
-                if meta:
-                    meta["original_query"] = query  # 원본 쿼리 정보 저장
-                query_results[query]["docs"].append(doc)
-                query_results[query]["metas"].append(meta)
-                query_results[query]["dists"].append(dist)
-    
-    # 각 쿼리별로 상위 결과 보존
-    preserved_docs = []  # 보존할 문서
-    preserved_metas = []  # 보존할 메타데이터
-    preserved_dists = []  # 보존할 점수
-    preserved_hashes = set()  # 보존된 문서 해시
-    
-    # 1단계: 각 쿼리별 상위 결과 보존
-    for query, results in query_results.items():
-        # 점수 기준으로 정렬 (높은 점수 우선)
-        sorted_items = sorted(zip(results["docs"], results["metas"], results["dists"]), 
-                               key=lambda x: x[2], reverse=True)
-        
-        preserved_count = 0
-        for doc, meta, dist in sorted_items:
-            # 문서 해시 계산
-            doc_key = doc[:200] + doc[-100:] if len(doc) > 300 else doc
-            doc_hash = hashlib.sha256(doc_key.encode()).hexdigest()
-            
-            # 상위 K개 이내이거나, 해시가 없는 경우 보존
-            if preserved_count < TOP_K_PER_QUERY or doc_hash not in preserved_hashes:
-                preserved_docs.append(doc)
-                preserved_metas.append(meta)
-                preserved_dists.append(dist)
-                preserved_hashes.add(doc_hash)
-                preserved_count += 1
-                
-                # 상위 K개는 해시에 추가하지 않음 (다른 쿼리에서도 상위 K개면 보존)
-                if preserved_count > TOP_K_PER_QUERY:
-                    preserved_hashes.add(doc_hash)
-    
-    # 2단계: 나머지 결과 중 중복이 아닌 결과만 추가
-    remaining_docs = []
-    remaining_metas = []
-    remaining_dists = []
-    
-    for query, results in query_results.items():
-        for doc, meta, dist in zip(results["docs"], results["metas"], results["dists"]):
-            doc_key = doc[:200] + doc[-100:] if len(doc) > 300 else doc
-            doc_hash = hashlib.sha256(doc_key.encode()).hexdigest()
-            
-            if doc_hash not in preserved_hashes:
-                remaining_docs.append(doc)
-                remaining_metas.append(meta)
-                remaining_dists.append(dist)
-                preserved_hashes.add(doc_hash)
-    
-    # 최종 결과 구성
-    all_docs = preserved_docs + remaining_docs
-    all_metas = preserved_metas + remaining_metas
-    all_dists = preserved_dists + remaining_dists
-    
-    # 원래 결과와 최종 결과의 개수 로깅
-    original_count = sum(len(result.get("documents", [[]])[0]) for result in all_results)
-    log.info(f"병합 및 중복 제거 결과: {original_count}개 -> {len(all_docs)}개 문서 (쿼리별 상위 {TOP_K_PER_QUERY}개 보존)")
-    
+        # 결과에 문서가 없으면 건너뛰
+        if not (docs := result.get("documents", [[]])[0]):
+            continue
+
+        total_docs_before += len(docs)
+
+        # 메타데이터와 점수가 없으면 기본값으로 채움
+        metas = result.get("metadatas", [[]])[0] or [{}] * len(docs)
+        dists = result.get("distances", [[]])[0] or [0.5] * len(docs)
+        query = result.get("query", "unknown_query")
+
+        for doc, meta, dist in zip(docs, metas, dists):
+            if not isinstance(doc, str):
+                log.warning(f"문서 내용이 문자열이 아니므로 건너뛰니다: {type(doc)}")
+                continue
+
+            # Use first 64 chars for more efficient hashing
+            doc_hash = hashlib.sha256(doc[:64].encode('utf-8')).hexdigest()
+
+            # 기존에 없거나, 새 점수가 더 높으면 정보 업데이트
+            if doc_hash not in best_docs or dist > best_docs[doc_hash][0]:
+                # 원본 메탄데이터를 수정하지 않도록 복사
+                updated_meta = meta.copy() if meta else {}
+                updated_meta["original_query"] = query
+                best_docs[doc_hash] = (dist, doc, updated_meta)
+
+    if not best_docs:
+        return {"distances": [[]], "documents": [[]], "metadatas": [[]]}
+
+    # 점수(distance) 기준으로 내림차순 정렬
+    sorted_results = sorted(best_docs.values(), key=lambda item: item[0], reverse=True)
+
+    # 결과 분리
+    final_dists, final_docs, final_metas = zip(*sorted_results)
+
+    log.info(
+        f"병합 및 중복 제거 완료: "
+        f"총 {total_docs_before}개 문서에서 {len(final_docs)}개의 고유한 문서 선택 "
+        f"({total_docs_before - len(final_docs)}개 중복 제거)"
+    )
+
     return {
-        "distances": [all_dists],
-        "documents": [all_docs],
-        "metadatas": [all_metas],
+        "distances": [list(final_dists)],
+        "documents": [list(final_docs)],
+        "metadatas": [list(final_metas)],
     }
 
-# Cache management functions
+# 캐시 관리 함수들
 def get_cache_stats() -> Dict[str, Any]:
     """캐시 통계 정보 반환"""
     return {
         "enabled": ENABLE_CACHING,
-        "medical_abbrev": {
-            "size": medical_abbrev_cache.size(),
-            "max_size": medical_abbrev_cache.max_size,
-            "ttl_seconds": CACHE_TTL_MEDICAL_ABBREV
-        },
-        "query_enhance": {
-            "size": query_enhance_cache.size(),
-            "max_size": query_enhance_cache.max_size,
-            "ttl_seconds": CACHE_TTL_QUERY_ENHANCE
-        },
-        "llm_rerank": {
-            "size": llm_rerank_cache.size(),
-            "max_size": llm_rerank_cache.max_size,
-            "ttl_seconds": CACHE_TTL_LLM_RERANK
+        "bm25_retriever": {
+            "size": bm25_retriever_cache.size(),
+            "max_size": bm25_retriever_cache.max_size,
+            "ttl_seconds": CACHE_TTL_BM25
         }
     }
 
 def clear_all_caches() -> None:
     """모든 캐시 클리어"""
-    medical_abbrev_cache.clear()
-    query_enhance_cache.clear()
-    llm_rerank_cache.clear()
+    bm25_retriever_cache.clear()
     log.info("모든 RAG 캐시가 클리어되었습니다.")
 
 def clear_cache_by_type(cache_type: str) -> bool:
     """특정 타입의 캐시만 클리어"""
-    if cache_type == "medical_abbrev":
-        medical_abbrev_cache.clear()
-        log.info("의학약어 캐시가 클리어되었습니다.")
-        return True
-    elif cache_type == "query_enhance":
-        query_enhance_cache.clear()
-        log.info("쿼리 확장 캐시가 클리어되었습니다.")
-        return True
-    elif cache_type == "llm_rerank":
-        llm_rerank_cache.clear()
-        log.info("LLM 리랭킹 캐시가 클리어되었습니다.")
+    if cache_type == "bm25":
+        bm25_retriever_cache.clear()
+        log.info("BM25 검색기 캐시가 클리어되었습니다.")
         return True
     else:
         log.warning(f"알 수 없는 캐시 타입: {cache_type}")
@@ -2619,7 +2208,5 @@ def clear_cache_by_type(cache_type: str) -> bool:
 
 def cleanup_expired_caches() -> None:
     """만료된 캐시 엔트리들 정리"""
-    medical_abbrev_cache._cleanup_expired()
-    query_enhance_cache._cleanup_expired()
-    llm_rerank_cache._cleanup_expired()
+    bm25_retriever_cache._cleanup_expired()
     log.info("만료된 캐시 엔트리들이 정리되었습니다.")
