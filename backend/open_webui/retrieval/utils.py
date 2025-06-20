@@ -6,70 +6,66 @@
 #25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
+import asyncio
+import hashlib
+import json
 import logging
 import os
-import re  # 정규표현식 모듈 추가
-import json
-from typing import Optional, Union, Dict, List, Tuple, Any
-
-import asyncio
+import operator
+import re
 import requests
-import hashlib
-from concurrent.futures import ThreadPoolExecutor
-from dotenv import load_dotenv
 import time
-from functools import wraps
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from functools import wraps
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
+from dotenv import load_dotenv
 from huggingface_hub import snapshot_download
+
 from langchain.retrievers import ContextualCompressionRetriever, EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
-from langchain_core.documents import Document
+from langchain_core.callbacks import (
+    CallbackManagerForRetrieverRun,
+    Callbacks,
+)
+from langchain_core.documents import BaseDocumentCompressor, Document
+from langchain_core.retrievers import BaseRetriever
 
-from open_webui.config import VECTOR_DB
-from open_webui.retrieval.vector.factory import VECTOR_DB_CLIENT
-
-from open_webui.models.users import UserModel
-from open_webui.models.files import Files
-
-from open_webui.retrieval.vector.main import GetResult
-
-
+from open_webui.config import (
+    VECTOR_DB,
+    RAG_EMBEDDING_QUERY_PREFIX,
+    RAG_EMBEDDING_CONTENT_PREFIX,
+    RAG_EMBEDDING_PREFIX_FIELD_NAME,
+)
 from open_webui.env import (
     SRC_LOG_LEVELS,
     OFFLINE_MODE,
     ENABLE_FORWARD_USER_INFO_HEADERS,
 )
-from open_webui.config import (
-    RAG_EMBEDDING_QUERY_PREFIX,
-    RAG_EMBEDDING_CONTENT_PREFIX,
-    RAG_EMBEDDING_PREFIX_FIELD_NAME,
-)
+from open_webui.models.files import Files
+from open_webui.models.users import UserModel
+from open_webui.retrieval.vector.factory import VECTOR_DB_CLIENT
+from open_webui.retrieval.vector.main import GetResult
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
-
-
-from typing import Any, Dict, List, Tuple
-
-from langchain_core.callbacks import CallbackManagerForRetrieverRun
-from langchain_core.retrievers import BaseRetriever
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINIAPIKEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Configuration constants
-GEMINI_MODEL = "gemini-2.5-flash"
-OPENAI_MODEL = "gpt-4.1-mini"
-API_TEMPERATURE = 0
-SAFE_MAX_DOCS_FOR_RERANKING = 20
-TOP_K_PER_QUERY = 3
-DEFAULT_BM25_WEIGHT = 0.3
-DEFAULT_VECTOR_WEIGHT = 0.7
-ASYNC_TIMEOUT_SECONDS = 30
-MAX_CONTENT_PREVIEW_LENGTH = 500
-MMR_DIVERSITY_THRESHOLD = 0.8
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+API_TEMPERATURE = float(os.getenv("API_TEMPERATURE", "0"))
+SAFE_MAX_DOCS_FOR_RERANKING = int(os.getenv("SAFE_MAX_DOCS_FOR_RERANKING", "20"))
+TOP_K_PER_QUERY = int(os.getenv("TOP_K_PER_QUERY", "3"))
+DEFAULT_BM25_WEIGHT = float(os.getenv("DEFAULT_BM25_WEIGHT", "0.3"))
+DEFAULT_VECTOR_WEIGHT = float(os.getenv("DEFAULT_VECTOR_WEIGHT", "0.7"))
+ASYNC_TIMEOUT_SECONDS = int(os.getenv("ASYNC_TIMEOUT_SECONDS", "30"))
+MAX_CONTENT_PREVIEW_LENGTH = int(os.getenv("MAX_CONTENT_PREVIEW_LENGTH", "500"))
+MMR_DIVERSITY_THRESHOLD = float(os.getenv("MMR_DIVERSITY_THRESHOLD", "0.8"))
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
@@ -135,6 +131,59 @@ def cache_key_hash(data: str) -> str:
     """Generate a consistent hash for cache keys"""
     return hashlib.sha256(data.encode('utf-8')).hexdigest()[:16]
 
+async def call_llm_api(prompt: str, system_prompt: str, api_key: str, use_gemini: bool = True) -> str:
+    """Unified LLM API call function with fallback support"""
+    if use_gemini and api_key:
+        try:
+            response = requests.post(
+                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}"
+                },
+                json={
+                    "model": GEMINI_MODEL,
+                    "reasoning_effort": "none",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": API_TEMPERATURE
+                },
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            log.warning(f"Gemini API call failed: {type(e).__name__}, trying OpenAI fallback")
+    
+    # OpenAI fallback
+    if OPENAI_API_KEY:
+        try:
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {OPENAI_API_KEY}"
+                },
+                json={
+                    "model": OPENAI_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": API_TEMPERATURE
+                },
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            log.error(f"OpenAI API call also failed: {type(e).__name__}")
+            raise
+    else:
+        raise ValueError("No valid API key available for LLM calls")
+
 def async_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
     """Decorator for caching async function results"""
     def decorator(func):
@@ -193,40 +242,50 @@ async def process_queries_async(queries: List[str], openai_key: Optional[str] = 
     
     # 모든 비동기 작업을 모아서 한 번에 실행
     async def process_single_query(query: str) -> Tuple[str, List[str]]:
-        # 1. 의학 약어 확장
-        expanded_query = await expand_medical_abbreviation(query, api_key)
-        
-        # 2. 쿼리 향상
-        enhanced_queries = await enhance_query(expanded_query, api_key)
-        
-        return expanded_query, enhanced_queries
+        try:
+            # 1. 의학 약어 확장
+            expanded_query = await expand_medical_abbreviation(query, api_key)
+            
+            # 2. 쿼리 향상
+            enhanced_queries = await enhance_query(expanded_query, api_key)
+            
+            return expanded_query, enhanced_queries
+        except Exception as e:
+            log.error(f"Error processing query '{query}': {e}")
+            return query, [query]  # 실패 시 원본 쿼리 반환
     
     # 모든 쿼리에 대한 작업 생성
     tasks = [process_single_query(query) for query in queries]
     
-    # 모든 작업 병렬 실행
-    results = await asyncio.gather(*tasks)
+    try:
+        # 모든 작업 병렬 실행 (return_exceptions=True로 예외도 결과로 받음)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+    except Exception as e:
+        log.error(f"Critical error in async processing: {e}")
+        # 전체 실패 시 원본 쿼리들 반환
+        return queries
     
     # 결과 처리
     all_queries = []
     for i, result in enumerate(results):
-        original_query = queries[i] # 해당 결과에 대한 원본 쿼리 가져오기
-
+        original_query = queries[i]
+        
         # 원본 쿼리 추가
         all_queries.append(original_query)
 
         if isinstance(result, Exception):
-            # gather에서 예외가 발생한 경우 로그 기록 (이미 process_single_query에서 처리했을 수 있음)
+            # 예외 발생한 경우 로그 기록
             log.error(f"Task for query '{original_query}' failed with exception: {result}")
             # 실패한 경우 향상된 쿼리는 추가하지 않음
-        elif result:
-            # 성공적인 결과 처리 (expanded_query는 사용하지 않음)
+        elif result and len(result) == 2:
+            # 성공적인 결과 처리
             _, enhanced_queries = result
-            # 향상된 쿼리들 추가
-            all_queries.extend(enhanced_queries)
+            if enhanced_queries and isinstance(enhanced_queries, list):
+                # 향상된 쿼리들 추가
+                all_queries.extend(enhanced_queries)
         else:
-             # 결과가 비어있는 예외적인 경우 (process_single_query에서 빈 결과를 반환한 경우)
-             log.warning(f"No results returned for query '{original_query}'")
+            # 결과가 비어있거나 예상과 다른 경우
+            log.warning(f"Unexpected result format for query '{original_query}': {result}")
 
 
     # 중복 제거 (선택 사항): 원본 쿼리가 향상된 쿼리 결과와 동일할 수 있음
@@ -241,7 +300,7 @@ async def process_queries_async(queries: List[str], openai_key: Optional[str] = 
     return unique_queries
 
 class VectorSearchRetriever(BaseRetriever):
-    collection_name: Any
+    collection_name: str
     embedding_function: Any
     top_k: int
 
@@ -273,7 +332,10 @@ class VectorSearchRetriever(BaseRetriever):
 
 
 def query_doc(
-    collection_name: str, query_embedding: List[float], k: int, user: Optional[UserModel] = None
+    collection_name: str, 
+    query_embedding: List[float], 
+    k: int, 
+    user: Optional[UserModel] = None
 ) -> Any:
     try:
         log.debug(f"query_doc:doc {collection_name}")
@@ -292,7 +354,10 @@ def query_doc(
         raise e
 
 
-def get_doc(collection_name: str, user: Optional[UserModel] = None) -> Any:
+def get_doc(
+    collection_name: str, 
+    user: Optional[UserModel] = None
+) -> Any:
     try:
         log.debug(f"get_doc:doc {collection_name}")
         result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
@@ -400,10 +465,18 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
         )
         response.raise_for_status()
         expanded_term = response.json()["choices"][0]["message"]["content"].strip()
-        log.info(f"Medical abbreviation expansion completed for query: '{query[:20]}...'")
+        # 로그에서 민감정보 제거 (쿼리 내용 마스킹)
+        masked_query = query[:10] + '***' if len(query) > 10 else '***'
+        log.info(f"Medical abbreviation expansion completed for query: '{masked_query}'")
         return expanded_term
+    except requests.exceptions.RequestException as e:
+        log.error(f"Network error expanding medical abbreviation: {type(e).__name__}")
+        return query
+    except KeyError as e:
+        log.error(f"API response format error: {type(e).__name__}")
+        return query
     except Exception as e:
-        log.error(f"Error expanding medical abbreviation: {e}")
+        log.error(f"Unexpected error expanding medical abbreviation: {type(e).__name__}")
         return query
 
 
@@ -464,11 +537,17 @@ async def enhance_query(query: str, openai_key: Optional[str] = None) -> List[st
             parsed_result["original"],
             parsed_result["synonyms"]
         ]
-        log.info(f"Enhanced queries: {enhanced_queries}")
+        log.info(f"Enhanced queries count: {len(enhanced_queries)} (content masked for privacy)")
         return enhanced_queries
+    except requests.exceptions.RequestException as e:
+        log.error(f"Network error enhancing query: {type(e).__name__}")
+        return [query]
+    except (KeyError, json.JSONDecodeError) as e:
+        log.error(f"API response parsing error: {type(e).__name__}")
+        return [query]
     except Exception as e:
-        log.error(f"Error enhancing query: {e}")
-        return [query]  # 오류 발생 시 원본 쿼리만 반환
+        log.error(f"Unexpected error enhancing query: {type(e).__name__}")
+        return [query]
 
 def query_doc_with_hybrid_search(
     collection_name: str,
@@ -549,7 +628,11 @@ def query_doc_with_hybrid_search(
         log.exception(f"Error querying doc {collection_name} with hybrid search: {e}")
         raise e
 
-def adjust_search_weights(query: str, default_bm25_weight: float, default_vector_weight: float) -> Dict[str, float]:
+def adjust_search_weights(
+    query: str, 
+    default_bm25_weight: float, 
+    default_vector_weight: float
+) -> Dict[str, float]:
     """쿼리 특성에 따라 검색 가중치를 동적으로 조정하는 함수"""
     # 기본 가중치
     weights = {
@@ -584,10 +667,12 @@ def adjust_search_weights(query: str, default_bm25_weight: float, default_vector
     weights["bm25"] /= total
     weights["vector"] /= total
     
-    log.info(f"Adjusted search weights for query '{query}': {weights}")
+    # 쿼리 내용 마스킹
+    masked_query = query[:10] + '***' if len(query) > 10 else '***'
+    log.debug(f"Adjusted search weights for query '{masked_query}': {weights}")
     return weights
 
-def merge_get_results(get_results: List[Dict]) -> Dict:
+def merge_get_results(get_results: List[Dict[str, Any]]) -> Dict[str, Any]:
     # Initialize lists to store combined data
     combined_documents = []
     combined_metadatas = []
@@ -608,7 +693,11 @@ def merge_get_results(get_results: List[Dict]) -> Dict:
     return result
 
 
-def merge_and_sort_query_results(query_results: List[Dict], k: int, diversity_threshold: float = MMR_DIVERSITY_THRESHOLD) -> Dict:
+def merge_and_sort_query_results(
+    query_results: List[Dict[str, Any]], 
+    k: int, 
+    diversity_threshold: float = MMR_DIVERSITY_THRESHOLD
+) -> Dict[str, Any]:
     # Initialize lists to store combined data
     combined = dict()  # To store documents with unique document hashes
 
@@ -661,10 +750,10 @@ def merge_and_sort_query_results(query_results: List[Dict], k: int, diversity_th
     return result
 
 def apply_maximal_marginal_relevance(
-    combined_results: List[Tuple], 
+    combined_results: List[Tuple[float, str, Dict[str, Any]]], 
     k: int, 
     diversity_threshold: float = MMR_DIVERSITY_THRESHOLD
-) -> List[Tuple]:
+) -> List[Tuple[float, str, Dict[str, Any]]]:
     """
     결과의 다양성을 높이기 위해 개선된 Maximal Marginal Relevance 알고리즘 적용
     
@@ -805,7 +894,9 @@ def apply_maximal_marginal_relevance(
             
     return selected_results
 
-def get_all_items_from_collections(collection_names: list[str]) -> dict:
+def get_all_items_from_collections(
+    collection_names: List[str]
+) -> Dict[str, Any]:
     results = []
 
     for collection_name in collection_names:
@@ -823,11 +914,11 @@ def get_all_items_from_collections(collection_names: list[str]) -> dict:
 
 
 def query_collection(
-    collection_names: list[str],
-    queries: list[str],
-    embedding_function,
+    collection_names: List[str],
+    queries: List[str],
+    embedding_function: Any,
     k: int,
-) -> dict:
+) -> Dict[str, Any]:
     results = []
     error = False
 
@@ -852,15 +943,26 @@ def query_collection(
         f"query_collection: processing {len(queries)} queries across {len(collection_names)} collections"
     )
 
-    with ThreadPoolExecutor() as executor:
-        future_results = []
+    with ThreadPoolExecutor(max_workers=min(len(collection_names) * len(query_embeddings), 10)) as executor:
+        # Submit all tasks
+        future_to_params = {}
         for query_embedding in query_embeddings:
             for collection_name in collection_names:
-                result = executor.submit(
-                    process_query_collection, collection_name, query_embedding
-                )
-                future_results.append(result)
-        task_results = [future.result() for future in future_results]
+                future = executor.submit(process_query_collection, collection_name, query_embedding)
+                future_to_params[future] = (collection_name, query_embedding)
+        
+        # Collect results as they complete
+        task_results = []
+        from concurrent.futures import as_completed
+        
+        for future in as_completed(future_to_params):
+            try:
+                result, err = future.result(timeout=30)  # 30초 타임아웃
+                task_results.append((result, err))
+            except Exception as e:
+                collection_name, _ = future_to_params[future]
+                log.error(f"Task failed for collection {collection_name}: {e}")
+                task_results.append((None, e))
 
     for result, err in task_results:
         if err is not None:
@@ -875,16 +977,16 @@ def query_collection(
 
 
 def query_collection_with_hybrid_search(
-    collection_names: list[str],
-    queries: list[str],
-    embedding_function,
+    collection_names: List[str],
+    queries: List[str],
+    embedding_function: Any,
     k: int,
-    reranking_function,
+    reranking_function: Any,
     k_reranker: int,
     r: float,
     hybrid_bm25_weight: float,
     openai_key: Optional[str] = None,
-) -> dict:
+) -> Dict[str, Any]:
     results = []
     error = False
     
@@ -916,7 +1018,7 @@ def query_collection_with_hybrid_search(
             log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
             expanded_queries = queries
             
-        log.info(f"Final expanded queries: {expanded_queries}")
+        log.info(f"Final expanded queries count: {len(expanded_queries)} (content masked for privacy)")
         
         # 각 쿼리의 결과를 모두 수집
         all_results = []
@@ -1430,11 +1532,6 @@ def generate_embeddings(
         return embeddings[0] if isinstance(text, str) else embeddings
 
 
-import operator
-from typing import Optional, Sequence
-
-from langchain_core.callbacks import Callbacks
-from langchain_core.documents import BaseDocumentCompressor, Document
 
 
 class RerankCompressor(BaseDocumentCompressor):
