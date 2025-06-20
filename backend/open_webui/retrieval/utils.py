@@ -511,8 +511,7 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
         response.raise_for_status()
         expanded_term = response.json()["choices"][0]["message"]["content"].strip()
         # 로그에서 민감정보 제거 (쿼리 내용 마스킹)
-        masked_query = query[:10] + '***' if len(query) > 10 else '***'
-        log.info(f"Medical abbreviation expansion completed for query: '{masked_query}'")
+        log.info(f"Medical abbreviation expansion completed for query: '{expanded_term[:20]}...'")
         return expanded_term
     except requests.exceptions.RequestException as e:
         log.error(f"Network error expanding medical abbreviation: {type(e).__name__}")
@@ -582,7 +581,7 @@ async def enhance_query(query: str, openai_key: Optional[str] = None) -> List[st
             parsed_result["original"],
             parsed_result["synonyms"]
         ]
-        log.info(f"Enhanced queries count: {len(enhanced_queries)} (content masked for privacy)")
+        log.info(f"Enhanced queries: {enhanced_queries}")
         return enhanced_queries
     except requests.exceptions.RequestException as e:
         log.error(f"Network error enhancing query: {type(e).__name__}")
@@ -726,9 +725,7 @@ def adjust_search_weights(
     weights["bm25"] /= total
     weights["vector"] /= total
     
-    # 쿼리 내용 마스킹
-    masked_query = query[:10] + '***' if len(query) > 10 else '***'
-    log.debug(f"Adjusted search weights for query '{masked_query}': {weights}")
+    log.info(f"Adjusted search weights for query '{query}': {weights}")
     return weights
 
 def merge_get_results(get_results: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -1120,7 +1117,7 @@ def query_collection_with_hybrid_search(
             log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
             expanded_queries = queries
             
-        log.info(f"Final expanded queries count: {len(expanded_queries)} (content masked for privacy)")
+        log.info(f"Final expanded queries: {expanded_queries}")
         
         # 각 쿼리의 결과를 모두 수집
         all_results = []
