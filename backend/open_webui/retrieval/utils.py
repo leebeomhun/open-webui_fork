@@ -10,7 +10,7 @@ import logging
 import os
 import re
 import json
-from typing import Awaitable, Optional, Union
+from typing import Any, Awaitable, Dict, List, Optional, Tuple, Union
 
 import asyncio
 import requests
@@ -20,7 +20,8 @@ import hashlib
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import time
-import re
+from functools import wraps
+from datetime import datetime, timedelta
 
 from urllib.parse import quote
 from huggingface_hub import snapshot_download
@@ -72,15 +73,139 @@ from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.retrievers import BaseRetriever
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("GEMINIAPIKEY", "")
-apikeyopenai = os.getenv("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINIAPIKEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# Configuration constants
+GEMINI_MODEL = "gemini-2.5-flash"
+OPENAI_MODEL = "gpt-4.1-mini"
+API_TEMPERATURE = 0
+SAFE_MAX_DOCS_FOR_RERANKING = 20
+TOP_K_PER_QUERY = 3
+DEFAULT_BM25_WEIGHT = 0.3
+DEFAULT_VECTOR_WEIGHT = 0.7
+ASYNC_TIMEOUT_SECONDS = 30
+MAX_CONTENT_PREVIEW_LENGTH = 500
+MMR_DIVERSITY_THRESHOLD = 0.8
+
+# Cache configuration
+ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
+CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
+CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600)))    # 7 days
+CACHE_TTL_LLM_RERANK = int(os.getenv("CACHE_TTL_LLM_RERANK", str(7 * 24 * 3600)))              # 7 days
+MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
+
+# Simple in-memory cache with TTL support
+class SimpleCache:
+    def __init__(self, max_size: int = MAX_CACHE_SIZE):
+        self.cache: Dict[str, Tuple[Any, datetime]] = {}
+        self.max_size = max_size
+    
+    def get(self, key: str) -> Optional[Any]:
+        if not ENABLE_CACHING:
+            return None
+            
+        if key in self.cache:
+            value, expiry = self.cache[key]
+            if datetime.now() < expiry:
+                return value
+            else:
+                del self.cache[key]
+        return None
+    
+    def set(self, key: str, value: Any, ttl_seconds: int) -> None:
+        if not ENABLE_CACHING:
+            return
+            
+        # Clean up expired entries if cache is getting full
+        if len(self.cache) >= self.max_size:
+            self._cleanup_expired()
+            
+        # If still full, remove oldest entries
+        if len(self.cache) >= self.max_size:
+            oldest_keys = sorted(self.cache.keys(), 
+                               key=lambda k: self.cache[k][1])[:len(self.cache) // 4]
+            for old_key in oldest_keys:
+                del self.cache[old_key]
+        
+        expiry = datetime.now() + timedelta(seconds=ttl_seconds)
+        self.cache[key] = (value, expiry)
+    
+    def _cleanup_expired(self) -> None:
+        now = datetime.now()
+        expired_keys = [k for k, (_, expiry) in self.cache.items() if now >= expiry]
+        for key in expired_keys:
+            del self.cache[key]
+    
+    def clear(self) -> None:
+        self.cache.clear()
+    
+    def size(self) -> int:
+        return len(self.cache)
+
+# Global cache instances
+medical_abbrev_cache = SimpleCache()
+query_enhance_cache = SimpleCache()
+llm_rerank_cache = SimpleCache()
+
+def cache_key_hash(data: str) -> str:
+    """Generate a consistent hash for cache keys"""
+    return hashlib.sha256(data.encode('utf-8')).hexdigest()[:16]
+
+def async_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
+    """Decorator for caching async function results"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Generate cache key from function arguments
+            cache_data = f"{key_prefix}:{str(args)}:{str(sorted(kwargs.items()))}"
+            cache_key = cache_key_hash(cache_data)
+            
+            # Try to get from cache
+            cached_result = cache.get(cache_key)
+            if cached_result is not None:
+                log.debug(f"Cache hit for {func.__name__}: {cache_key}")
+                return cached_result
+            
+            # Execute function and cache result
+            log.debug(f"Cache miss for {func.__name__}: {cache_key}")
+            result = await func(*args, **kwargs)
+            cache.set(cache_key, result, ttl_seconds)
+            
+            return result
+        return wrapper
+    return decorator
+
+def sync_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
+    """Decorator for caching sync function results"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Generate cache key from function arguments
+            cache_data = f"{key_prefix}:{str(args)}:{str(sorted(kwargs.items()))}"
+            cache_key = cache_key_hash(cache_data)
+            
+            # Try to get from cache
+            cached_result = cache.get(cache_key)
+            if cached_result is not None:
+                log.debug(f"Cache hit for {func.__name__}: {cache_key}")
+                return cached_result
+            
+            # Execute function and cache result
+            log.debug(f"Cache miss for {func.__name__}: {cache_key}")
+            result = func(*args, **kwargs)
+            cache.set(cache_key, result, ttl_seconds)
+            
+            return result
+        return wrapper
+    return decorator
 
 async def process_queries_async(queries: List[str], openai_key: Optional[str] = None) -> List[str]:
     """여러 쿼리를 병렬로 처리하는 비동기 함수"""
-    api_key = openai_key or OPENAI_API_KEY
+    api_key = openai_key or GEMINI_API_KEY
     
     if not api_key:
-        log.warning("OpenAI API 키가 설정되지 않았습니다. 쿼리 처리를 건너뜁니다.")
+        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 처리를 건너뜁니다.")
         return queries
     
     # 모든 비동기 작업을 모아서 한 번에 실행
@@ -208,8 +333,8 @@ class VectorSearchRetriever(BaseRetriever):
 
 
 def query_doc(
-    collection_name: str, query_embedding: list[float], k: int, user: UserModel = None
-):
+    collection_name: str, query_embedding: List[float], k: int, user: Optional[UserModel] = None
+) -> Any:
     try:
         log.debug(f"query_doc:doc {collection_name}")
         result = VECTOR_DB_CLIENT.search(
@@ -227,7 +352,7 @@ def query_doc(
         raise e
 
 
-def get_doc(collection_name: str, user: UserModel = None):
+def get_doc(collection_name: str, user: Optional[UserModel] = None) -> Any:
     try:
         log.debug(f"get_doc:doc {collection_name}")
         result = VECTOR_DB_CLIENT.get(collection_name=collection_name)
@@ -240,13 +365,14 @@ def get_doc(collection_name: str, user: UserModel = None):
         log.exception(f"Error getting doc {collection_name}: {e}")
         raise e
 
+@async_cached(medical_abbrev_cache, CACHE_TTL_MEDICAL_ABBREV, "med_abbrev")
 async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = None) -> str:
     """의학 약어를 full term으로 변환하는 함수"""
-    # OpenAI API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or OPENAI_API_KEY
+    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
+    api_key = openai_key or GEMINI_API_KEY
     
     if not api_key:
-        log.warning("OpenAI API 키가 설정되지 않았습니다. 의학 약어 확장을 건너뜁니다.")
+        log.warning("Gemini API 키가 설정되지 않았습니다. 의학 약어 확장을 건너뜁니다.")
         return query
         
     try:
@@ -257,7 +383,7 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
                 "Authorization": f"Bearer {api_key}"
             },
             json={
-                "model": "gemini-2.5-flash",
+                "model": GEMINI_MODEL,
                 "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": """당신은 한국표준질병사인분류(KCD, Korean Classification of Diseases) 진단 코드 및 의학용어(의학약어) 전문가입니다.
@@ -329,29 +455,30 @@ async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = No
 """},
                     {"role": "user", "content": query}
                 ],
-                "temperature": 0
+                "temperature": API_TEMPERATURE
             }
         )
         response.raise_for_status()
         expanded_term = response.json()["choices"][0]["message"]["content"].strip()
-        log.info(f"Medical abbreviation expansion: '{query}' -> '{expanded_term}'")
+        log.info(f"Medical abbreviation expansion completed for query: '{query[:20]}...'")
         return expanded_term
     except Exception as e:
         log.error(f"Error expanding medical abbreviation: {e}")
         return query
 
 
-async def enhance_query(query: str, openai_key: Optional[str] = None) -> list[str]:
+@async_cached(query_enhance_cache, CACHE_TTL_QUERY_ENHANCE, "query_enhance")
+async def enhance_query(query: str, openai_key: Optional[str] = None) -> List[str]:
     """쿼리를 분석하고 확장하여 더 정확한 검색 결과를 얻기 위한 함수
     
     1. 원본 쿼리 유지
     2. 동의어/유사어 추가
     """
-    # OpenAI API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or OPENAI_API_KEY
+    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
+    api_key = openai_key or GEMINI_API_KEY
     
     if not api_key:
-        log.warning("OpenAI API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
+        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
         return [query]
         
     try:
@@ -362,7 +489,7 @@ async def enhance_query(query: str, openai_key: Optional[str] = None) -> list[st
                 "Authorization": f"Bearer {api_key}"
             },
             json={
-                "model": "gemini-2.5-flash",
+                "model": GEMINI_MODEL,
                 "reasoning_effort": "none",
                 "messages": [
                     {"role": "system", "content": """당신은 의학 및 일반 검색 쿼리 향상 전문가입니다.
@@ -381,7 +508,7 @@ async def enhance_query(query: str, openai_key: Optional[str] = None) -> list[st
 """},
                     {"role": "user", "content": query}
                 ],
-                "temperature": 0
+                "temperature": API_TEMPERATURE
             }
         )
         response.raise_for_status()
@@ -457,7 +584,7 @@ async def query_doc_with_hybrid_search(
     vector_weight: float = 0.7,
 ) -> dict:
     
-    api_key = openai_key or OPENAI_API_KEY
+    api_key = openai_key or GEMINI_API_KEY
     
     try:
         # First check if collection_result has the required attributes
@@ -550,7 +677,7 @@ async def query_doc_with_hybrid_search(
         log.exception(f"Error querying doc {collection_name} with hybrid search: {e}")
         raise e
 
-def adjust_search_weights(query: str, default_bm25_weight: float, default_vector_weight: float) -> dict:
+def adjust_search_weights(query: str, default_bm25_weight: float, default_vector_weight: float) -> Dict[str, float]:
     """쿼리 특성에 따라 검색 가중치를 동적으로 조정하는 함수"""
     # 기본 가중치
     weights = {
@@ -588,7 +715,7 @@ def adjust_search_weights(query: str, default_bm25_weight: float, default_vector
     log.info(f"Adjusted search weights for query '{query}': {weights}")
     return weights
 
-def merge_get_results(get_results: list[dict]) -> dict:
+def merge_get_results(get_results: List[Dict]) -> Dict:
     # Initialize lists to store combined data
     combined_documents = []
     combined_metadatas = []
@@ -609,7 +736,7 @@ def merge_get_results(get_results: list[dict]) -> dict:
     return result
 
 
-def merge_and_sort_query_results(query_results: list[dict], k: int, diversity_threshold: float = 0.8) -> dict:
+def merge_and_sort_query_results(query_results: List[Dict], k: int, diversity_threshold: float = MMR_DIVERSITY_THRESHOLD) -> Dict:
     # Initialize lists to store combined data
     combined = dict()  # To store documents with unique document hashes
 
@@ -669,10 +796,10 @@ def merge_and_sort_query_results(query_results: list[dict], k: int, diversity_th
     return result
 
 def apply_maximal_marginal_relevance(
-    combined_results: list[tuple], 
+    combined_results: List[Tuple], 
     k: int, 
-    diversity_threshold: float = 0.8
-) -> list[tuple]:
+    diversity_threshold: float = MMR_DIVERSITY_THRESHOLD
+) -> List[Tuple]:
     """
     결과의 다양성을 높이기 위해 개선된 Maximal Marginal Relevance 알고리즘 적용
     
@@ -936,7 +1063,7 @@ async def query_collection_with_hybrid_search(
             log.exception(f"Error when querying the collection with hybrid_search: {e}")
             return None, e
     
-    api_key = openai_key or OPENAI_API_KEY
+    api_key = openai_key or GEMINI_API_KEY
     
     try:
         # 비동기 코드를 한 번의 호출로 처리
@@ -951,7 +1078,7 @@ async def query_collection_with_hybrid_search(
                     future = asyncio.run_coroutine_threadsafe(
                         process_queries_async(queries, api_key), loop
                     )
-                    expanded_queries = future.result(timeout=30)  # 30초 타임아웃
+                    expanded_queries = future.result(timeout=ASYNC_TIMEOUT_SECONDS)
                 else:
                     # 루프가 실행 중이 아니면 run_until_complete 사용
                     expanded_queries = loop.run_until_complete(
@@ -961,7 +1088,7 @@ async def query_collection_with_hybrid_search(
                 # 이벤트 루프가 없으면 새로 생성
                 expanded_queries = asyncio.run(process_queries_async(queries, api_key))
         else:
-            log.warning("OpenAI API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
+            log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
             expanded_queries = queries
             
         log.info(f"Final expanded queries: {expanded_queries}")
@@ -1815,7 +1942,7 @@ def generate_openai_batch_embeddings(
         if "data" in data:
             return [elem["embedding"] for elem in data["data"]]
         else:
-            raise "Something went wrong :/"
+            raise Exception("Something went wrong :/")
     except Exception as e:
         log.exception(f"Error generating openai batch embeddings: {e}")
         return None
@@ -1914,7 +2041,7 @@ def generate_ollama_batch_embeddings(
         if "embeddings" in data:
             return data["embeddings"]
         else:
-            raise "Something went wrong :/"
+            raise Exception("Something went wrong :/")
     except Exception as e:
         log.exception(f"Error generating ollama batch embeddings: {e}")
         return None
@@ -2071,7 +2198,7 @@ def get_hybrid_search_results_without_reranking(
     vector_weight: float = 0.7,
 ) -> dict:
     
-    api_key = openai_key or OPENAI_API_KEY
+    api_key = openai_key or GEMINI_API_KEY
     
     try:
         
@@ -2239,13 +2366,27 @@ def perform_llm_reranking(
             import logging
             log = logging.getLogger("llm_rerank")
 
-        # 필요한 데이터 추출
+        # 캐싱을 위한 키 생성
         docs = combined_results["documents"][0]
         metas = combined_results["metadatas"][0]
+        
+        # 문서 내용의 해시를 생성 (처음 100자씩만 사용해서 키 길이 제한)
+        docs_sample = [doc[:100] for doc in docs[:10]]  # 상위 10개 문서의 처음 100자만
+        cache_data = f"llm_rerank:{str(original_query)}:{str(docs_sample)}:{k}:{r}"
+        cache_key = cache_key_hash(cache_data)
+        
+        # 캐시 확인
+        cached_result = llm_rerank_cache.get(cache_key)
+        if cached_result is not None:
+            log.debug(f"Cache hit for LLM reranking: {cache_key}")
+            return cached_result
 
-        SAFE_MAX_DOCS = 20
-        max_docs_for_reranking = min(SAFE_MAX_DOCS, k*3, len(docs))
-        log.info(f"리랭킹을 위한 문서 수: {max_docs_for_reranking}개 (요청: {k}, 안전 최대값: {SAFE_MAX_DOCS})")
+        log.debug(f"Cache miss for LLM reranking: {cache_key}")
+        
+        # 필요한 데이터 추출
+
+        max_docs_for_reranking = min(SAFE_MAX_DOCS_FOR_RERANKING, k*3, len(docs))
+        log.info(f"리랭킹을 위한 문서 수: {max_docs_for_reranking}개 (요청: {k}, 안전 최대값: {SAFE_MAX_DOCS_FOR_RERANKING})")
         selected_docs = docs[:max_docs_for_reranking]
         selected_metas = metas[:max_docs_for_reranking]
 
@@ -2314,8 +2455,8 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
 
         for i, doc in enumerate(document_objects):
             content = doc.page_content
-            if len(content) > 500:
-                content = content[:500] + "..."
+            if len(content) > MAX_CONTENT_PREVIEW_LENGTH:
+                content = content[:MAX_CONTENT_PREVIEW_LENGTH] + "..."
             user_prompt += f"문서 {i+1}:\n{content}\n\n"
         user_prompt += "위 문서들을 쿼리와의 관련성에 따라 재평가하고 순위를 매겨주세요."
 
@@ -2327,13 +2468,13 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
                 "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
                 headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_key}"},
                 json={
-                    "model": "gemini-2.5-flash",
+                    "model": GEMINI_MODEL,
                     "reasoning_effort": "none",
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
                     ],
-                    "temperature": 0,
+                    "temperature": API_TEMPERATURE,
                 }
             )
             response.raise_for_status()
@@ -2343,22 +2484,22 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
             log.warning(f"Gemini 호출 실패 ({e}), OpenAI로 폴백 시도")
             try:
                 response = requests.post(
-                    "https://api.openai.com/v1/responses",
+                    "https://api.openai.com/v1/chat/completions",
                     headers={
                         "Content-Type": "application/json",
-                        "Authorization": f"Bearer {apikeyopenai}"
+                        "Authorization": f"Bearer {OPENAI_API_KEY}"
                     },
                     json={
-                        "model": "gpt-4.1-mini",
-                        "input": [
+                        "model": OPENAI_MODEL,
+                        "messages": [
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": user_prompt}
                         ],
-                        "temperature": 0,
+                        "temperature": API_TEMPERATURE,
                     }
                 )
                 response.raise_for_status()
-                llm_output = response.json()["output"][0]["content"][0]["text"].strip()
+                llm_output = response.json()["choices"][0]["message"]["content"].strip()
                 log.debug(f"OpenAI 응답 수신 성공")
             except Exception as e2:
                 log.error(f"OpenAI API 호출 오류: {e2}")
@@ -2367,6 +2508,8 @@ KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
         # 공통 파싱/리랭킹/로그출력
         result = parse_and_rerank(llm_output, document_objects, reranking_query_context, k, log)
         if result is not None:
+            # 성공한 결과를 캐시에 저장
+            llm_rerank_cache.set(cache_key, result, CACHE_TTL_LLM_RERANK)
             return result
         else:
             return combined_results
@@ -2406,8 +2549,7 @@ def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
                 query_results[query]["metas"].append(meta)
                 query_results[query]["dists"].append(dist)
     
-    # 각 쿼리별로 상위 결과 보존 (예: 상위 3개)
-    TOP_K_PER_QUERY = 3  # 각 쿼리별 보존할 상위 결과 수
+    # 각 쿼리별로 상위 결과 보존
     preserved_docs = []  # 보존할 문서
     preserved_metas = []  # 보존할 메타데이터
     preserved_dists = []  # 보존할 점수
@@ -2467,3 +2609,57 @@ def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
         "documents": [all_docs],
         "metadatas": [all_metas],
     }
+
+# Cache management functions
+def get_cache_stats() -> Dict[str, Any]:
+    """캐시 통계 정보 반환"""
+    return {
+        "enabled": ENABLE_CACHING,
+        "medical_abbrev": {
+            "size": medical_abbrev_cache.size(),
+            "max_size": medical_abbrev_cache.max_size,
+            "ttl_seconds": CACHE_TTL_MEDICAL_ABBREV
+        },
+        "query_enhance": {
+            "size": query_enhance_cache.size(),
+            "max_size": query_enhance_cache.max_size,
+            "ttl_seconds": CACHE_TTL_QUERY_ENHANCE
+        },
+        "llm_rerank": {
+            "size": llm_rerank_cache.size(),
+            "max_size": llm_rerank_cache.max_size,
+            "ttl_seconds": CACHE_TTL_LLM_RERANK
+        }
+    }
+
+def clear_all_caches() -> None:
+    """모든 캐시 클리어"""
+    medical_abbrev_cache.clear()
+    query_enhance_cache.clear()
+    llm_rerank_cache.clear()
+    log.info("모든 RAG 캐시가 클리어되었습니다.")
+
+def clear_cache_by_type(cache_type: str) -> bool:
+    """특정 타입의 캐시만 클리어"""
+    if cache_type == "medical_abbrev":
+        medical_abbrev_cache.clear()
+        log.info("의학약어 캐시가 클리어되었습니다.")
+        return True
+    elif cache_type == "query_enhance":
+        query_enhance_cache.clear()
+        log.info("쿼리 확장 캐시가 클리어되었습니다.")
+        return True
+    elif cache_type == "llm_rerank":
+        llm_rerank_cache.clear()
+        log.info("LLM 리랭킹 캐시가 클리어되었습니다.")
+        return True
+    else:
+        log.warning(f"알 수 없는 캐시 타입: {cache_type}")
+        return False
+
+def cleanup_expired_caches() -> None:
+    """만료된 캐시 엔트리들 정리"""
+    medical_abbrev_cache._cleanup_expired()
+    query_enhance_cache._cleanup_expired()
+    llm_rerank_cache._cleanup_expired()
+    log.info("만료된 캐시 엔트리들이 정리되었습니다.")
