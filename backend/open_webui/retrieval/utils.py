@@ -6,6 +6,9 @@
 #25.6.10 llm reranking에서 gemini api호출 오류발생시 openai api로 호출하도록 수정
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
+#25.6.22 쿼리향상, 리랭킹 api 호출로 변경
+import httpx
+import requests # API 호출을 위해 requests 라이브러리 추가
 import asyncio
 import hashlib
 import json
@@ -52,26 +55,22 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 load_dotenv()
+QUERY_EXPANSION_API_URL = os.getenv("QUERY_EXPANSION_API_URL", "http://localhost:8001/process-query")
+RERANK_API_URL = os.getenv("RERANK_API_URL", "http://localhost:8002/rerank")
 GEMINI_API_KEY = os.getenv("GEMINIAPIKEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Configuration constants
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
-API_TEMPERATURE = float(os.getenv("API_TEMPERATURE", "0"))
-SAFE_MAX_DOCS_FOR_RERANKING = int(os.getenv("SAFE_MAX_DOCS_FOR_RERANKING", "20"))
 TOP_K_PER_QUERY = int(os.getenv("TOP_K_PER_QUERY", "3"))
 DEFAULT_BM25_WEIGHT = float(os.getenv("DEFAULT_BM25_WEIGHT", "0.3"))
 DEFAULT_VECTOR_WEIGHT = float(os.getenv("DEFAULT_VECTOR_WEIGHT", "0.7"))
 ASYNC_TIMEOUT_SECONDS = int(os.getenv("ASYNC_TIMEOUT_SECONDS", "30"))
-MAX_CONTENT_PREVIEW_LENGTH = int(os.getenv("MAX_CONTENT_PREVIEW_LENGTH", "500"))
 MMR_DIVERSITY_THRESHOLD = float(os.getenv("MMR_DIVERSITY_THRESHOLD", "0.8"))
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
 CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
-CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600)))    # 7 days
-CACHE_TTL_LLM_RERANK = int(os.getenv("CACHE_TTL_LLM_RERANK", str(7 * 24 * 3600)))              # 7 days
+CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600))) # 7 days
 MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
 
 # Simple in-memory cache with TTL support
@@ -125,7 +124,6 @@ class SimpleCache:
 # Global cache instances
 medical_abbrev_cache = SimpleCache()
 query_enhance_cache = SimpleCache()
-llm_rerank_cache = SimpleCache()
 
 def cache_key_hash(data: str) -> str:
     """Generate a consistent hash for cache keys"""
@@ -232,72 +230,127 @@ def sync_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
         return wrapper
     return decorator
 
+# RAG 코드에서
+@async_cached(query_enhance_cache, CACHE_TTL_QUERY_ENHANCE, "query_api")
+async def call_query_expansion_api(query: str) -> Optional[List[str]]:
+    """
+    쿼리 확장 API 서버를 호출하여 확장된 쿼리 목록을 가져옵니다.
+    """
+    log.info(f"API 호출 시작: 쿼리='{query}', URL='{QUERY_EXPANSION_API_URL}'") # [디버깅 로그 추가 1]
+    try:
+        # 비동기 환경에서 requests를 사용하려면 run_in_executor를 사용하는 것이 좋습니다.
+        # 또는 httpx와 같은 비동기 HTTP 클라이언트를 사용해야 합니다.
+        # 현재 코드에서는 requests를 직접 호출하고 있으므로, 블로킹 호출이 될 수 있습니다.
+        # 먼저 httpx를 설치합니다: uv pip install httpx
+        import httpx
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                QUERY_EXPANSION_API_URL,
+                json={"query": query},
+                timeout=10
+            )
+        
+        log.info(f"API 응답 수신: 상태 코드={response.status_code}") # [디버깅 로그 추가 2]
+        response.raise_for_status()
+        
+        data = response.json()
+        log.debug(f"API로부터 받은 원본 데이터: {data}") # [디버깅 로그 추가 3]
+        
+        expanded_terms = data.get("expanded_terms")
+        if expanded_terms and isinstance(expanded_terms, list):
+            log.info(f"API로부터 쿼리 '{query}' 확장 결과 성공적으로 수신: {expanded_terms}")
+            return expanded_terms
+        else:
+            log.warning(f"API 응답에 'expanded_terms'가 없거나 형식이 올바르지 않습니다. 원본 쿼리 사용: {query}")
+            return [query]
+            
+    except httpx.RequestError as e: # httpx 예외 처리로 변경
+        log.error(f"쿼리 확장 API 네트워크 호출 실패 ({type(e).__name__}): {e}. 원본 쿼리를 사용합니다.")
+        return [query]
+    except Exception as e:
+        log.error(f"쿼리 확장 처리 중 예상치 못한 예외 발생: {e.__class__.__name__}: {e}", exc_info=True) # [디버깅 로그 추가 4]
+        return [query]
+
+# `process_queries_async` 함수를 API를 사용하도록 대폭 수정합니다.
 async def process_queries_async(queries: List[str], openai_key: Optional[str] = None) -> List[str]:
-    """여러 쿼리를 병렬로 처리하는 비동기 함수"""
-    api_key = openai_key or GEMINI_API_KEY
-    
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 처리를 건너뜁니다.")
-        return queries
-    
-    # 모든 비동기 작업을 모아서 한 번에 실행
-    async def process_single_query(query: str) -> Tuple[str, List[str]]:
-        try:
-            # 1. 의학 약어 확장
-            expanded_query = await expand_medical_abbreviation(query, api_key)
-            
-            # 2. 쿼리 향상
-            enhanced_queries = await enhance_query(expanded_query, api_key)
-            
-            return expanded_query, enhanced_queries
-        except Exception as e:
-            log.error(f"Error processing query '{query}': {e}")
-            return query, [query]  # 실패 시 원본 쿼리 반환
-    
-    # 모든 쿼리에 대한 작업 생성
-    tasks = [process_single_query(query) for query in queries]
+    """
+    여러 쿼리를 병렬로 처리하는 비동기 함수.
+    내부적으로 쿼리 확장 API를 호출합니다.
+    """
+    # openai_key는 이제 사용되지 않지만, 함수 시그니처 유지를 위해 남겨둡니다.
+    if not queries:
+        return []
+
+    # 각 쿼리에 대해 API 호출 태스크를 생성
+    tasks = [call_query_expansion_api(query) for query in queries]
     
     try:
-        # 모든 작업 병렬 실행 (return_exceptions=True로 예외도 결과로 받음)
+        # 모든 API 호출을 병렬로 실행
         results = await asyncio.gather(*tasks, return_exceptions=True)
     except Exception as e:
-        log.error(f"Critical error in async processing: {e}")
-        # 전체 실패 시 원본 쿼리들 반환
-        return queries
-    
-    # 결과 처리
+        log.error(f"쿼리 확장 API 병렬 처리 중 심각한 오류 발생: {e}")
+        return queries # 실패 시 원본 쿼리 반환
+
     all_queries = []
     for i, result in enumerate(results):
         original_query = queries[i]
         
-        # 원본 쿼리 추가
+        # 원본 쿼리는 항상 포함
         all_queries.append(original_query)
 
         if isinstance(result, Exception):
-            # 예외 발생한 경우 로그 기록
-            log.error(f"Task for query '{original_query}' failed with exception: {result}")
-            # 실패한 경우 향상된 쿼리는 추가하지 않음
-        elif result and len(result) == 2:
-            # 성공적인 결과 처리
-            _, enhanced_queries = result
-            if enhanced_queries and isinstance(enhanced_queries, list):
-                # 향상된 쿼리들 추가
-                all_queries.extend(enhanced_queries)
+            log.error(f"쿼리 '{original_query}' 처리 중 예외 발생: {result}")
+        elif isinstance(result, list):
+            # API로부터 받은 확장된 쿼리들을 추가 (중복 방지를 위해 set 사용)
+            all_queries.extend(result)
         else:
-            # 결과가 비어있거나 예상과 다른 경우
-            log.warning(f"Unexpected result format for query '{original_query}': {result}")
+            log.warning(f"쿼리 '{original_query}'에 대한 API 결과가 비정상적입니다: {result}")
 
-
-    # 중복 제거 (선택 사항): 원본 쿼리가 향상된 쿼리 결과와 동일할 수 있음
-    # 순서를 유지하면서 중복 제거
+    # 최종적으로 순서를 유지하며 중복을 제거
     seen = set()
     unique_queries = []
     for q in all_queries:
         if q not in seen:
             unique_queries.append(q)
             seen.add(q)
-
+            
+    log.info(f"최종 확장 쿼리 목록: {unique_queries}")
     return unique_queries
+
+async def call_rerank_api_async(
+    combined_results: dict,
+    original_query: list,
+    k: int,
+    r: float,
+    api_key: str,
+) -> dict:
+    """새로운 리랭킹 API를 비동기적으로 호출합니다."""
+    log.info(f"LLM 리랭킹을 위해 API 호출: {RERANK_API_URL}")
+    
+    payload = {
+        "combined_results": combined_results,
+        "original_query": original_query,
+        "k": k,
+        "r": r,
+        "api_key": api_key,
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(RERANK_API_URL, json=payload)
+            response.raise_for_status() # 오류가 있으면 예외 발생
+            log.info("리랭킹 API로부터 성공적으로 응답 받음.")
+            return response.json()
+    except httpx.RequestError as e:
+        log.error(f"리랭킹 API 호출 중 네트워크 오류 발생: {e}. 리랭킹 없이 진행합니다.")
+        return combined_results # 실패 시 원본 결과 반환
+    except httpx.HTTPStatusError as e:
+        log.error(f"리랭킹 API가 오류를 반환했습니다 (상태 코드: {e.response.status_code}): {e.response.text}. 리랭킹 없이 진행합니다.")
+        return combined_results # 실패 시 원본 결과 반환
+    except Exception as e:
+        log.error(f"리랭킹 API 호출 중 예상치 못한 오류 발생: {e}", exc_info=True)
+        return combined_results # 실패 시 원본 결과 반환
 
 class VectorSearchRetriever(BaseRetriever):
     collection_name: str
@@ -369,184 +422,6 @@ def get_doc(
     except Exception as e:
         log.exception(f"Error getting doc {collection_name}: {e}")
         raise e
-
-@async_cached(medical_abbrev_cache, CACHE_TTL_MEDICAL_ABBREV, "med_abbrev")
-async def expand_medical_abbreviation(query: str, openai_key: Optional[str] = None) -> str:
-    """의학 약어를 full term으로 변환하는 함수"""
-    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or GEMINI_API_KEY
-    
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 의학 약어 확장을 건너뜁니다.")
-        return query
-        
-    try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            },
-            json={
-                "model": GEMINI_MODEL,
-                "reasoning_effort": "none",
-                "messages": [
-                    {"role": "system", "content": """당신은 한국표준질병사인분류(KCD, Korean Classification of Diseases) 진단 코드 및 의학용어(의학약어) 전문가입니다.
-
-입력된 내용에 따라 다음 규칙에 맞춰 응답하세요.
-
-1. 의료 약어 처리
-입력이 의료 약어(영문 또는 국문)일 경우, KCD 진단 코드의 맥락에서 가장 일반적으로 사용되는 공식적인 풀네임(Full term) '만' 반환합니다.
-약어가 여러 의미를 가질 수 있을 때는 가장 흔히 사용되는 진단명을 기준으로 합니다.
-추가적인 설명이나 문장은 절대 포함하지 마십시오.
-
-2. 문장 요약
-입력이 문장 형태의 질문이나 서술일 경우, 핵심 내용을 명확하고 간결한 형태(핵심 키워드 중심)로 추출하여 요약합니다.
-문장에 "코드", "환자", "KCD" 등의 단어가 포함되어 있다면 해당 단어는 제외하고 핵심 내용만 추출합니다.
-
-3. 예외 처리 1
-다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **원본 문자열을 그대로** 반환합니다.
-이미 완전한 형태의 단일 의학용어 (예: folliculitis)
-
-예외 처리 2
-다음의 경우에는 어떠한 수정이나 추론도 하지 말고 **빈 문자열("")**을 반환합니다.
-의미를 알 수 없는 긴 문자열 나열 (예: 이미지 벡터 값 등)
-예시:
-
-(규칙 1: 의료 약어 처리)
-입력: MM
-출력: Multiple Myeloma
-
-입력: AKI
-출력: Acute Kidney Injury
-
-입력: DM
-출력: Diabetes Mellitus
-
-입력: pcp
-출력: Pneumocystis Pneumonia
-
-입력: pjp
-출력: Pneumocystis jirovecii pneumonia
-
-입력: hCCA
-출력: Hilar Cholangiocarcinoma
-
-(규칙 2: 문장 요약)
-입력: soft tissue cancer의 skin invasion의 seer코드 알려줘
-출력: 연부조직암 피부 침범 SEER
-
-입력: 코로나 바이러스 감염 후 폐렴 진단 받았는데 KCD 코드가 뭔가요?
-출력: 코로나19 감염 후 폐렴 
-
-(규칙 3: 예외 처리)
-입력: folliculitis
-출력: folliculitis
-
-입력: 상세불명의 위염
-출력: 상세불명의 위염
-
-입력: multiple myeloma
-출력: multiple myeloma
-
-입력: Multiple myeloma
-출력: Multiple myeloma
-
-입력: Diabetes Mellitus
-출력: Diabetes Mellitus
-
-입력: +16Tc6Y8OjWCWcNpbF9ssU8DKAdrqu44XGBwOKzfgv8AHC88J/Bv4p+DNK8HJrkWuTRXv237J5ttaRSZQvdqVbcIcK0ZGNrc8cUhc5ag8afAq3/ZNbRD4LuJvElxqr20upXCbo4tSCht8d0o3RoYcBYyBmofiP8AEv4W6h+~
-출력: ""
-"""},
-                    {"role": "user", "content": query}
-                ],
-                "temperature": API_TEMPERATURE
-            }
-        )
-        response.raise_for_status()
-        expanded_term = response.json()["choices"][0]["message"]["content"].strip()
-        # 로그에서 민감정보 제거 (쿼리 내용 마스킹)
-        log.info(f"Medical abbreviation expansion completed for query: '{expanded_term[:20]}...'")
-        return expanded_term
-    except requests.exceptions.RequestException as e:
-        log.error(f"Network error expanding medical abbreviation: {type(e).__name__}")
-        return query
-    except KeyError as e:
-        log.error(f"API response format error: {type(e).__name__}")
-        return query
-    except Exception as e:
-        log.error(f"Unexpected error expanding medical abbreviation: {type(e).__name__}")
-        return query
-
-
-@async_cached(query_enhance_cache, CACHE_TTL_QUERY_ENHANCE, "query_enhance")
-async def enhance_query(query: str, openai_key: Optional[str] = None) -> List[str]:
-    """쿼리를 분석하고 확장하여 더 정확한 검색 결과를 얻기 위한 함수
-    
-    1. 원본 쿼리 유지
-    2. 동의어/유사어 추가
-    """
-    # Gemini API 키 설정 (인자로 전달받지 않으면 환경 변수 사용)
-    api_key = openai_key or GEMINI_API_KEY
-    
-    if not api_key:
-        log.warning("Gemini API 키가 설정되지 않았습니다. 쿼리 향상을 건너뜁니다.")
-        return [query]
-        
-    try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            },
-            json={
-                "model": GEMINI_MODEL,
-                "reasoning_effort": "none",
-                "messages": [
-                    {"role": "system", "content": """당신은 의학 및 일반 검색 쿼리 향상 전문가입니다.
-주어진 검색 쿼리를 분석하여 검색 성능을 높이기 위한 다양한 변형 쿼리를 생성하세요.
-다음 2가지 타입의 쿼리를 반환하세요:
-1. original: 원본 쿼리 그대로
-2. synonyms: 동의어나 유사어를 포함한 쿼리를 1개만 생성(원본쿼리가 한국어라면 영어로 동의어나 유사어, 원본쿼리가 영어라면 한국어로 동의어나 유사어 생성, 원본쿼리에 의학약어가 있다면 full term으로 변환 후 생성)
-
-예시:
-입력: "Acute Kidney Injury"
-출력:
-{
-  "original": "Acute Kidney Injury",
-  "synonyms": "급성신손상"
-}
-"""},
-                    {"role": "user", "content": query}
-                ],
-                "temperature": API_TEMPERATURE
-            }
-        )
-        response.raise_for_status()
-        content_from_api = response.json()["choices"][0]["message"]["content"]
-        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", content_from_api, re.DOTALL)
-        if match:
-            json_string = match.group(1)
-        else:
-            json_string = content_from_api
-        result = json_string.strip()
-        parsed_result = json.loads(result)
-        enhanced_queries = [
-            parsed_result["original"],
-            parsed_result["synonyms"]
-        ]
-        log.info(f"Enhanced queries: {enhanced_queries}")
-        return enhanced_queries
-    except requests.exceptions.RequestException as e:
-        log.error(f"Network error enhancing query: {type(e).__name__}")
-        return [query]
-    except (KeyError, json.JSONDecodeError) as e:
-        log.error(f"API response parsing error: {type(e).__name__}")
-        return [query]
-    except Exception as e:
-        log.error(f"Unexpected error enhancing query: {type(e).__name__}")
-        return [query]
 
 def query_doc_with_hybrid_search(
     collection_name: str,
@@ -1053,19 +928,37 @@ def query_collection_with_hybrid_search(
         # 중복 제거 및 결과 통합 (모든 쿼리 결과를 병합)
         combined_results = merge_and_deduplicate_results(all_results)
         
-        # 모든 통합된 결과에 대해 한 번만 LLM 리랭킹 수행
+        # LLM 리랭킹 수행 부분을 API 호출로 변경
         if api_key and combined_results and combined_results["documents"][0]:
-            log.info(f"한 번에 LLM 기반 리랭킹 수행: 문서 수={len(combined_results['documents'][0])}")
-            final_results = perform_llm_reranking(
-                combined_results=combined_results,
-                original_query=expanded_queries,  # 원본 쿼리 사용
-                k=k,
-                r=r,
-                openai_key=api_key,
-            )
-            results = [final_results]
+            log.info(f"API를 통해 LLM 기반 리랭킹 수행: 문서 수={len(combined_results['documents'][0])}")
+            
+            # ############################################################### #
+            # ##               여기가 수정된 핵심 부분입니다                ## #
+            # ############################################################### #
+            
+            try:
+                # 동기 스레드 컨텍스트에서 비동기 API 호출을 위한 가장 간단하고 안전한 방법
+                final_results = asyncio.run(
+                    call_rerank_api_async(
+                        combined_results=combined_results,
+                        original_query=expanded_queries,
+                        k=k,
+                        r=r,
+                        api_key=api_key,
+                    )
+                )
+                results = [final_results]
+            except Exception as e:
+                # asyncio.run()은 이미 실행 중인 루프에서 호출되면 RuntimeError를 발생시킬 수 있습니다.
+                # 이는 이 함수가 다른 비동기 컨텍스트에서 호출될 경우에 대한 안전장치입니다.
+                if "cannot run event loop while another loop is running" in str(e):
+                    log.warning("리랭킹을 중첩된 이벤트 루프에서 호출하려고 시도했습니다. 이 시나리오는 현재 지원되지 않습니다.")
+                
+                log.error(f"리랭킹 API 호출 중 오류 발생: {e}. 리랭킹 없이 진행합니다.", exc_info=True)
+                results = [combined_results] # 실패 시 리랭킹 전 결과 사용
+
         else:
-            # API 키가 없거나 결과가 없으면 통합 결과 그대로 사용
+            log.info("리랭킹을 건너뜁니다 (API 키 또는 문서 없음).")
             results = [combined_results]
 
         if VECTOR_DB == "chroma":
@@ -1631,291 +1524,6 @@ def get_hybrid_search_results_without_reranking(
     except Exception as e:
         raise e
 
-def parse_and_rerank(
-    llm_output: str,
-    document_objects: List[Document],
-    reranking_query_context: str,
-    k: int,
-    log
-) -> Dict[str, Any]:
-    reranked_docs = []
-    parsed_rankings = []
-
-    # 줄 단위로 분리하고 패턴 매칭
-    for line in llm_output.split('\n'):
-        match = re.match(r'(\d+)[.,]\s*(\d+)[.,]\s*(\d+\.?\d*)[.,]?(.*)', line)
-        if match:
-            rank, doc_num, llm_score, reason = match.groups()
-            parsed_rankings.append({
-                'rank': int(rank),
-                'doc_num': int(doc_num),
-                'score': float(llm_score),
-                'reason': reason.strip()
-            })
-
-    # 파싱 실패 시 대체 패턴 시도
-    if not parsed_rankings:
-        doc_nums = re.findall(r'(?:^|\D)(\d+)(?:\D|$)', llm_output)
-        if doc_nums:
-            seen = set()
-            for num in doc_nums:
-                num = int(num)
-                if 1 <= num <= len(document_objects) and num not in seen:
-                    seen.add(num)
-                    parsed_rankings.append({
-                        'rank': len(parsed_rankings) + 1,
-                        'doc_num': num,
-                        'score': 10.0 - (len(parsed_rankings) * 0.5),  # 임의 점수 부여
-                        'reason': "LLM이 선택한 문서"
-                    })
-
-    # 파싱된 결과로 문서 재정렬
-    if parsed_rankings:
-        for ranking in sorted(parsed_rankings, key=lambda x: x['rank']):
-            doc_idx = ranking['doc_num'] - 1
-            if 0 <= doc_idx < len(document_objects):
-                doc = document_objects[doc_idx]
-                original_index = doc.metadata.get('original_index', 0)
-                llm_rank = ranking['rank']
-                rank_diff = abs(original_index + 1 - llm_rank)
-                base_score = min(ranking['score'] / 10.0, 1.0)
-                penalty_factor = min(0.5, rank_diff * 0.03)
-                adjusted_score = base_score * (1.0 - penalty_factor)
-                if doc.metadata is None:
-                    doc.metadata = {}
-                doc.metadata['score'] = adjusted_score
-                doc.metadata['base_score'] = base_score
-                doc.metadata['rank_penalty'] = penalty_factor
-                doc.metadata['llm_reason'] = ranking['reason']
-                doc.metadata['llm_rank'] = ranking['rank']
-                reranked_docs.append(doc)
-
-        mentioned_indices = set(r['doc_num'] - 1 for r in parsed_rankings)
-        for i, doc in enumerate(document_objects):
-            if i not in mentioned_indices:
-                if doc.metadata is None:
-                    doc.metadata = {}
-                doc.metadata['score'] = 0.3
-                doc.metadata['llm_reason'] = "LLM이 관련성이 낮다고 판단한 문서"
-                reranked_docs.append(doc)
-
-        if len(reranked_docs) < 5 and len(document_objects) > len(reranked_docs):
-            added_indices = set(mentioned_indices)
-            for i, doc in enumerate(document_objects):
-                if i not in added_indices and len(reranked_docs) < 5:
-                    if doc.metadata is None:
-                        doc.metadata = {}
-                    doc.metadata['score'] = 0.2
-                    doc.metadata['llm_reason'] = "추가된 문서"
-                    reranked_docs.append(doc)
-
-        total_reranked_docs = len(reranked_docs)
-        if len(reranked_docs) > 5:
-            log.info(f"리랭킹된 전체 문서 {len(reranked_docs)}개 중 상위 5개만 반환합니다.")
-            reranked_docs = reranked_docs[:5]
-
-        rerank_details = []
-        for i, doc in enumerate(reranked_docs):
-            content_preview = doc.page_content[:30].replace('\n', ' ')
-            if len(doc.page_content) > 30:
-                content_preview += "..."
-            score = doc.metadata.get("score", "N/A")
-            base_score = doc.metadata.get("base_score", score)
-            rank_penalty = doc.metadata.get("rank_penalty", 0)
-            llm_rank = doc.metadata.get("llm_rank", "N/A")
-            llm_reason = doc.metadata.get("llm_reason", "N/A")
-            original_index = doc.metadata.get("original_index", "N/A")
-            query_info = f" (쿼리 컨텍스트: {reranking_query_context[:30]}...)" if reranking_query_context else ""
-            score_info = f"{f'{score:.2f}' if isinstance(score, float) else score}"
-            if isinstance(base_score, float) and isinstance(rank_penalty, float) and rank_penalty > 0:
-                score_info += f" (원래: {base_score:.2f}, 패널티: {rank_penalty:.2f})"
-            rerank_details.append(
-                f"\n  {i+1}. [원래순위: {original_index + 1 if isinstance(original_index, int) else original_index}, "
-                f"LLM순위: {llm_rank}, 점수: {score_info}]{query_info}\n"
-                f"     내용: {content_preview}\n"
-                f"     이유: {llm_reason[:80] + '...' if len(llm_reason) > 80 else llm_reason}"
-            )
-
-        result = {
-            "distances": [[d.metadata.get("score", 0.5) for d in reranked_docs]],
-            "documents": [[d.page_content for d in reranked_docs]],
-            "metadatas": [[d.metadata for d in reranked_docs]],
-        }
-
-        log.info(f"LLM 리랭킹 완료: 총 {total_reranked_docs}개 문서 중 {len(reranked_docs)}개 반환 - {''.join(rerank_details)}")
-        return result
-    else:
-        # 파싱 실패 시 원본 결과 반환 (혹은 적절한 fallback)
-        log.warning("LLM 파싱 실패: 원본 결과 반환")
-        return None
-
-def perform_llm_reranking(
-    combined_results: dict,
-    original_query: list,
-    k: int,
-    r: float,
-    openai_key: str,
-    log=None,  # log 인자 추가 (기본값 None)
-) -> dict:
-    """통합된 검색 결과에 대해 LLM 기반 리랭킹 수행"""
-    try:
-        if log is None:
-            import logging
-            log = logging.getLogger("llm_rerank")
-
-        # 캐싱을 위한 키 생성
-        docs = combined_results["documents"][0]
-        metas = combined_results["metadatas"][0]
-        
-        # 문서 내용의 해시를 생성 (처음 100자씩만 사용해서 키 길이 제한)
-        docs_sample = [doc[:100] for doc in docs[:10]]  # 상위 10개 문서의 처음 100자만
-        cache_data = f"llm_rerank:{str(original_query)}:{str(docs_sample)}:{k}:{r}"
-        cache_key = cache_key_hash(cache_data)
-        
-        # 캐시 확인
-        cached_result = llm_rerank_cache.get(cache_key)
-        if cached_result is not None:
-            log.debug(f"Cache hit for LLM reranking: {cache_key}")
-            return cached_result
-
-        log.debug(f"Cache miss for LLM reranking: {cache_key}")
-        
-        # 필요한 데이터 추출
-
-        max_docs_for_reranking = min(SAFE_MAX_DOCS_FOR_RERANKING, k*3, len(docs))
-        log.info(f"리랭킹을 위한 문서 수: {max_docs_for_reranking}개 (요청: {k}, 안전 최대값: {SAFE_MAX_DOCS_FOR_RERANKING})")
-        selected_docs = docs[:max_docs_for_reranking]
-        selected_metas = metas[:max_docs_for_reranking]
-
-        # Document 객체 생성
-        document_objects = []
-        for i, (doc_content, meta) in enumerate(zip(selected_docs, selected_metas)):
-            if meta is None:
-                meta = {}
-            meta['original_index'] = i
-            document_objects.append(
-                Document(
-                    page_content=doc_content,
-                    metadata=meta
-                )
-            )
-
-        system_prompt = """역할: 당신은 사용자의 질병명 또는 암 관련 정보 쿼리에 대해 검색된 문서가 KCD 코드(한국표준질병사인분류) 또는 **암등록 관련 정보(T코드, M코드, 분화도, 편측성, SEER 코드 등)**를 얼마나 정확하고 유용하게 제공하는지 판단하는 전문가입니다.
-        
-목표: 주어진 쿼리(질병명, 암 관련 설명 등)와 검색 결과 문서들을 분석하여, 쿼리의 의도(특정 KCD 코드 또는 암등록 정보 획득)에 가장 부합하는 문서를 관련성 높은 순서대로 번호를 나열하고 평가합니다.
-
-평가 기준 (총 10점 만점):
- 질병명/용어 정확도 및 독립성 (최대 4점)
- 문서에 쿼리의 질병명 또는 핵심 용어(예: 암 부위, 조직학명)가 **정확히 일치(Exact match)**하는 형태로 명확하게 제시되는 경우 (3-4점)
- 참고: 정확히 일치하는 용어와 불필요한 수식어가 있는 용어가 함께 존재 시, 정확히 일치하는 용어 자체에 대한 명확성을 기준으로 평가 (최대 3점)
- 문서에 쿼리의 질병명 또는 핵심 용어가 정확히 일치하지만, 관련성이 낮거나 불필요한 다른 정보와 함께 혼재되어 명확성이 떨어지는 경우 (1-2점)
- 정확한 일치 없이, 일부 유사하거나 관련된 표현만 포함된 경우 (0점)
- 
-KCD 코드 또는 암등록 정보의 직접적 제공 (최대 4점)
- KCD: 쿼리된 질병명에 대한 정확한 KCD 코드(들) (필요시 †/*, T/Y 코드 포함)를 명확하게 제공하는가? (0-4점)
- 정확한 코드(들)를 모두 명시적으로 제공 (4점)
- 일부 코드만 제공하거나, 관련 코드를 암시하지만 명확하지 않음 (1-3점)
- 코드 정보 없음 (0점)
- 
- 암등록: 쿼리된 암 정보에 대한 **요구되는 암등록 정보(T코드, M코드, 분화도, 편측성, SEER 코드 등)**를 정확하게 제공하는가? (0-4점)
- 요구되는 핵심 정보(T/M 코드 등)를 정확하고 명확하게 제공 (4점)
- 일부 정보만 제공하거나, 정보가 불명확함 (1-3점)
- 관련 등록 정보 없음 (0점)
- (KCD 또는 암등록 중 쿼리의 의도에 맞는 기준으로 평가)
- 
-최신성 및 신뢰성 (최대 1점)
- 문서가 최신 KCD 버전, 최신 암등록 지침/공지 또는 신뢰할 수 있는 공식 자료(예: 통계청, 암등록본부, 관련 학회 지침)에 기반하여 작성되었는가? (0-1점)
- 특히 암등록 정보는 지침 변경이 잦으므로 최신 공지/지침 반영 여부가 중요
- 
-정보의 구체성 및 완전성 (최대 1점)
- KCD: 필요한 경우 검표(†)/별표(*), T/Y 코드 등 관련 코드를 완전하게 제공하는가? 급성/만성 등 세부 분류가 필요할 때 구체적인 정보를 포함하는가?
- 암등록: T코드, M코드 외 분화도, 편측성, SEER 코드 등 맥락상 필요한 부가 정보를 구체적으로 제공하는가?
- (쿼리 의도에 따라 필요한 정보의 구체성과 완전성을 평가, 0-1점)
- 
-제외 기준:
- 문서가 쿼리된 질병명이나 암 자체에 대한 설명만 장황하게 늘어놓고, 정작 핵심인 KCD 코드나 암등록 세부 정보(T/M 코드 등)를 전혀 포함하지 않는 경우 관련성이 낮다고 판단하여 낮은 점수를 부여하거나 제외 고려.
- 문서가 쿼리의 의도(KCD 코드 찾기, 암등록 정보 찾기)와 본질적으로 다른 내용(예: 일반적인 건강 정보, 치료 후기 등)을 주로 담고 있을 경우 제외합니다.
- 
-출력 형식:
-결과는 다음 형식으로 제공하세요.
-순위,문서번호,점수(0-10),이유
-1,3,9.5,쿼리된 질병명과 정확히 일치하며 최신 지침 기반의 정확한 KCD 코드(†/* 포함)를 명확하고 완전하게 제공함.
-2,1,7.0,쿼리된 암 정보와 정확히 일치하는 T/M 코드를 제공하나, 최신 지침 변경 사항 반영 여부가 불확실하고 SEER 코드 정보가 누락됨.
-3,4,4.0,질병명은 일치하나 KCD 코드를 직접 제공하지 않고 질병 정의만 설명함.
-4,2,2.0,유사 질병명에 대한 정보만 포함하고 있으며, 쿼리에 대한 직접적인 KCD 코드 정보 없음.
-"""
-
-        reranking_query_context = " | ".join(original_query)
-        user_prompt = f"쿼리: {reranking_query_context}\n\n"
-
-        query_keywords = [word for q in original_query if isinstance(q, str) for word in q.lower().split() if len(word) > 2]
-
-        for i, doc in enumerate(document_objects):
-            content = doc.page_content
-            if len(content) > MAX_CONTENT_PREVIEW_LENGTH:
-                content = content[:MAX_CONTENT_PREVIEW_LENGTH] + "..."
-            user_prompt += f"문서 {i+1}:\n{content}\n\n"
-        user_prompt += "위 문서들을 쿼리와의 관련성에 따라 재평가하고 순위를 매겨주세요."
-
-        llm_output = None
-
-        # Gemini 우선 시도
-        try:
-            response = requests.post(
-                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_key}"},
-                json={
-                    "model": GEMINI_MODEL,
-                    "reasoning_effort": "none",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "temperature": API_TEMPERATURE,
-                }
-            )
-            response.raise_for_status()
-            llm_output = response.json()["choices"][0]["message"]["content"].strip()
-            log.debug(f"Gemini 응답 수신 성공")
-        except Exception as e:
-            log.warning(f"Gemini 호출 실패 ({e}), OpenAI로 폴백 시도")
-            try:
-                response = requests.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {OPENAI_API_KEY}"
-                    },
-                    json={
-                        "model": OPENAI_MODEL,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        "temperature": API_TEMPERATURE,
-                    }
-                )
-                response.raise_for_status()
-                llm_output = response.json()["choices"][0]["message"]["content"].strip()
-                log.debug(f"OpenAI 응답 수신 성공")
-            except Exception as e2:
-                log.error(f"OpenAI API 호출 오류: {e2}")
-                return combined_results
-
-        # 공통 파싱/리랭킹/로그출력
-        result = parse_and_rerank(llm_output, document_objects, reranking_query_context, k, log)
-        if result is not None:
-            # 성공한 결과를 캐시에 저장
-            llm_rerank_cache.set(cache_key, result, CACHE_TTL_LLM_RERANK)
-            return result
-        else:
-            return combined_results
-
-    except Exception as e:
-        if log:
-            log.error(f"LLM 리랭킹 오류: {e}")
-        return combined_results
-
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
     """여러 쿼리의 모든 결과를 병합하고 중복 제거하면서 각 쿼리의 상위 결과 보존"""
     if not all_results:
@@ -2021,11 +1629,6 @@ def get_cache_stats() -> Dict[str, Any]:
             "size": query_enhance_cache.size(),
             "max_size": query_enhance_cache.max_size,
             "ttl_seconds": CACHE_TTL_QUERY_ENHANCE
-        },
-        "llm_rerank": {
-            "size": llm_rerank_cache.size(),
-            "max_size": llm_rerank_cache.max_size,
-            "ttl_seconds": CACHE_TTL_LLM_RERANK
         }
     }
 
@@ -2033,7 +1636,6 @@ def clear_all_caches() -> None:
     """모든 캐시 클리어"""
     medical_abbrev_cache.clear()
     query_enhance_cache.clear()
-    llm_rerank_cache.clear()
     log.info("모든 RAG 캐시가 클리어되었습니다.")
 
 def clear_cache_by_type(cache_type: str) -> bool:
@@ -2046,10 +1648,6 @@ def clear_cache_by_type(cache_type: str) -> bool:
         query_enhance_cache.clear()
         log.info("쿼리 확장 캐시가 클리어되었습니다.")
         return True
-    elif cache_type == "llm_rerank":
-        llm_rerank_cache.clear()
-        log.info("LLM 리랭킹 캐시가 클리어되었습니다.")
-        return True
     else:
         log.warning(f"알 수 없는 캐시 타입: {cache_type}")
         return False
@@ -2058,5 +1656,4 @@ def cleanup_expired_caches() -> None:
     """만료된 캐시 엔트리들 정리"""
     medical_abbrev_cache._cleanup_expired()
     query_enhance_cache._cleanup_expired()
-    llm_rerank_cache._cleanup_expired()
     log.info("만료된 캐시 엔트리들이 정리되었습니다.")
