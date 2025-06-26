@@ -7,6 +7,7 @@
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
 #25.6.22 쿼리향상, 리랭킹 api 호출로 변경
+#25.6.26 임베딩 생략을 통한 직접 파일 업로드 최적화, v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용)
 import httpx
 import requests # API 호출을 위해 requests 라이브러리 추가
 import asyncio
@@ -1122,9 +1123,28 @@ def get_sources_from_items(
                             ]
                         ],
                     }
+<<<<<<< HEAD
                 elif item.get("id"):
                     file_object = Files.get_file_by_id(item.get("id"))
                     if file_object:
+=======
+            elif file.get("file").get("data"):
+                query_result = {
+                    "documents": [[file.get("file").get("data", {}).get("content")]],
+                    "metadatas": [
+                        [file.get("file").get("data", {}).get("metadata", {})]
+                    ],
+                }
+        else:
+            # [최종 수정] 파일 타입에 따라 RAG 사용 여부를 명확히 결정합니다.
+            # Case 1: 직접 업로드된 파일 (컬렉션의 일부가 아님)
+            if file.get("type") != "collection":
+                log.info(f"Direct file upload '{file.get('name')}' detected. Using full content.")
+                file_id = file.get("id")
+                if file_id:
+                    file_object = Files.get_file_by_id(file_id)
+                    if file_object and file_object.data and 'content' in file_object.data:
+>>>>>>> 8388961c2 (v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용))
                         query_result = {
                             "documents": [[file_object.data.get("content", "")]],
                             "metadatas": [
@@ -1137,6 +1157,7 @@ def get_sources_from_items(
                                 ]
                             ],
                         }
+<<<<<<< HEAD
             else:
                 # Fallback to collection names
                 if item.get("legacy"):
@@ -1151,6 +1172,81 @@ def get_sources_from_items(
             ):
                 # Manual Full Mode Toggle for Collection
                 knowledge_base = Knowledges.get_knowledge_by_id(item.get("id"))
+=======
+                    else:
+                        log.warning(f"Could not retrieve content for direct file upload: {file_id}")
+                        query_result = None
+                else:
+                    query_result = None
+            
+            # Case 2: 컬렉션의 일부인 파일 (RAG 수행)
+            else:
+                collection_names = []
+                if file.get("type") == "collection":
+                    if file.get("legacy"):
+                        collection_names = file.get("collection_names", [])
+                    else:
+                        collection_names.append(file["id"])
+                elif file.get("collection_name"):
+                    collection_names.append(file["collection_name"])
+                elif file.get("id"):
+                    if file.get("legacy"):
+                        collection_names.append(f"{file['id']}")
+                    else:
+                        collection_names.append(f"file-{file['id']}")
+
+                collection_names = set(collection_names).difference(extracted_collections)
+                if not collection_names:
+                    log.debug(f"skipping {file} as it has already been extracted")
+                    continue
+
+                if full_context:
+                    try:
+                        query_result = get_all_items_from_collections(collection_names)
+                    except Exception as e:
+                        log.exception(e)
+                else:
+                    try:
+                        query_result = None
+                        if file.get("type") == "text":
+                            # Not sure when this is used, but it seems to be a fallback
+                            query_result = {
+                                "documents": [
+                                    [file.get("file").get("data", {}).get("content")]
+                                ],
+                                "metadatas": [
+                                    [file.get("file").get("data", {}).get("meta", {})]
+                                ],
+                            }
+                        else:
+                            if hybrid_search:
+                                try:
+                                    query_result = query_collection_with_hybrid_search(
+                                        collection_names=collection_names,
+                                        queries=queries,
+                                        embedding_function=embedding_function,
+                                        k=k,
+                                        reranking_function=reranking_function,
+                                        k_reranker=k_reranker,
+                                        r=r,
+                                        hybrid_bm25_weight=hybrid_bm25_weight,
+                                    )
+                                except Exception as e:
+                                    log.debug(
+                                        "Error when using hybrid search, using"
+                                        " non hybrid search as fallback."
+                                    )
+
+                            if (not hybrid_search) or (query_result is None):
+                                query_result = query_collection(
+                                    collection_names=collection_names,
+                                    queries=queries,
+                                    embedding_function=embedding_function,
+                                    k=k,
+                                )
+                    except Exception as e:
+                        log.exception(e)
+>>>>>>> 8388961c2 (v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용))
 
                 if knowledge_base and (
                     user.role == "admin"
