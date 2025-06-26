@@ -1407,7 +1407,9 @@ def process_file(
         hash = calculate_sha256_string(text_content)
         Files.update_file_hash_by_id(file.id, hash)
 
-        if not request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
+        # [수정] collection_name이 있는 경우에만 벡터 DB에 저장합니다.
+        # 이렇게 하면 단순 파일 업로드 시에는 불필요한 임베딩 과정을 건너뜁니다.
+        if form_data.collection_name and not request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
             try:
                 result = save_docs_to_vector_db(
                     request,
@@ -1439,6 +1441,7 @@ def process_file(
             except Exception as e:
                 raise e
         else:
+            # 단순 파일 업로드의 경우, 텍스트 내용만 저장하고 바로 반환합니다.
             return {
                 "status": True,
                 "collection_name": None,
