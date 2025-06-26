@@ -7,6 +7,7 @@
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
 #25.6.22 쿼리향상, 리랭킹 api 호출로 변경
+#25.6.26 임베딩 생략을 통한 직접 파일 업로드 최적화, v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용)
 import httpx
 import requests # API 호출을 위해 requests 라이브러리 추가
 import asyncio
@@ -1237,97 +1238,73 @@ def get_sources_from_items(
                     "metadatas": [[{"url": item.get("url"), "name": item.get("url")}]],
                 }
         elif item.get("type") == "file":
-            if (
-                item.get("context") == "full"
-                or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
-            ):
-                if item.get("file", {}).get("data", {}).get("content", ""):
-                    # Manual Full Mode Toggle
-                    # Used from chat file modal, we can assume that the file content will be available from item.get("file").get("data", {}).get("content")
-                    query_result = {
-                        "documents": [
-                            [item.get("file", {}).get("data", {}).get("content", "")]
-                        ],
-                        "metadatas": [
-                            [
-                                {
-                                    "file_id": item.get("id"),
-                                    "name": item.get("name"),
-                                    **item.get("file")
-                                    .get("data", {})
-                                    .get("metadata", {}),
-                                }
-                            ]
-                        ],
-                    }
-                elif item.get("id"):
-                    file_object = Files.get_file_by_id(item.get("id"))
-                    if file_object:
-                        query_result = {
-                            "documents": [[file_object.data.get("content", "")]],
-                            "metadatas": [
-                                [
-                                    {
-                                        "file_id": item.get("id"),
-                                        "name": file_object.filename,
-                                        "source": file_object.filename,
-                                    }
-                                ]
-                            ],
-                        }
+            # User-uploaded files should always use the full context.
+            file_object = Files.get_file_by_id(item.get("id"))
+            if file_object:
+                log.debug(
+                    f"Loading full content for user-uploaded file: {file_object.filename}"
+                )
+                query_result = {
+                    "documents": [[file_object.data.get("content", "")]],
+                    "metadatas": [
+                        [
+                            {
+                                "file_id": item.get("id"),
+                                "name": file_object.filename,
+                                "source": file_object.filename,
+                            }
+                        ]
+                    ],
+                }
             else:
-                # Fallback to collection names
+                # Fallback to collection names if file object not found for some reason
+                log.warning(f"Could not find file object for id: {item.get('id')}")
                 if item.get("legacy"):
                     collection_names.append(f"{item['id']}")
                 else:
                     collection_names.append(f"file-{item['id']}")
 
         elif item.get("type") == "collection":
-            # Manual Full Mode Toggle for Collection
-            knowledge_base = Knowledges.get_knowledge_by_id(item.get("id"))
-
-            if knowledge_base and (
-                user.role == "admin"
-                or knowledge_base.user_id == user.id
-                or has_access(user.id, "read", knowledge_base.access_control)
+            if (
+                item.get("context") == "full"
+                or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
             ):
-                if (
-                    item.get("context") == "full"
-                    or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
+                # Manual Full Mode Toggle for Collection
+                knowledge_base = Knowledges.get_knowledge_by_id(item.get("id"))
+
+                if knowledge_base and (
+                    user.role == "admin"
+                    or knowledge_base.user_id == user.id
+                    or has_access(user.id, "read", knowledge_base.access_control)
                 ):
-                    if knowledge_base and (
-                        user.role == "admin"
-                        or knowledge_base.user_id == user.id
-                        or has_access(user.id, "read", knowledge_base.access_control)
-                    ):
 
-                        file_ids = knowledge_base.data.get("file_ids", [])
+                    file_ids = knowledge_base.data.get("file_ids", [])
 
-                        documents = []
-                        metadatas = []
-                        for file_id in file_ids:
-                            file_object = Files.get_file_by_id(file_id)
+                    documents = []
+                    metadatas = []
+                    for file_id in file_ids:
+                        file_object = Files.get_file_by_id(file_id)
 
-                            if file_object:
-                                documents.append(file_object.data.get("content", ""))
-                                metadatas.append(
-                                    {
-                                        "file_id": file_id,
-                                        "name": file_object.filename,
-                                        "source": file_object.filename,
-                                    }
-                                )
+                        if file_object:
+                            documents.append(file_object.data.get("content", ""))
+                            metadatas.append(
+                                {
+                                    "file_id": file_id,
+                                    "name": file_object.filename,
+                                    "source": file_object.filename,
+                                }
+                            )
 
-                        query_result = {
-                            "documents": [documents],
-                            "metadatas": [metadatas],
-                        }
+                    query_result = {
+                        "documents": [documents],
+                        "metadatas": [metadatas],
+                    }
+            else:
+                # Fallback to collection names
+                if item.get("legacy"):
+                    collection_names = item.get("collection_names", [])
                 else:
-                    # Fallback to collection names
-                    if item.get("legacy"):
-                        collection_names = item.get("collection_names", [])
-                    else:
-                        collection_names.append(item["id"])
+                    collection_names.append(item["id"])
 
         elif item.get("docs"):
             # BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL
