@@ -1143,74 +1143,85 @@ def get_sources_from_files(
                     ],
                 }
         else:
-            collection_names = []
-            if file.get("type") == "collection":
-                if file.get("legacy"):
-                    collection_names = file.get("collection_names", [])
-                else:
-                    collection_names.append(file["id"])
-            elif file.get("collection_name"):
-                collection_names.append(file["collection_name"])
-            elif file.get("id"):
-                if file.get("legacy"):
-                    collection_names.append(f"{file['id']}")
-                else:
-                    collection_names.append(f"file-{file['id']}")
-
-            collection_names = set(collection_names).difference(extracted_collections)
-            if not collection_names:
-                log.debug(f"skipping {file} as it has already been extracted")
-                continue
-
-            if full_context:
-                try:
-                    query_result = get_all_items_from_collections(collection_names)
-                except Exception as e:
-                    log.exception(e)
-
-            else:
-                try:
-                    query_result = None
-                    if file.get("type") == "text":
-                        # Not sure when this is used, but it seems to be a fallback
-                        query_result = {
-                            "documents": [
-                                [file.get("file").get("data", {}).get("content")]
-                            ],
-                            "metadatas": [
-                                [file.get("file").get("data", {}).get("meta", {})]
-                            ],
+            # [최종 수정] 파일 타입에 따라 RAG 사용 여부를 명확히 결정합니다.
+            # Case 1: 직접 업로드된 파일 (컬렉션의 일부가 아님)
+            if file.get("type") != "collection":
+                log.info(f"Direct file upload '{file.get('name')}' detected. Using full content.")
+                file_id = file.get("id")
+                if file_id:
+                    file_object = Files.get_file_by_id(file_id)
+                    if file_object and file_object.data and 'content' in file_object.data:
+                        context = {
+                            "documents": [[file_object.data.get("content", "")]],
+                            "metadatas": [[{"file_id": file.get("id"), "name": file_object.filename, "source": file_object.filename}]],
                         }
                     else:
-                        if hybrid_search:
-                            try:
-                                query_result = query_collection_with_hybrid_search(
+                        log.warning(f"Could not retrieve content for direct file upload: {file_id}")
+                        context = None
+                else:
+                    context = None
+            
+            # Case 2: 컬렉션의 일부인 파일 (RAG 수행)
+            else:
+                collection_names = []
+                if file.get("type") == "collection":
+                    if file.get("legacy"):
+                        collection_names = file.get("collection_names", [])
+                    else:
+                        collection_names.append(file["id"])
+                elif file.get("collection_name"):
+                    collection_names.append(file["collection_name"])
+                elif file.get("id"):
+                    if file.get("legacy"):
+                        collection_names.append(f"{file['id']}")
+                    else:
+                        collection_names.append(f"file-{file['id']}")
+
+                collection_names = set(collection_names).difference(extracted_collections)
+                if not collection_names:
+                    log.debug(f"skipping {file} as it has already been extracted")
+                    continue
+
+                if full_context:
+                    try:
+                        context = get_all_items_from_collections(collection_names)
+                    except Exception as e:
+                        log.exception(e)
+                else:
+                    try:
+                        context = None
+                        if file.get("type") == "text":
+                            context = file["content"]
+                        else:
+                            if hybrid_search:
+                                try:
+                                    context = query_collection_with_hybrid_search(
+                                        collection_names=collection_names,
+                                        queries=queries,
+                                        embedding_function=embedding_function,
+                                        k=k,
+                                        reranking_function=reranking_function,
+                                        k_reranker=k_reranker,
+                                        r=r,
+                                        hybrid_bm25_weight=hybrid_bm25_weight,
+                                    )
+                                except Exception as e:
+                                    log.debug(
+                                        "Error when using hybrid search, using"
+                                        " non hybrid search as fallback."
+                                    )
+
+                            if (not hybrid_search) or (context is None):
+                                context = query_collection(
                                     collection_names=collection_names,
                                     queries=queries,
                                     embedding_function=embedding_function,
                                     k=k,
-                                    reranking_function=reranking_function,
-                                    k_reranker=k_reranker,
-                                    r=r,
-                                    hybrid_bm25_weight=hybrid_bm25_weight,
                                 )
-                            except Exception as e:
-                                log.debug(
-                                    "Error when using hybrid search, using"
-                                    " non hybrid search as fallback."
-                                )
+                    except Exception as e:
+                        log.exception(e)
 
-                        if (not hybrid_search) or (query_result is None):
-                            query_result = query_collection(
-                                collection_names=collection_names,
-                                queries=queries,
-                                embedding_function=embedding_function,
-                                k=k,
-                            )
-                except Exception as e:
-                    log.exception(e)
-
-            extracted_collections.extend(collection_names)
+                extracted_collections.extend(collection_names)
 
         if query_result:
             if "data" in file:
