@@ -7,6 +7,7 @@
 #25.6.18 gemini model 쿼리확장, 리랭킹 gemini-2.5-flash model name 변경
 #25.6.19 expand_medical_abbreviation 함수 수정 - 의학약어 처리 규칙 추가, 예외 처리 추가
 #25.6.22 쿼리향상, 리랭킹 api 호출로 변경
+#25.6.26 임베딩 생략을 통한 직접 파일 업로드 최적화, v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용)
 import httpx
 import requests # API 호출을 위해 requests 라이브러리 추가
 import asyncio
@@ -1151,15 +1152,15 @@ def get_sources_from_files(
                 if file_id:
                     file_object = Files.get_file_by_id(file_id)
                     if file_object and file_object.data and 'content' in file_object.data:
-                        context = {
+                        query_result = {
                             "documents": [[file_object.data.get("content", "")]],
                             "metadatas": [[{"file_id": file.get("id"), "name": file_object.filename, "source": file_object.filename}]],
                         }
                     else:
                         log.warning(f"Could not retrieve content for direct file upload: {file_id}")
-                        context = None
+                        query_result = None
                 else:
-                    context = None
+                    query_result = None
             
             # Case 2: 컬렉션의 일부인 파일 (RAG 수행)
             else:
@@ -1184,18 +1185,26 @@ def get_sources_from_files(
 
                 if full_context:
                     try:
-                        context = get_all_items_from_collections(collection_names)
+                        query_result = get_all_items_from_collections(collection_names)
                     except Exception as e:
                         log.exception(e)
                 else:
                     try:
-                        context = None
+                        query_result = None
                         if file.get("type") == "text":
-                            context = file["content"]
+                            # Not sure when this is used, but it seems to be a fallback
+                            query_result = {
+                                "documents": [
+                                    [file.get("file").get("data", {}).get("content")]
+                                ],
+                                "metadatas": [
+                                    [file.get("file").get("data", {}).get("meta", {})]
+                                ],
+                            }
                         else:
                             if hybrid_search:
                                 try:
-                                    context = query_collection_with_hybrid_search(
+                                    query_result = query_collection_with_hybrid_search(
                                         collection_names=collection_names,
                                         queries=queries,
                                         embedding_function=embedding_function,
@@ -1211,8 +1220,8 @@ def get_sources_from_files(
                                         " non hybrid search as fallback."
                                     )
 
-                            if (not hybrid_search) or (context is None):
-                                context = query_collection(
+                            if (not hybrid_search) or (query_result is None):
+                                query_result = query_collection(
                                     collection_names=collection_names,
                                     queries=queries,
                                     embedding_function=embedding_function,
