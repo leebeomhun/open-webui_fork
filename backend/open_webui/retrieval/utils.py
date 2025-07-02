@@ -1669,10 +1669,20 @@ def get_hybrid_search_results_without_reranking(
         adjusted_weights = adjust_search_weights(query, bm25_weight, vector_weight)
         log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
         
-        # BM25 검색 수행
+        # BM25 검색 수행 (대소문자 구분 없이)
+        original_texts = collection_result.documents[0]
+        lowercase_texts = [text.lower() for text in original_texts]
+        
+        # 소문자 텍스트로 BM25 retriever 생성하되, 메타데이터에 원본 인덱스 보존
+        enhanced_metadatas = []
+        for i, meta in enumerate(collection_result.metadatas[0]):
+            enhanced_meta = meta.copy() if meta else {}
+            enhanced_meta['_original_index'] = i  # 원본 문서 인덱스 저장
+            enhanced_metadatas.append(enhanced_meta)
+        
         bm25_retriever = BM25Retriever.from_texts(
-            texts=collection_result.documents[0],
-            metadatas=collection_result.metadatas[0],
+            texts=lowercase_texts,  # 소문자로 변환된 텍스트로 검색
+            metadatas=enhanced_metadatas,
         )
         # 하이브리드 검색의 다양성을 위해 각 검색에서 더 많은 후보 확보
         # k가 작을 때(≤5)는 2배, 클 때는 1.5배로 조정하여 성능과 정확도 균형
@@ -1680,7 +1690,24 @@ def get_hybrid_search_results_without_reranking(
         candidate_k = max(k, int(k * candidate_multiplier))
         
         bm25_retriever.k = candidate_k
-        bm25_results = bm25_retriever.invoke(query)
+        bm25_results_raw = bm25_retriever.invoke(query.lower())  # 쿼리도 소문자로 변환
+        
+        # BM25 결과를 원본 텍스트로 복원
+        bm25_results = []
+        for doc in bm25_results_raw:
+            original_idx = doc.metadata.get('_original_index')
+            if original_idx is not None and original_idx < len(original_texts):
+                # 원본 텍스트로 교체하고 원본 메타데이터 복원
+                original_meta = collection_result.metadatas[0][original_idx].copy() if collection_result.metadatas[0][original_idx] else {}
+                from langchain_core.documents import Document
+                restored_doc = Document(
+                    page_content=original_texts[original_idx],  # 원본 텍스트 사용
+                    metadata=original_meta  # 원본 메타데이터 사용
+                )
+                bm25_results.append(restored_doc)
+            else:
+                # 인덱스가 없으면 기존 문서 그대로 사용
+                bm25_results.append(doc)
         
         # Vector 검색 수행  
         vector_search_retriever = VectorSearchRetriever(
