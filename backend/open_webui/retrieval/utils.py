@@ -1700,36 +1700,103 @@ def get_hybrid_search_results_without_reranking(
     api_key = openai_key or GEMINI_API_KEY
     
     try:
-        
         adjusted_weights = adjust_search_weights(query, bm25_weight, vector_weight)
         log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
+        
+        # BM25 검색 수행
         bm25_retriever = BM25Retriever.from_texts(
             texts=collection_result.documents[0],
             metadatas=collection_result.metadatas[0],
         )
-        bm25_retriever.k = k  # BM25에서는 더 많은 결과를 가져와 다양성 확보
-
+        # 하이브리드 검색의 다양성을 위해 각 검색에서 더 많은 후보 확보
+        # k가 작을 때(≤5)는 2배, 클 때는 1.5배로 조정하여 성능과 정확도 균형
+        candidate_multiplier = 2.0 if k <= 5 else 1.5
+        candidate_k = max(k, int(k * candidate_multiplier))
+        
+        bm25_retriever.k = candidate_k
+        bm25_results = bm25_retriever.invoke(query)
+        
+        # Vector 검색 수행  
         vector_search_retriever = VectorSearchRetriever(
             collection_name=collection_name,
             embedding_function=embedding_function,
-            top_k=k,
+            top_k=candidate_k,
         )
-
-        ensemble_retriever = EnsembleRetriever(
-            retrievers=[bm25_retriever, vector_search_retriever], 
-            weights=[adjusted_weights["bm25"], adjusted_weights["vector"]]
-        )
+        vector_results = vector_search_retriever.invoke(query)
         
-        # 리랭킹 없이 하이브리드 검색 결과만 반환
-        results = ensemble_retriever.invoke(query)
-        result = {
-            "distances": [[1.0 - i * 0.01 for i in range(len(results))]],  # 임시 점수
-            "documents": [[d.page_content for d in results]],
-            "metadatas": [[d.metadata for d in results]],
-            "query": query,  # 원본 쿼리 정보도 저장
-        }
+        # 문서별 점수 계산을 위한 딕셔너리 생성
+        doc_scores = {}
+        doc_contents = {}
+        doc_metadatas = {}
         
+        # BM25 점수 수집 (BM25Retriever는 내부적으로 점수를 계산하지만 노출하지 않음)
+        # 대신 문서 순서를 점수로 활용 (첫 번째가 가장 높은 점수)
+        for i, doc in enumerate(bm25_results):
+            doc_key = doc.page_content
+            bm25_score = 1.0 / (i + 1)  # 순위 역수로 점수 계산 (첫 번째: 1.0, 두 번째: 0.5, ...)
+            
+            if doc_key not in doc_scores:
+                doc_scores[doc_key] = {"bm25": 0, "vector": 0}
+                doc_contents[doc_key] = doc.page_content
+                doc_metadatas[doc_key] = doc.metadata
+            
+            doc_scores[doc_key]["bm25"] = max(doc_scores[doc_key]["bm25"], bm25_score)
+        
+        # Vector 점수 수집 (VectorDB 검색 결과 활용 - 임베딩 재계산 불필요)
+        if vector_results:
+            # VectorSearchRetriever 결과에서 실제 점수를 가져올 수 있다면 활용
+            # 현재는 LangChain이 점수를 노출하지 않으므로 순위 기반 점수 사용
+            # TODO: VectorDB 직접 호출로 실제 거리/점수 획득하도록 개선 가능
+            
+            for i, doc in enumerate(vector_results):
+                doc_key = doc.page_content
+                # 순위 기반 점수 (임베딩 재계산 없이)
+                vector_score = 1.0 / (i + 1)  # 첫 번째: 1.0, 두 번째: 0.5, ...
+                
+                if doc_key not in doc_scores:
+                    doc_scores[doc_key] = {"bm25": 0, "vector": 0}
+                    doc_contents[doc_key] = doc.page_content
+                    doc_metadatas[doc_key] = doc.metadata
+                
+                doc_scores[doc_key]["vector"] = max(doc_scores[doc_key]["vector"], vector_score)
+        
+        # 최종 하이브리드 점수 계산 및 정렬
+        final_results = []
+        for doc_key, scores in doc_scores.items():
+            hybrid_score = (
+                adjusted_weights["bm25"] * scores["bm25"] + 
+                adjusted_weights["vector"] * scores["vector"]
+            )
+            final_results.append((
+                hybrid_score,
+                doc_contents[doc_key],
+                doc_metadatas[doc_key]
+            ))
+        
+        # 점수 기준으로 내림차순 정렬하고 상위 k개만 선택
+        final_results.sort(key=lambda x: x[0], reverse=True)
+        final_results = final_results[:k]
+        
+        # 결과 구성
+        if final_results:
+            distances, documents, metadatas = zip(*final_results)
+            result = {
+                "distances": [list(distances)],
+                "documents": [list(documents)],
+                "metadatas": [list(metadatas)],
+                "query": query,  # 원본 쿼리 정보도 저장
+            }
+        else:
+            result = {
+                "distances": [[]],
+                "documents": [[]],
+                "metadatas": [[]],
+                "query": query,
+            }
+        
+        log.debug(f"Hybrid search completed with {len(final_results)} results, top score: {final_results[0][0] if final_results else 'N/A'}")
         return result
+        
     except Exception as e:
         raise e
 
