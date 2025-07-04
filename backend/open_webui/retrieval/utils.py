@@ -1957,7 +1957,6 @@ def _update_rrf_scores(
             }
         ranked_results[doc_hash]["score"] += weight * rrf_score
 
-
 def get_hybrid_search_results_without_reranking(
     collection_name: str,
     collection_result: GetResult,
