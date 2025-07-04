@@ -1556,135 +1556,111 @@ def get_hybrid_search_results_without_reranking(
     bm25_weight: float = 0.3,
     vector_weight: float = 0.7,
 ) -> dict:
-    
-    api_key = openai_key or GEMINI_API_KEY
-    
+    """
+    하이브리드 검색(BM25 + Vector)을 수행하고 Reciprocal Rank Fusion (RRF)으로 결과를 결합합니다.
+    리랭킹은 수행하지 않습니다.
+    """
     try:
-        adjusted_weights = adjust_search_weights(query, bm25_weight, vector_weight)
         log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
-        
-        # BM25 검색 수행 (대소문자 구분 없이)
-        original_texts = collection_result.documents[0]
-        lowercase_texts = [text.lower() for text in original_texts]
-        
-        # 소문자 텍스트로 BM25 retriever 생성하되, 메타데이터에 원본 인덱스 보존
-        enhanced_metadatas = []
-        for i, meta in enumerate(collection_result.metadatas[0]):
-            enhanced_meta = meta.copy() if meta else {}
-            enhanced_meta['_original_index'] = i  # 원본 문서 인덱스 저장
-            enhanced_metadatas.append(enhanced_meta)
-        
-        bm25_retriever = BM25Retriever.from_texts(
-            texts=lowercase_texts,  # 소문자로 변환된 텍스트로 검색
-            metadatas=enhanced_metadatas,
-        )
+
         # 하이브리드 검색의 다양성을 위해 각 검색에서 더 많은 후보 확보
-        # k가 작을 때(≤5)는 2배, 클 때는 1.5배로 조정하여 성능과 정확도 균형
         candidate_multiplier = 2.0 if k <= 5 else 1.5
         candidate_k = max(k, int(k * candidate_multiplier))
         
-        bm25_retriever.k = candidate_k
-        bm25_results_raw = bm25_retriever.invoke(query.lower())  # 쿼리도 소문자로 변환
+        # 1. BM25 검색 수행
+        original_texts = collection_result.documents[0]
+        lowercase_texts = [text.lower() for text in original_texts]
         
-        # BM25 결과를 원본 텍스트로 복원
-        bm25_results = []
-        for doc in bm25_results_raw:
+        # 원본 인덱스를 메타데이터에 추가
+        enhanced_metadatas = []
+        for i, meta in enumerate(collection_result.metadatas[0]):
+            new_meta = meta.copy() if meta else {}
+            new_meta['_original_index'] = i
+            enhanced_metadatas.append(new_meta)
+
+        bm25_retriever = BM25Retriever.from_texts(
+            texts=lowercase_texts,
+            metadatas=enhanced_metadatas,
+        )
+        bm25_retriever.k = candidate_k
+        # invoke가 LangChain 0.1.46+의 표준 메서드
+        bm25_results_raw = bm25_retriever.invoke(query.lower())
+
+        # 2. 벡터 검색 수행 (VectorDB 직접 호출)
+        query_embedding = embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)
+        vector_search_results = VECTOR_DB_CLIENT.search(
+            collection_name=collection_name,
+            vectors=[query_embedding],
+            limit=candidate_k,
+        )
+
+        # 3. Reciprocal Rank Fusion (RRF)으로 결과 결합
+        RRF_K = 60  # RRF 상수 (일반적으로 60 사용)
+        ranked_results = {} # 문서별 RRF 점수를 저장할 딕셔너리
+
+        # BM25 결과 처리
+        for rank, doc in enumerate(bm25_results_raw):
             original_idx = doc.metadata.get('_original_index')
             if original_idx is not None and original_idx < len(original_texts):
-                # 원본 텍스트로 교체하고 원본 메타데이터 복원
-                original_meta = collection_result.metadatas[0][original_idx].copy() if collection_result.metadatas[0][original_idx] else {}
-                from langchain_core.documents import Document
-                restored_doc = Document(
-                    page_content=original_texts[original_idx],  # 원본 텍스트 사용
-                    metadata=original_meta  # 원본 메타데이터 사용
-                )
-                bm25_results.append(restored_doc)
-            else:
-                # 인덱스가 없으면 기존 문서 그대로 사용
-                bm25_results.append(doc)
-        
-        # Vector 검색 수행  
-        vector_search_retriever = VectorSearchRetriever(
-            collection_name=collection_name,
-            embedding_function=embedding_function,
-            top_k=candidate_k,
+                content = original_texts[original_idx]
+                # 원본 메타데이터에서 _original_index 제거
+                metadata = doc.metadata.copy()
+                del metadata['_original_index']
+
+                doc_hash = hashlib.sha256(content.encode()).hexdigest()
+                rrf_score = 1 / (RRF_K + rank + 1)
+                
+                if doc_hash not in ranked_results:
+                    ranked_results[doc_hash] = {
+                        "content": content,
+                        "metadata": metadata,
+                        "score": 0,
+                    }
+                ranked_results[doc_hash]["score"] += rrf_score
+
+        # 벡터 검색 결과 처리
+        if vector_search_results and vector_search_results.documents:
+            for rank, (content, metadata) in enumerate(zip(vector_search_results.documents[0], vector_search_results.metadatas[0])):
+                doc_hash = hashlib.sha256(content.encode()).hexdigest()
+                rrf_score = 1 / (RRF_K + rank + 1)
+
+                if doc_hash not in ranked_results:
+                    ranked_results[doc_hash] = {
+                        "content": content,
+                        "metadata": metadata,
+                        "score": 0,
+                    }
+                ranked_results[doc_hash]["score"] += rrf_score
+
+        # 최종 결과를 RRF 점수 기준으로 정렬
+        sorted_results = sorted(
+            ranked_results.values(), key=lambda x: x["score"], reverse=True
         )
-        vector_results = vector_search_retriever.invoke(query)
         
-        # 문서별 점수 계산을 위한 딕셔너리 생성
-        doc_scores = {}
-        doc_contents = {}
-        doc_metadatas = {}
-        
-        # BM25 점수 수집 (BM25Retriever는 내부적으로 점수를 계산하지만 노출하지 않음)
-        # 대신 문서 순서를 점수로 활용 (첫 번째가 가장 높은 점수)
-        for i, doc in enumerate(bm25_results):
-            doc_key = doc.page_content
-            bm25_score = 1.0 / (i + 1)  # 순위 역수로 점수 계산 (첫 번째: 1.0, 두 번째: 0.5, ...)
+        top_k_results = sorted_results[:k]
+
+        # 4. 결과 포맷팅
+        if top_k_results:
+            scores = [res["score"] for res in top_k_results]
+            documents = [res["content"] for res in top_k_results]
+            metadatas = [res["metadata"] for res in top_k_results]
             
-            if doc_key not in doc_scores:
-                doc_scores[doc_key] = {"bm25": 0, "vector": 0}
-                doc_contents[doc_key] = doc.page_content
-                doc_metadatas[doc_key] = doc.metadata
-            
-            doc_scores[doc_key]["bm25"] = max(doc_scores[doc_key]["bm25"], bm25_score)
-        
-        # Vector 점수 수집 (VectorDB 검색 결과 활용 - 임베딩 재계산 불필요)
-        if vector_results:
-            # VectorSearchRetriever 결과에서 실제 점수를 가져올 수 있다면 활용
-            # 현재는 LangChain이 점수를 노출하지 않으므로 순위 기반 점수 사용
-            # TODO: VectorDB 직접 호출로 실제 거리/점수 획득하도록 개선 가능
-            
-            for i, doc in enumerate(vector_results):
-                doc_key = doc.page_content
-                # 순위 기반 점수 (임베딩 재계산 없이)
-                vector_score = 1.0 / (i + 1)  # 첫 번째: 1.0, 두 번째: 0.5, ...
-                
-                if doc_key not in doc_scores:
-                    doc_scores[doc_key] = {"bm25": 0, "vector": 0}
-                    doc_contents[doc_key] = doc.page_content
-                    doc_metadatas[doc_key] = doc.metadata
-                
-                doc_scores[doc_key]["vector"] = max(doc_scores[doc_key]["vector"], vector_score)
-        
-        # 최종 하이브리드 점수 계산 및 정렬
-        final_results = []
-        for doc_key, scores in doc_scores.items():
-            hybrid_score = (
-                adjusted_weights["bm25"] * scores["bm25"] + 
-                adjusted_weights["vector"] * scores["vector"]
-            )
-            final_results.append((
-                hybrid_score,
-                doc_contents[doc_key],
-                doc_metadatas[doc_key]
-            ))
-        
-        # 점수 기준으로 내림차순 정렬하고 상위 k개만 선택
-        final_results.sort(key=lambda x: x[0], reverse=True)
-        final_results = final_results[:k]
-        
-        # 결과 구성
-        if final_results:
-            distances, documents, metadatas = zip(*final_results)
             result = {
-                "distances": [list(distances)],
-                "documents": [list(documents)],
-                "metadatas": [list(metadatas)],
-                "query": query,  # 원본 쿼리 정보도 저장
+                "distances": [scores],
+                "documents": [documents],
+                "metadatas": [metadatas],
+                "query": query,
             }
         else:
             result = {
-                "distances": [[]],
-                "documents": [[]],
-                "metadatas": [[]],
-                "query": query,
+                "distances": [[]], "documents": [[]], "metadatas": [[]], "query": query
             }
         
-        log.debug(f"Hybrid search completed with {len(final_results)} results, top score: {final_results[0][0] if final_results else 'N/A'}")
+        log.debug(f"Hybrid search (RRF) completed with {len(top_k_results)} results, top score: {top_k_results[0]['score'] if top_k_results else 'N/A'}")
         return result
         
     except Exception as e:
+        log.error(f"Error in get_hybrid_search_results_without_reranking: {e}", exc_info=True)
         raise e
 
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
