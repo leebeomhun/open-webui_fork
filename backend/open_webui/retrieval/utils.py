@@ -135,6 +135,7 @@ class SimpleCache:
 # Global cache instances
 medical_abbrev_cache = SimpleCache()
 query_enhance_cache = SimpleCache()
+bm25_retriever_cache = SimpleCache() # BM25 캐시 추가
 
 def cache_key_hash(data: str) -> str:
     """Generate a consistent hash for cache keys"""
@@ -1648,51 +1649,88 @@ class RerankCompressor(BaseDocumentCompressor):
             final_results.append(doc)
         return final_results
 
+def _update_rrf_scores(
+    ranked_results: dict,
+    retrieved_docs: list,
+    original_texts: list,
+    rrf_k: int,
+    is_bm25: bool = False,
+):
+    """RRF 점수를 계산하고 ranked_results 딕셔너리를 업데이트하는 헬퍼 함수"""
+    for rank, doc in enumerate(retrieved_docs):
+        if is_bm25:
+            original_idx = doc.metadata.get("_original_index")
+            if original_idx is None or original_idx >= len(original_texts):
+                continue
+            content = original_texts[original_idx]
+            metadata = doc.metadata.copy()
+            del metadata["_original_index"]
+        else:
+            # 벡터 검색 결과 (doc은 (content, metadata) 튜플)
+            content, metadata = doc
+
+        doc_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        rrf_score = 1 / (rrf_k + rank + 1)
+
+        if doc_hash not in ranked_results:
+            ranked_results[doc_hash] = {
+                "content": content,
+                "metadata": metadata,
+                "score": 0,
+            }
+        ranked_results[doc_hash]["score"] += rrf_score
+
+
 def get_hybrid_search_results_without_reranking(
     collection_name: str,
     collection_result: GetResult,
     query: str,
     embedding_function,
     k: int,
-    reranking_function,
-    k_reranker: int,
-    r: float,
-    hybrid_bm25_weight: float,
+    reranking_function,  # 사용되지 않지만 시그니처 유지를 위해 남겨둠
+    k_reranker: int,      # 사용되지 않지만 시그니처 유지를 위해 남겨둠
+    r: float,             # 사용되지 않지만 시그니처 유지를 위해 남겨둠
+    hybrid_bm25_weight: float, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
     openai_key: Optional[str] = None,
-    bm25_weight: float = 0.3,
-    vector_weight: float = 0.7,
+    bm25_weight: float = 0.3, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
+    vector_weight: float = 0.7, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
+    rrf_k: int = 60, # RRF_K를 파라미터로 변경
 ) -> dict:
     """
     하이브리드 검색(BM25 + Vector)을 수행하고 Reciprocal Rank Fusion (RRF)으로 결과를 결합합니다.
-    리랭킹은 수행하지 않습니다.
+    성능 향상을 위해 BM25 리트리버를 캐싱합니다.
     """
     try:
         log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
 
-        # 하이브리드 검색의 다양성을 위해 각 검색에서 더 많은 후보 확보
         candidate_multiplier = 2.0 if k <= 5 else 1.5
         candidate_k = max(k, int(k * candidate_multiplier))
         
-        # 1. BM25 검색 수행
-        original_texts = collection_result.documents[0]
-        lowercase_texts = [text.lower() for text in original_texts]
-        
-        # 원본 인덱스를 메타데이터에 추가
-        enhanced_metadatas = []
-        for i, meta in enumerate(collection_result.metadatas[0]):
-            new_meta = meta.copy() if meta else {}
-            new_meta['_original_index'] = i
-            enhanced_metadatas.append(new_meta)
+        # 1. BM25 검색 수행 (캐싱 적용)
+        bm25_retriever = bm25_retriever_cache.get(collection_name)
+        if not bm25_retriever:
+            log.info(f"BM25 캐시 미스: '{collection_name}'에 대한 리트리버를 새로 생성합니다.")
+            original_texts = collection_result.documents[0]
+            lowercase_texts = [text.lower() for text in original_texts]
+            
+            enhanced_metadatas = [
+                {**(meta or {}), "_original_index": i}
+                for i, meta in enumerate(collection_result.metadatas[0])
+            ]
 
-        bm25_retriever = BM25Retriever.from_texts(
-            texts=lowercase_texts,
-            metadatas=enhanced_metadatas,
-        )
-        bm25_retriever.k = candidate_k
-        # invoke가 LangChain 0.1.46+의 표준 메서드
+            bm25_retriever = BM25Retriever.from_texts(
+                texts=lowercase_texts,
+                metadatas=enhanced_metadatas,
+            )
+            bm25_retriever.k = candidate_k
+            bm25_retriever_cache.set(collection_name, bm25_retriever, ttl_seconds=86400) # 24시간 캐시
+        else:
+            log.debug(f"BM25 캐시 히트: '{collection_name}'")
+            bm25_retriever.k = candidate_k
+
         bm25_results_raw = bm25_retriever.invoke(query.lower())
 
-        # 2. 벡터 검색 수행 (VectorDB 직접 호출)
+        # 2. 벡터 검색 수행
         query_embedding = embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)
         vector_search_results = VECTOR_DB_CLIENT.search(
             collection_name=collection_name,
@@ -1701,42 +1739,17 @@ def get_hybrid_search_results_without_reranking(
         )
 
         # 3. Reciprocal Rank Fusion (RRF)으로 결과 결합
-        RRF_K = 60  # RRF 상수 (일반적으로 60 사용)
-        ranked_results = {} # 문서별 RRF 점수를 저장할 딕셔너리
+        ranked_results = {}  # 문서별 RRF 점수를 저장할 딕셔너리
 
         # BM25 결과 처리
-        for rank, doc in enumerate(bm25_results_raw):
-            original_idx = doc.metadata.get('_original_index')
-            if original_idx is not None and original_idx < len(original_texts):
-                content = original_texts[original_idx]
-                # 원본 메타데이터에서 _original_index 제거
-                metadata = doc.metadata.copy()
-                del metadata['_original_index']
-
-                doc_hash = hashlib.sha256(content.encode()).hexdigest()
-                rrf_score = 1 / (RRF_K + rank + 1)
-                
-                if doc_hash not in ranked_results:
-                    ranked_results[doc_hash] = {
-                        "content": content,
-                        "metadata": metadata,
-                        "score": 0,
-                    }
-                ranked_results[doc_hash]["score"] += rrf_score
+        _update_rrf_scores(
+            ranked_results, bm25_results_raw, collection_result.documents[0], rrf_k, is_bm25=True
+        )
 
         # 벡터 검색 결과 처리
         if vector_search_results and vector_search_results.documents:
-            for rank, (content, metadata) in enumerate(zip(vector_search_results.documents[0], vector_search_results.metadatas[0])):
-                doc_hash = hashlib.sha256(content.encode()).hexdigest()
-                rrf_score = 1 / (RRF_K + rank + 1)
-
-                if doc_hash not in ranked_results:
-                    ranked_results[doc_hash] = {
-                        "content": content,
-                        "metadata": metadata,
-                        "score": 0,
-                    }
-                ranked_results[doc_hash]["score"] += rrf_score
+            vector_docs = zip(vector_search_results.documents[0], vector_search_results.metadatas[0])
+            _update_rrf_scores(ranked_results, list(vector_docs), [], rrf_k, is_bm25=False)
 
         # 최종 결과를 RRF 점수 기준으로 정렬
         sorted_results = sorted(
@@ -1746,23 +1759,21 @@ def get_hybrid_search_results_without_reranking(
         top_k_results = sorted_results[:k]
 
         # 4. 결과 포맷팅
-        if top_k_results:
-            scores = [res["score"] for res in top_k_results]
-            documents = [res["content"] for res in top_k_results]
-            metadatas = [res["metadata"] for res in top_k_results]
-            
-            result = {
-                "distances": [scores],
-                "documents": [documents],
-                "metadatas": [metadatas],
-                "query": query,
-            }
-        else:
-            result = {
-                "distances": [[]], "documents": [[]], "metadatas": [[]], "query": query
-            }
+        if not top_k_results:
+            return {"distances": [[]], "documents": [[]], "metadatas": [[]], "query": query}
+
+        scores = [res["score"] for res in top_k_results]
+        documents = [res["content"] for res in top_k_results]
+        metadatas = [res["metadata"] for res in top_k_results]
         
-        log.debug(f"Hybrid search (RRF) completed with {len(top_k_results)} results, top score: {top_k_results[0]['score'] if top_k_results else 'N/A'}")
+        result = {
+            "distances": [scores],
+            "documents": [documents],
+            "metadatas": [metadatas],
+            "query": query,
+        }
+        
+        log.debug(f"Hybrid search (RRF) completed with {len(top_k_results)} results, top score: {scores[0] if scores else 'N/A'}")
         return result
         
     except Exception as e:
@@ -1770,94 +1781,69 @@ def get_hybrid_search_results_without_reranking(
         raise e
 
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
-    """여러 쿼리의 모든 결과를 병합하고 중복 제거하면서 각 쿼리의 상위 결과 보존"""
+    """
+    여러 쿼리의 모든 결과를 병합하고, 내용 기반으로 중복을 제거하며, 각 문서의 최고 점수를 보존합니다.
+
+    Args:
+        all_results: 각 쿼리에 대한 결과 딕셔너리의 리스트.
+                     각 딕셔너리는 'documents', 'metadatas', 'distances' 키를 포함할 수 있습니다.
+
+    Returns:
+        병합되고 정렬된 결과 딕셔너리.
+    """
     if not all_results:
         return {"distances": [[]], "documents": [[]], "metadatas": [[]]}
-    
-    # 쿼리별 결과 그룹화
-    query_results = {}  # 쿼리별 결과 저장
-    
+
+    # 문서 해시를 키로 사용하여 최고 점수, 문서 내용, 메타데이터를 저장
+    # 형식: {doc_hash: (score, doc_content, metadata)}
+    best_docs = {}
+    total_docs_before = 0
+
     for result in all_results:
-        if "documents" in result and result["documents"] and result["documents"][0]:
-            docs = result["documents"][0]
-            metas = result["metadatas"][0] if "metadatas" in result and result["metadatas"] else [{}] * len(docs)
-            dists = result["distances"][0] if "distances" in result and result["distances"] else [0.5] * len(docs)
-            query = result.get("query", "")
-            
-            if query not in query_results:
-                query_results[query] = {
-                    "docs": [],
-                    "metas": [],
-                    "dists": []
-                }
-            
-            # 문서와 메타데이터, 점수 저장
-            for doc, meta, dist in zip(docs, metas, dists):
-                if meta:
-                    meta["original_query"] = query  # 원본 쿼리 정보 저장
-                query_results[query]["docs"].append(doc)
-                query_results[query]["metas"].append(meta)
-                query_results[query]["dists"].append(dist)
-    
-    # 각 쿼리별로 상위 결과 보존
-    preserved_docs = []  # 보존할 문서
-    preserved_metas = []  # 보존할 메타데이터
-    preserved_dists = []  # 보존할 점수
-    preserved_hashes = set()  # 보존된 문서 해시
-    
-    # 1단계: 각 쿼리별 상위 결과 보존
-    for query, results in query_results.items():
-        # 점수 기준으로 정렬 (높은 점수 우선)
-        sorted_items = sorted(zip(results["docs"], results["metas"], results["dists"]), 
-                               key=lambda x: x[2], reverse=True)
-        
-        preserved_count = 0
-        for doc, meta, dist in sorted_items:
-            # 문서 해시 계산
-            doc_key = doc[:200] + doc[-100:] if len(doc) > 300 else doc
-            doc_hash = hashlib.sha256(doc_key.encode()).hexdigest()
-            
-            # 상위 K개 이내이거나, 해시가 없는 경우 보존
-            if preserved_count < TOP_K_PER_QUERY or doc_hash not in preserved_hashes:
-                preserved_docs.append(doc)
-                preserved_metas.append(meta)
-                preserved_dists.append(dist)
-                preserved_hashes.add(doc_hash)
-                preserved_count += 1
-                
-                # 상위 K개는 해시에 추가하지 않음 (다른 쿼리에서도 상위 K개면 보존)
-                if preserved_count > TOP_K_PER_QUERY:
-                    preserved_hashes.add(doc_hash)
-    
-    # 2단계: 나머지 결과 중 중복이 아닌 결과만 추가
-    remaining_docs = []
-    remaining_metas = []
-    remaining_dists = []
-    
-    for query, results in query_results.items():
-        for doc, meta, dist in zip(results["docs"], results["metas"], results["dists"]):
-            doc_key = doc[:200] + doc[-100:] if len(doc) > 300 else doc
-            doc_hash = hashlib.sha256(doc_key.encode()).hexdigest()
-            
-            if doc_hash not in preserved_hashes:
-                remaining_docs.append(doc)
-                remaining_metas.append(meta)
-                remaining_dists.append(dist)
-                preserved_hashes.add(doc_hash)
-    
-    # 최종 결과 구성
-    all_docs = preserved_docs + remaining_docs
-    all_metas = preserved_metas + remaining_metas
-    all_dists = preserved_dists + remaining_dists
-    
-    # 원래 결과와 최종 결과의 개수 로깅
-    original_count = sum(len(result.get("documents", [[]])[0]) for result in all_results)
-    log.info(f"병합 및 중복 제거 결과: {original_count}개 -> {len(all_docs)}개 문서 (쿼리별 상위 {TOP_K_PER_QUERY}개 보존)")
-    
+        # 결과에 문서가 없으면 건너뜀
+        if not (docs := result.get("documents", [[]])[0]):
+            continue
+
+        total_docs_before += len(docs)
+
+        # 메타데이터와 점수가 없으면 기본값으로 채움
+        metas = result.get("metadatas", [[]])[0] or [{}] * len(docs)
+        dists = result.get("distances", [[]])[0] or [0.5] * len(docs)
+        query = result.get("query", "unknown_query")
+
+        for doc, meta, dist in zip(docs, metas, dists):
+            if not isinstance(doc, str):
+                log.warning(f"문서 내용이 문자열이 아니므로 건너뜁니다: {type(doc)}")
+                continue
+
+            doc_hash = hashlib.sha256(doc.encode('utf-8')).hexdigest()
+
+            # 기존에 없거나, 새 점수가 더 높으면 정보 업데이트
+            if doc_hash not in best_docs or dist > best_docs[doc_hash][0]:
+                # 원본 메타데이터를 수정하지 않도록 복사
+                updated_meta = meta.copy() if meta else {}
+                updated_meta["original_query"] = query
+                best_docs[doc_hash] = (dist, doc, updated_meta)
+
+    if not best_docs:
+        return {"distances": [[]], "documents": [[]], "metadatas": [[]]}
+
+    # 점수(distance) 기준으로 내림차순 정렬
+    sorted_results = sorted(best_docs.values(), key=lambda item: item[0], reverse=True)
+
+    # 결과 분리
+    final_dists, final_docs, final_metas = zip(*sorted_results)
+
+    log.info(
+        f"병합 및 중복 제거 완료: "
+        f"총 {total_docs_before}개 문서에서 {len(final_docs)}개의 고유한 문서 선택 "
+        f"({total_docs_before - len(final_docs)}개 중복 제거)"
+    )
+
     return {
-        "distances": [all_dists],
-        "documents": [all_docs],
-        "metadatas": [all_metas],
+        "distances": [list(final_dists)],
+        "documents": [list(final_docs)],
+        "metadatas": [list(final_metas)],
     }
 
 # Cache management functions
