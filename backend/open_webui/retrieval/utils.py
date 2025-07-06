@@ -9,7 +9,6 @@
 #25.6.22 쿼리향상, 리랭킹 api 호출로 변경
 #25.6.26 임베딩 생략을 통한 직접 파일 업로드 최적화, v0.6.16버전 업데이트대비 호환성 추가(context 대신 query_result 사용)
 import httpx
-import requests # API 호출을 위해 requests 라이브러리 추가
 import asyncio
 import hashlib
 import json
@@ -77,12 +76,16 @@ DEFAULT_BM25_WEIGHT = float(os.getenv("DEFAULT_BM25_WEIGHT", "0.3"))
 DEFAULT_VECTOR_WEIGHT = float(os.getenv("DEFAULT_VECTOR_WEIGHT", "0.7"))
 ASYNC_TIMEOUT_SECONDS = int(os.getenv("ASYNC_TIMEOUT_SECONDS", "30"))
 MMR_DIVERSITY_THRESHOLD = float(os.getenv("MMR_DIVERSITY_THRESHOLD", "0.8"))
+CANDIDATE_MULTIPLIER_LOW_K = 2.0
+CANDIDATE_MULTIPLIER_HIGH_K = 1.5
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
 CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
 CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600))) # 7 days
+CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 2 hours
 MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
+MAX_CANDIDATE_MULTIPLIER = float(os.getenv("MAX_CANDIDATE_MULTIPLIER", "3.0"))
 
 # Simple in-memory cache with TTL support
 class SimpleCache:
@@ -919,13 +922,6 @@ def query_collection_with_hybrid_search(
                         query=query,
                         embedding_function=embedding_function,
                         k=k,
-                        reranking_function=reranking_function,
-                        k_reranker=k_reranker,
-                        r=r,
-                        hybrid_bm25_weight=hybrid_bm25_weight,
-                        openai_key=api_key,
-                        bm25_weight=0.3,
-                        vector_weight=0.7,
                     )
                     all_results.append(result)
             except Exception as e:
@@ -1652,6 +1648,7 @@ def _update_rrf_scores(
     retrieved_docs: list,
     original_texts: list,
     rrf_k: int,
+    weight: float,
     is_bm25: bool = False,
 ):
     """RRF 점수를 계산하고 ranked_results 딕셔너리를 업데이트하는 헬퍼 함수"""
@@ -1667,7 +1664,8 @@ def _update_rrf_scores(
             # 벡터 검색 결과 (doc은 (content, metadata) 튜플)
             content, metadata = doc
 
-        doc_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        # 더 효율적인 해싱을 위해 처음 64자만 사용
+        doc_hash = hashlib.sha256(content[:64].encode("utf-8")).hexdigest()
         rrf_score = 1 / (rrf_k + rank + 1)
 
         if doc_hash not in ranked_results:
@@ -1676,7 +1674,7 @@ def _update_rrf_scores(
                 "metadata": metadata,
                 "score": 0,
             }
-        ranked_results[doc_hash]["score"] += rrf_score
+        ranked_results[doc_hash]["score"] += weight * rrf_score
 
 
 def get_hybrid_search_results_without_reranking(
@@ -1685,99 +1683,137 @@ def get_hybrid_search_results_without_reranking(
     query: str,
     embedding_function,
     k: int,
-    reranking_function,  # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    k_reranker: int,      # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    r: float,             # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    hybrid_bm25_weight: float, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    openai_key: Optional[str] = None,
-    bm25_weight: float = 0.3, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    vector_weight: float = 0.7, # 사용되지 않지만 시그니처 유지를 위해 남겨둠
-    rrf_k: int = 60, # RRF_K를 파라미터로 변경
+    rrf_k: int = 60,
 ) -> dict:
     """
-    하이브리드 검색(BM25 + Vector)을 수행하고 Reciprocal Rank Fusion (RRF)으로 결과를 결합합니다.
-    성능 향상을 위해 BM25 리트리버를 캐싱합니다.
+    BM25와 벡터 검색을 사용하여 하이브리드 검색을 수행하고,
+    Reciprocal Rank Fusion (RRF)로 결과를 결합합니다.
+
+    이 함수는 키워드 검색과 의미적 검색을 병렬로 수행하며,
+    캐시된 BM25 검색기를 사용하여 성능을 향상시킵니다.
+    결과는 RRF 알고리즘을 사용하여 최적 순위로 결합됩니다.
+
+    Args:
+        collection_name: 검색할 컬렉션 이름
+        collection_result: 컬렉션의 전체 내용 (문서, 메타데이터)
+        query: 사용자 검색 쿼리
+        embedding_function: 쿼리 임베딩 생성 함수
+        k: 반환할 최종 문서 수
+        rrf_k: RRF 계산에 사용되는 상수 (기본값: 60)
+
+    Returns:
+        거리(점수), 문서, 메타데이터를 포함한 병합된 순위 검색 결과 딕셔너리
     """
     try:
-        log.debug(f"get_hybrid_search_results_without_reranking:doc {collection_name}")
+        log.debug(f"컬렉션 '{collection_name}'에 대한 하이브리드 검색 실행")
 
-        candidate_multiplier = 2.0 if k <= 5 else 1.5
-        candidate_k = max(k, int(k * candidate_multiplier))
-        
-        # 1. BM25 검색 수행 (캐싱 적용)
+        # 1. 쿼리 특성에 따른 동적 가중치와 후보 수 계산
+        weights = adjust_search_weights(query, DEFAULT_BM25_WEIGHT, DEFAULT_VECTOR_WEIGHT)
+        candidate_multiplier = min(
+            CANDIDATE_MULTIPLIER_LOW_K if k <= 5 else CANDIDATE_MULTIPLIER_HIGH_K,
+            MAX_CANDIDATE_MULTIPLIER
+        )
+        candidate_k = max(k, min(int(k * candidate_multiplier), k * 5))  # 최대 5배로 제한
+
+        # 2. 설정 가능한 TTL로 캐시된 BM25 검색기 가져오기 또는 생성
         bm25_retriever = bm25_retriever_cache.get(collection_name)
         if not bm25_retriever:
-            log.info(f"BM25 캐시 미스: '{collection_name}'에 대한 리트리버를 새로 생성합니다.")
+            log.info(f"'{collection_name}'에 대한 BM25 캐시 미스. 새 검색기 생성.")
             original_texts = collection_result.documents[0]
             lowercase_texts = [text.lower() for text in original_texts]
-            
             enhanced_metadatas = [
                 {**(meta or {}), "_original_index": i}
                 for i, meta in enumerate(collection_result.metadatas[0])
             ]
-
             bm25_retriever = BM25Retriever.from_texts(
-                texts=lowercase_texts,
-                metadatas=enhanced_metadatas,
+                texts=lowercase_texts, metadatas=enhanced_metadatas
             )
-            bm25_retriever.k = candidate_k
-            bm25_retriever_cache.set(collection_name, bm25_retriever, ttl_seconds=86400) # 24시간 캐시
+            bm25_retriever_cache.set(
+                collection_name, bm25_retriever, ttl_seconds=CACHE_TTL_BM25
+            )
         else:
-            log.debug(f"BM25 캐시 히트: '{collection_name}'")
-            bm25_retriever.k = candidate_k
+            log.debug(f"'{collection_name}'에 대한 BM25 캐시 히트.")
+        bm25_retriever.k = candidate_k
 
-        bm25_results_raw = bm25_retriever.invoke(query.lower())
+        # 3. BM25와 벡터 검색을 병렬로 수행
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            bm25_future = executor.submit(bm25_retriever.invoke, query.lower())
+            vector_future = executor.submit(
+                VECTOR_DB_CLIENT.search,
+                collection_name=collection_name,
+                vectors=[embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)],
+                limit=candidate_k,
+            )
+            bm25_results_raw = bm25_future.result()
+            vector_search_results = vector_future.result()
 
-        # 2. 벡터 검색 수행
-        query_embedding = embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)
-        vector_search_results = VECTOR_DB_CLIENT.search(
-            collection_name=collection_name,
-            vectors=[query_embedding],
-            limit=candidate_k,
-        )
-
-        # 3. Reciprocal Rank Fusion (RRF)으로 결과 결합
-        ranked_results = {}  # 문서별 RRF 점수를 저장할 딕셔너리
+        # 4. Reciprocal Rank Fusion (RRF)로 결과 결합
+        ranked_results = {}
 
         # BM25 결과 처리
         _update_rrf_scores(
-            ranked_results, bm25_results_raw, collection_result.documents[0], rrf_k, is_bm25=True
+            ranked_results,
+            bm25_results_raw,
+            collection_result.documents[0],
+            rrf_k,
+            weight=weights["bm25"],
+            is_bm25=True,
         )
 
         # 벡터 검색 결과 처리
         if vector_search_results and vector_search_results.documents:
-            vector_docs = zip(vector_search_results.documents[0], vector_search_results.metadatas[0])
-            _update_rrf_scores(ranked_results, list(vector_docs), [], rrf_k, is_bm25=False)
+            vector_docs = zip(
+                vector_search_results.documents[0], vector_search_results.metadatas[0]
+            )
+            _update_rrf_scores(
+                ranked_results,
+                list(vector_docs),
+                [],
+                rrf_k,
+                weight=weights["vector"],
+                is_bm25=False,
+            )
 
-        # 최종 결과를 RRF 점수 기준으로 정렬
+        # 5. RRF 점수로 최종 결과 정렬
         sorted_results = sorted(
             ranked_results.values(), key=lambda x: x["score"], reverse=True
         )
-        
         top_k_results = sorted_results[:k]
 
-        # 4. 결과 포맷팅
+        # 6. 결과 포맷팅 및 반환
         if not top_k_results:
-            return {"distances": [[]], "documents": [[]], "metadatas": [[]], "query": query}
+            return {
+                "distances": [[]],
+                "documents": [[]],
+                "metadatas": [[]],
+                "query": query,
+            }
 
         scores = [res["score"] for res in top_k_results]
         documents = [res["content"] for res in top_k_results]
         metadatas = [res["metadata"] for res in top_k_results]
-        
+
         result = {
             "distances": [scores],
             "documents": [documents],
             "metadatas": [metadatas],
             "query": query,
         }
-        
-        log.debug(f"Hybrid search (RRF) completed with {len(top_k_results)} results, top score: {scores[0] if scores else 'N/A'}")
-        return result
-        
-    except Exception as e:
-        log.error(f"Error in get_hybrid_search_results_without_reranking: {e}", exc_info=True)
-        raise e
 
+        log.debug(
+            f"하이브리드 검색 완료: {len(top_k_results)}개 결과. "
+            f"최고 점수: {scores[0] if scores else 'N/A'}. "
+            f"가중치 (BM25/벡터): {weights['bm25']:.2f}/{weights['vector']:.2f}. "
+            f"후보 수: {candidate_k}"
+        )
+        return result
+
+    except Exception as e:
+        log.error(
+            f"get_hybrid_search_results_without_reranking에서 오류 발생: {e}", exc_info=True
+        )
+        raise e
+        
 def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
     """
     여러 쿼리의 모든 결과를 병합하고, 내용 기반으로 중복을 제거하며, 각 문서의 최고 점수를 보존합니다.
@@ -1798,7 +1834,7 @@ def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
     total_docs_before = 0
 
     for result in all_results:
-        # 결과에 문서가 없으면 건너뜀
+        # 결과에 문서가 없으면 건너뛰
         if not (docs := result.get("documents", [[]])[0]):
             continue
 
@@ -1811,14 +1847,15 @@ def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
 
         for doc, meta, dist in zip(docs, metas, dists):
             if not isinstance(doc, str):
-                log.warning(f"문서 내용이 문자열이 아니므로 건너뜁니다: {type(doc)}")
+                log.warning(f"문서 내용이 문자열이 아니므로 건너뛰니다: {type(doc)}")
                 continue
 
-            doc_hash = hashlib.sha256(doc.encode('utf-8')).hexdigest()
+            # Use first 64 chars for more efficient hashing
+            doc_hash = hashlib.sha256(doc[:64].encode('utf-8')).hexdigest()
 
             # 기존에 없거나, 새 점수가 더 높으면 정보 업데이트
             if doc_hash not in best_docs or dist > best_docs[doc_hash][0]:
-                # 원본 메타데이터를 수정하지 않도록 복사
+                # 원본 메탄데이터를 수정하지 않도록 복사
                 updated_meta = meta.copy() if meta else {}
                 updated_meta["original_query"] = query
                 best_docs[doc_hash] = (dist, doc, updated_meta)
@@ -1844,7 +1881,7 @@ def merge_and_deduplicate_results(all_results: list[dict]) -> dict:
         "metadatas": [list(final_metas)],
     }
 
-# Cache management functions
+# 캐시 관리 함수들
 def get_cache_stats() -> Dict[str, Any]:
     """캐시 통계 정보 반환"""
     return {
@@ -1858,6 +1895,11 @@ def get_cache_stats() -> Dict[str, Any]:
             "size": query_enhance_cache.size(),
             "max_size": query_enhance_cache.max_size,
             "ttl_seconds": CACHE_TTL_QUERY_ENHANCE
+        },
+        "bm25_retriever": {
+            "size": bm25_retriever_cache.size(),
+            "max_size": bm25_retriever_cache.max_size,
+            "ttl_seconds": CACHE_TTL_BM25
         }
     }
 
@@ -1865,6 +1907,7 @@ def clear_all_caches() -> None:
     """모든 캐시 클리어"""
     medical_abbrev_cache.clear()
     query_enhance_cache.clear()
+    bm25_retriever_cache.clear()
     log.info("모든 RAG 캐시가 클리어되었습니다.")
 
 def clear_cache_by_type(cache_type: str) -> bool:
@@ -1877,6 +1920,10 @@ def clear_cache_by_type(cache_type: str) -> bool:
         query_enhance_cache.clear()
         log.info("쿼리 확장 캐시가 클리어되었습니다.")
         return True
+    elif cache_type == "bm25":
+        bm25_retriever_cache.clear()
+        log.info("BM25 검색기 캐시가 클리어되었습니다.")
+        return True
     else:
         log.warning(f"알 수 없는 캐시 타입: {cache_type}")
         return False
@@ -1885,4 +1932,6 @@ def cleanup_expired_caches() -> None:
     """만료된 캐시 엔트리들 정리"""
     medical_abbrev_cache._cleanup_expired()
     query_enhance_cache._cleanup_expired()
+    bm25_retriever_cache._cleanup_expired()
     log.info("만료된 캐시 엔트리들이 정리되었습니다.")
+
