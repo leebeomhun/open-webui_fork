@@ -242,6 +242,7 @@ input[type='number'] {
 .katex-display:hover::-webkit-scrollbar-thumb {
 	visibility: visible;
 }
+
 .katex-display::-webkit-scrollbar-thumb {
 	visibility: hidden;
 }
@@ -441,4 +442,13 @@ input[type='number'] {
 
 .tiptap tr {
 	@apply bg-white dark:bg-gray-900 dark:border-gray-850 text-xs;
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }

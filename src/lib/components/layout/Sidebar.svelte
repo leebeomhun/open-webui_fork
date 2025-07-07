@@ -458,9 +458,10 @@
 	data-state={$showSidebar}
 >
 	<div
-		class="py-2 my-auto flex flex-col justify-between h-screen max-h-[100dvh] w-[260px] overflow-x-hidden z-50 {$showSidebar
+		class="my-auto flex flex-col justify-between w-[260px] overflow-x-hidden z-50 {$showSidebar
 			? ''
 			: 'invisible'}"
+		style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));"
 	>
 		<div class="px-1.5 flex justify-between space-x-1 text-gray-600 dark:text-gray-400">
 			<button

@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "npm run pyodide:fetch && vite dev --host",
 		"dev:5050": "npm run pyodide:fetch && vite dev --port 5050",
-		"build": "npm run pyodide:fetch && vite build",
+		"build": "npm run pyodide:fetch && node --max-old-space-size=8192 ./node_modules/.bin/vite build",
 		"build:watch": "npm run pyodide:fetch && vite build --watch",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -53,6 +53,10 @@
 	"type": "module",
 	"dependencies": {
 		"@azure/msal-browser": "^4.5.0",
+		"@capacitor/android": "^7.4.1",
+		"@capacitor/cli": "^7.4.1",
+		"@capacitor/core": "^7.4.1",
+		"@capacitor/ios": "^7.4.1",
 		"@codemirror/lang-javascript": "^6.2.2",
 		"@codemirror/lang-python": "^6.1.6",
 		"@codemirror/language-data": "^6.5.1",

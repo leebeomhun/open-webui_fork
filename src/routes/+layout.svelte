@@ -686,7 +686,7 @@
 		<div class="flex flex-row h-screen">
 			<AppSidebar />
 
-			<div class="w-full flex-1 max-w-[calc(100%-4.5rem)]">
+			<div class="w-full flex-1 max-w-[calc(100%-4.5rem)]" style="padding-top: env(safe-area-inset-top);">
 				<slot />
 			</div>
 		</div>

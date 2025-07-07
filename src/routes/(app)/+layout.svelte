@@ -274,7 +274,8 @@
 {#if $user}
 	<div class="app relative">
 		<div
-			class=" text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 h-screen max-h-[100dvh] overflow-auto flex flex-row justify-end"
+			class=" text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 overflow-auto flex flex-row justify-end"
+			style="height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
 		>
 			{#if !['user', 'admin'].includes($user?.role)}
 				<AccountPending />
