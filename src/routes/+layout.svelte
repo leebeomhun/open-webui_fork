@@ -3,6 +3,9 @@
 	import { spring } from 'svelte/motion';
 	import PyodideWorker from '$lib/workers/pyodide.worker?worker';
 	import { Toaster, toast } from 'svelte-sonner';
+	import Popup from '$lib/components/Popup.svelte';
+
+	let showPopup = false;
 
 	let loadingProgress = spring(0, {
 		stiffness: 0.05
@@ -895,6 +898,21 @@
 					clearInterval(tokenTimer);
 				}
 				tokenTimer = setInterval(checkTokenExpiry, 15000);
+
+				if (value) {
+					const popupDismissed = localStorage.getItem('popupDismissed');
+					if (popupDismissed) {
+						const dismissedTime = new Date(parseInt(popupDismissed, 10));
+						const now = new Date();
+						if (now.getTime() - dismissedTime.getTime() < 24 * 60 * 60 * 1000) {
+							return;
+						}
+					}
+
+					setTimeout(() => {
+						showPopup = true;
+					}, 1000);
+				}
 			} else {
 				$socket?.off('events', chatEventHandler);
 				$socket?.off('events:channel', channelEventHandler);
@@ -1048,6 +1066,16 @@
 	<div class=" py-5">
 		<Spinner className="size-5" />
 	</div>
+{/if}
+
+{#if showPopup}
+	<Popup
+		on:close={() => (showPopup = false)}
+		on:close-for-day={() => {
+			showPopup = false;
+			localStorage.setItem('popupDismissed', new Date().getTime().toString());
+		}}
+	/>
 {/if}
 
 {#if loaded}
