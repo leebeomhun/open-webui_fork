@@ -120,7 +120,9 @@ async function copyPyodide() {
 	console.log('Copying Pyodide files into static directory');
 	// Copy all files from node_modules/pyodide to static/pyodide
 	for await (const entry of await readdir('node_modules/pyodide')) {
-		await copyFile(`node_modules/pyodide/${entry}`, `static/pyodide/${entry}`);
+		if (entry !== 'favicon-dark.png') {
+			await copyFile(`node_modules/pyodide/${entry}`, `static/pyodide/${entry}`);
+		}
 	}
 }
 
