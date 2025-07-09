@@ -1053,11 +1053,11 @@ def get_sources_from_files(
         elif file.get("type") == "note":
             # Note Attached
             note = Notes.get_note_by_id(file.get("id"))
-
             query_result = {
                 "documents": [[note.data.get("content", {}).get("md", "")]],
                 "metadatas": [[{"file_id": note.id, "name": note.title}]],
             }
+            
         elif file.get("context") == "full":
             if file.get("type") == "file":
                 # Manual Full Mode Toggle
