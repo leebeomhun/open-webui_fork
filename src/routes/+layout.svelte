@@ -740,6 +740,11 @@
 				tokenTimer = setInterval(checkTokenExpiry, 15000);
 
 				if (value) {
+					const dismissedHash = localStorage.getItem('dismissedPopupHash');
+					if (dismissedHash && dismissedHash === POPUP_HASH) {
+						return;
+					}
+
 					const popupDismissed = localStorage.getItem('popupDismissed');
 					if (popupDismissed) {
 						const dismissedTime = new Date(parseInt(popupDismissed, 10));
@@ -890,15 +895,18 @@
 	</div>
 {/if}
 
-{#if showPopup}
-	<Popup
-		on:close={() => (showPopup = false)}
-		on:close-for-day={() => {
-			showPopup = false;
-			localStorage.setItem('popupDismissed', new Date().getTime().toString());
-		}}
-	/>
-{/if}
+<Popup
+	bind:show={showPopup}
+	on:close={() => (showPopup = false)}
+	on:close-for-day={() => {
+		showPopup = false;
+		localStorage.setItem('popupDismissed', new Date().getTime().toString());
+	}}
+	on:dismiss-permanently={() => {
+		showPopup = false;
+		localStorage.setItem('dismissedPopupHash', POPUP_HASH);
+	}}
+/>
 
 {#if loaded}
 	{#if $isApp}
