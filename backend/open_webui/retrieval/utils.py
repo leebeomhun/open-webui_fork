@@ -1260,6 +1260,13 @@ def get_sources_from_items(
                     collection_names.append(f"{item['id']}")
                 else:
                     collection_names.append(f"file-{item['id']}")
+            else:
+                # Fallback to collection names if file object not found for some reason
+                log.warning(f"Could not find file object for id: {item.get('id')}")
+                if item.get("legacy"):
+                    collection_names.append(f"{item['id']}")
+                else:
+                    collection_names.append(f"file-{item['id']}")
 
         elif item.get("type") == "collection":
             if (
