@@ -97,22 +97,22 @@
 				{@html config.content}
 			</div>
 		</div>
-		<div class="flex justify-end pt-3 text-sm font-medium space-x-2">
+		<div class="flex justify-end pt-3 text-sm font-medium space-x-1 sm:space-x-2">
 			<button
 				on:click={closeModal}
-				class="px-3.5 py-1.5 text-sm font-medium border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition rounded-full"
+				class="px-2 py-1.5 text-xs sm:px-3.5 sm:text-sm font-medium border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition rounded-full whitespace-nowrap"
 			>
 				<span class="relative">{config.buttons.close}</span>
 			</button>
 			<button
 				on:click={closeForDay}
-				class="px-3.5 py-1.5 text-sm font-medium bg-sky-600 hover:bg-sky-700 text-white transition rounded-full"
+				class="px-2 py-1.5 text-xs sm:px-3.5 sm:text-sm font-medium bg-sky-600 hover:bg-sky-700 text-white transition rounded-full whitespace-nowrap"
 			>
 				<span class="relative">{config.buttons.closeForDay}</span>
 			</button>
 			<button
 				on:click={dismissPermanently}
-				class="px-3.5 py-1.5 text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full"
+				class="px-2 py-1.5 text-xs sm:px-3.5 sm:text-sm font-medium bg-black hover:bg-gray-900 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full whitespace-nowrap"
 			>
 				<span class="relative">{config.buttons.dismissForever}</span>
 			</button>
@@ -147,5 +147,7 @@
 	}
 	:global(.prose li) {
 		font-size: 0.95rem; /* text-sm */
+		margin-bottom: 0.125rem;
+		line-height: 1.5;
 	}
 </style>
