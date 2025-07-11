@@ -88,10 +88,8 @@ CANDIDATE_MULTIPLIER_HIGH_K = 1.5
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
-CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
-CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600))) # 7 days
-CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 2 hours
-MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
+CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 24 hours
+MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "1000"))
 MAX_CANDIDATE_MULTIPLIER = float(os.getenv("MAX_CANDIDATE_MULTIPLIER", "3.0"))
 
 # Simple in-memory cache with TTL support
@@ -143,66 +141,11 @@ class SimpleCache:
         return len(self.cache)
 
 # Global cache instances
-medical_abbrev_cache = SimpleCache()
-query_enhance_cache = SimpleCache()
 bm25_retriever_cache = SimpleCache() # BM25 캐시 추가
 
 def cache_key_hash(data: str) -> str:
     """Generate a consistent hash for cache keys"""
     return hashlib.sha256(data.encode('utf-8')).hexdigest()[:16]
-
-async def call_llm_api(prompt: str, system_prompt: str, api_key: str, use_gemini: bool = True) -> str:
-    """Unified LLM API call function with fallback support"""
-    if use_gemini and api_key:
-        try:
-            response = requests.post(
-                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {api_key}"
-                },
-                json={
-                    "model": GEMINI_MODEL,
-                    "reasoning_effort": "none",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": prompt}
-                    ],
-                    "temperature": API_TEMPERATURE
-                },
-                timeout=30
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip()
-        except Exception as e:
-            log.warning(f"Gemini API call failed: {type(e).__name__}, trying OpenAI fallback")
-    
-    # OpenAI fallback
-    if OPENAI_API_KEY:
-        try:
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {OPENAI_API_KEY}"
-                },
-                json={
-                    "model": OPENAI_MODEL,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": prompt}
-                    ],
-                    "temperature": API_TEMPERATURE
-                },
-                timeout=30
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip()
-        except Exception as e:
-            log.error(f"OpenAI API call also failed: {type(e).__name__}")
-            raise
-    else:
-        raise ValueError("No valid API key available for LLM calls")
 
 def async_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
     """Decorator for caching async function results"""
@@ -253,45 +196,36 @@ def sync_cached(cache: SimpleCache, ttl_seconds: int, key_prefix: str):
     return decorator
 
 # RAG 코드에서
-@async_cached(query_enhance_cache, CACHE_TTL_QUERY_ENHANCE, "query_api")
-async def call_query_expansion_api(query: str) -> Optional[List[str]]:
+async def call_query_expansion_api(query: str) -> List[str]:
     """
     쿼리 확장 API 서버를 호출하여 확장된 쿼리 목록을 가져옵니다.
+    API 서버 자체에서 캐싱을 처리합니다.
     """
-    log.info(f"API 호출 시작: 쿼리='{query}', URL='{QUERY_EXPANSION_API_URL}'") # [디버깅 로그 추가 1]
+    log.info(f"Calling Query Expansion API for: '{query}'")
     try:
-        # 비동기 환경에서 requests를 사용하려면 run_in_executor를 사용하는 것이 좋습니다.
-        # 또는 httpx와 같은 비동기 HTTP 클라이언트를 사용해야 합니다.
-        # 현재 코드에서는 requests를 직접 호출하고 있으므로, 블로킹 호출이 될 수 있습니다.
-        # 먼저 httpx를 설치합니다: uv pip install httpx
-        import httpx
-        
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 QUERY_EXPANSION_API_URL,
                 json={"query": query},
-                timeout=10
+                timeout=10.0
             )
         
-        log.info(f"API 응답 수신: 상태 코드={response.status_code}") # [디버깅 로그 추가 2]
         response.raise_for_status()
-        
         data = response.json()
-        log.debug(f"API로부터 받은 원본 데이터: {data}") # [디버깅 로그 추가 3]
         
         expanded_terms = data.get("expanded_terms")
         if expanded_terms and isinstance(expanded_terms, list):
-            log.info(f"API로부터 쿼리 '{query}' 확장 결과 성공적으로 수신: {expanded_terms}")
+            log.info(f"Successfully expanded '{query}' to: {expanded_terms}")
             return expanded_terms
         else:
-            log.warning(f"API 응답에 'expanded_terms'가 없거나 형식이 올바르지 않습니다. 원본 쿼리 사용: {query}")
+            log.warning(f"API response for '{query}' is malformed. Using original query.")
             return [query]
             
-    except httpx.RequestError as e: # httpx 예외 처리로 변경
-        log.error(f"쿼리 확장 API 네트워크 호출 실패 ({type(e).__name__}): {e}. 원본 쿼리를 사용합니다.")
+    except httpx.RequestError as e:
+        log.error(f"Network error calling Query Expansion API: {e}. Using original query.")
         return [query]
     except Exception as e:
-        log.error(f"쿼리 확장 처리 중 예상치 못한 예외 발생: {e.__class__.__name__}: {e}", exc_info=True) # [디버깅 로그 추가 4]
+        log.error(f"An unexpected error occurred during query expansion: {e}. Using original query.", exc_info=True)
         return [query]
 
 # `process_queries_async` 함수를 API를 사용하도록 대폭 수정합니다.
@@ -1929,16 +1863,6 @@ def get_cache_stats() -> Dict[str, Any]:
     """캐시 통계 정보 반환"""
     return {
         "enabled": ENABLE_CACHING,
-        "medical_abbrev": {
-            "size": medical_abbrev_cache.size(),
-            "max_size": medical_abbrev_cache.max_size,
-            "ttl_seconds": CACHE_TTL_MEDICAL_ABBREV
-        },
-        "query_enhance": {
-            "size": query_enhance_cache.size(),
-            "max_size": query_enhance_cache.max_size,
-            "ttl_seconds": CACHE_TTL_QUERY_ENHANCE
-        },
         "bm25_retriever": {
             "size": bm25_retriever_cache.size(),
             "max_size": bm25_retriever_cache.max_size,
@@ -1948,22 +1872,12 @@ def get_cache_stats() -> Dict[str, Any]:
 
 def clear_all_caches() -> None:
     """모든 캐시 클리어"""
-    medical_abbrev_cache.clear()
-    query_enhance_cache.clear()
     bm25_retriever_cache.clear()
     log.info("모든 RAG 캐시가 클리어되었습니다.")
 
 def clear_cache_by_type(cache_type: str) -> bool:
     """특정 타입의 캐시만 클리어"""
-    if cache_type == "medical_abbrev":
-        medical_abbrev_cache.clear()
-        log.info("의학약어 캐시가 클리어되었습니다.")
-        return True
-    elif cache_type == "query_enhance":
-        query_enhance_cache.clear()
-        log.info("쿼리 확장 캐시가 클리어되었습니다.")
-        return True
-    elif cache_type == "bm25":
+    if cache_type == "bm25":
         bm25_retriever_cache.clear()
         log.info("BM25 검색기 캐시가 클리어되었습니다.")
         return True
@@ -1973,8 +1887,6 @@ def clear_cache_by_type(cache_type: str) -> bool:
 
 def cleanup_expired_caches() -> None:
     """만료된 캐시 엔트리들 정리"""
-    medical_abbrev_cache._cleanup_expired()
-    query_enhance_cache._cleanup_expired()
     bm25_retriever_cache._cleanup_expired()
     log.info("만료된 캐시 엔트리들이 정리되었습니다.")
 
