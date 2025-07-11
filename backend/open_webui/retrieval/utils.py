@@ -90,10 +90,8 @@ CANDIDATE_MULTIPLIER_HIGH_K = 1.5
 
 # Cache configuration
 ENABLE_CACHING = os.getenv("ENABLE_RAG_CACHING", "true").lower() == "true"
-CACHE_TTL_MEDICAL_ABBREV = int(os.getenv("CACHE_TTL_MEDICAL_ABBREV", str(30 * 24 * 3600)))  # 30 days
-CACHE_TTL_QUERY_ENHANCE = int(os.getenv("CACHE_TTL_QUERY_ENHANCE", str(7 * 24 * 3600))) # 7 days
-CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 2 hours
-MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "10000"))
+CACHE_TTL_BM25 = int(os.getenv("CACHE_TTL_BM25", str(24 * 3600)))  # 24 hours
+MAX_CACHE_SIZE = int(os.getenv("MAX_RAG_CACHE_SIZE", "1000"))
 MAX_CANDIDATE_MULTIPLIER = float(os.getenv("MAX_CANDIDATE_MULTIPLIER", "3.0"))
 
 # Simple in-memory cache with TTL support
