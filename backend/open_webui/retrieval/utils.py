@@ -1075,46 +1075,25 @@ def get_sources_from_items(
                 }
 
         elif item.get("type") == "file":
-            if (
-                item.get("context") == "full"
-                or request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL
-            ):
-                if item.get("file", {}).get("data", {}).get("content", ""):
-                    # Manual Full Mode Toggle
-                    # Used from chat file modal, we can assume that the file content will be available from item.get("file").get("data", {}).get("content")
-                    query_result = {
-                        "documents": [
-                            [item.get("file", {}).get("data", {}).get("content", "")]
-                        ],
-                        "metadatas": [
-                            [
-                                {
-                                    "file_id": item.get("id"),
-                                    "name": item.get("name"),
-                                    **item.get("file")
-                                    .get("data", {})
-                                    .get("metadata", {}),
-                                }
-                            ]
-                        ],
-                    }
-                elif item.get("id"):
-                    file_object = Files.get_file_by_id(item.get("id"))
-                    if file_object:
-                        query_result = {
-                            "documents": [[file_object.data.get("content", "")]],
-                            "metadatas": [
-                                [
-                                    {
-                                        "file_id": item.get("id"),
-                                        "name": file_object.filename,
-                                        "source": file_object.filename,
-                                    }
-                                ]
-                            ],
-                        }
+            # User-uploaded files should always use the full context.
+            file_object = Files.get_file_by_id(item.get("id"))
+            if file_object:
+                log.debug(f"Loading full content for user-uploaded file: {file_object.filename}")
+                query_result = {
+                    "documents": [[file_object.data.get("content", "")]],
+                    "metadatas": [
+                        [
+                            {
+                                "file_id": item.get("id"),
+                                "name": file_object.filename,
+                                "source": file_object.filename,
+                            }
+                        ]
+                    ],
+                }
             else:
-                # Fallback to collection names
+                # Fallback to collection names if file object not found for some reason
+                log.warning(f"Could not find file object for id: {item.get('id')}")
                 if item.get("legacy"):
                     collection_names.append(f"{item['id']}")
                 else:
