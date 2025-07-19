@@ -105,7 +105,7 @@
 							{$i18n.t(
 								'This channel was created on {{createdAt}}. This is the very beginning of the {{channelName}} channel.',
 								{
-									createdAt: dayjs(channel.created_at / 1000000).format('MMMM D, YYYY'),
+									createdAt: dayjs(channel.created_at / 1000000).format('LL'),
 									channelName: channel.name
 								}
 							)}
