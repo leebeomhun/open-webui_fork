@@ -214,7 +214,22 @@
 
 					{#if $user?.role === 'admin' || ($user?.permissions.chat?.system_prompt ?? true)}
 						<div class="my-1">
-							<div class="mb-2 text-xs text-gray-500">{$i18n.t('System Prompt')}</div>
+							<div class="flex items-center gap-2 text-xs font-semibold mb-2 text-gray-500">
+								<span>{$i18n.t('System Prompt')}</span>
+								<div class="relative group">
+									<button 
+										type="button" 
+										class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 text-sm font-normal"
+										tabindex="-1"
+									>
+										?
+									</button>
+									<div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 whitespace-nowrap">
+										{$i18n.t('System prompt defines the AI model\'s behavior and personality')}
+										<div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+									</div>
+								</div>
+							</div>
 							<div>
 								<Textarea
 									className=" text-sm w-full bg-transparent outline-hidden "
