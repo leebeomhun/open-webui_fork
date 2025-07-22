@@ -405,11 +405,23 @@ export const generateInitialsImage = (name) => {
 	return canvas.toDataURL();
 };
 
+// Import Korean locale for testing and set Monday as first day globally
+import 'dayjs/locale/ko';
+
 // Set locale with Monday as first day globally
 dayjs.locale({
 	...dayjs.Ls[dayjs.locale()],
 	weekStart: 1
 });
+
+// For Korean locale specifically, ensure Monday is week start
+const koLocale = dayjs.Ls['ko'];
+if (koLocale) {
+	dayjs.Ls['ko'] = {
+		...koLocale,
+		weekStart: 1
+	};
+}
 
 export const formatDate = (inputDate, i18n = null) => {
 	const date = dayjs(inputDate);
