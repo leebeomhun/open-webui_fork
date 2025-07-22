@@ -1374,7 +1374,7 @@
 												loadMoreChats();
 											}
 										}}
-									>
+									>			
 										<div
 											class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
 										>
