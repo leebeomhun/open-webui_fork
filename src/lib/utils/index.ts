@@ -367,6 +367,12 @@ export const generateInitialsImage = (name) => {
 	return canvas.toDataURL();
 };
 
+// Set locale with Monday as first day globally
+dayjs.locale({
+	...dayjs.Ls[dayjs.locale()],
+	weekStart: 1
+});
+
 export const formatDate = (inputDate, i18n = null) => {
 	const date = dayjs(inputDate);
 
@@ -379,8 +385,12 @@ export const formatDate = (inputDate, i18n = null) => {
 		else if (date.isSame(now.subtract(1, 'day'), 'day')) {
 			return date.format(i18n.t('[Yesterday at] h:mm A'));
 		}
-		// Same week (Last Monday, Last Tuesday, etc.)
-		else if (date.isSame(now, 'week')) {
+		// This week (excluding today and yesterday) - Monday as week start
+		else if (date.isSame(now, 'week') && date.isBefore(now.subtract(1, 'day'))) {
+			return date.format(i18n.t('dddd [at] h:mm A'));
+		}
+		// Last week - Monday as week start
+		else if (date.isSame(now.subtract(1, 'week'), 'week')) {
 			return date.format(i18n.t('[Last] dddd [at] h:mm A'));
 		}
 		// Older dates - just date format without time
