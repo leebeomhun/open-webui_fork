@@ -20,6 +20,12 @@
 	dayjs.extend(duration);
 	dayjs.extend(relativeTime);
 
+	// Set Monday as the first day of the week globally
+	dayjs.locale({
+		...dayjs.Ls[dayjs.locale()],
+		weekStart: 1
+	});
+
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 
 	import { compressImage, copyToClipboard, splitStream, convertHeicToJpeg } from '$lib/utils';
@@ -1138,6 +1144,12 @@ Provide the enhanced notes in markdown format. Use markdown syntax for headings,
 										<span
 											>{dayjs(note.created_at / 1000000).format(
 												$i18n.t('[Yesterday at] h:mm A')
+											)}</span
+										>
+									{:else if dayjs(note.created_at / 1000000).isSame(dayjs(), 'week') && dayjs(note.created_at / 1000000).isBefore(dayjs().subtract(1, 'day'))}
+										<span
+											>{dayjs(note.created_at / 1000000).format(
+												$i18n.t('dddd [at] h:mm A')
 											)}</span
 										>
 									{:else if dayjs(note.created_at / 1000000).isSame(dayjs().subtract(1, 'week'), 'week')}
