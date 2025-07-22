@@ -11,7 +11,7 @@
 	import dayjs from '$lib/dayjs';
 	import calendar from 'dayjs/plugin/calendar';
 	import Loader from '../common/Loader.svelte';
-	import { createMessagesList } from '$lib/utils';
+	import { createMessagesList, formatDate } from '$lib/utils';
 	import { user } from '$lib/stores';
 	import Messages from '../chat/Messages.svelte';
 	import { goto } from '$app/navigation';
@@ -317,7 +317,7 @@
 							</div>
 
 							<div class=" pl-3 shrink-0 text-gray-500 dark:text-gray-400 text-xs">
-								{dayjs(chat?.updated_at * 1000).calendar()}
+								{formatDate(chat?.updated_at * 1000, $i18n)}
 							</div>
 						</a>
 					{/each}
