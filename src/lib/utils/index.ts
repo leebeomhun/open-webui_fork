@@ -423,6 +423,21 @@ if (koLocale) {
 	};
 }
 
+// Helper function to get Monday-based week start
+const getMondayOfWeek = (date) => {
+	const d = dayjs(date);
+	const dayOfWeek = d.day(); // 0 = Sunday, 1 = Monday, ...
+	const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday becomes 6, others subtract 1
+	return d.subtract(daysFromMonday, 'day').startOf('day');
+};
+
+// Helper function to check if two dates are in same Monday-based week
+const isSameMondayWeek = (date1, date2) => {
+	const monday1 = getMondayOfWeek(date1);
+	const monday2 = getMondayOfWeek(date2);
+	return monday1.isSame(monday2, 'day');
+};
+
 export const formatDate = (inputDate, i18n = null) => {
 	const date = dayjs(inputDate);
 
@@ -436,11 +451,11 @@ export const formatDate = (inputDate, i18n = null) => {
 			return date.format(i18n.t('[Yesterday at] h:mm A'));
 		}
 		// This week (excluding today and yesterday) - Monday as week start
-		else if (date.isSame(now, 'week') && date.isBefore(now.subtract(1, 'day'))) {
+		else if (isSameMondayWeek(date, now) && date.isBefore(now.subtract(1, 'day'))) {
 			return date.format(i18n.t('dddd [at] h:mm A'));
 		}
 		// Last week - Monday as week start
-		else if (date.isSame(now.subtract(1, 'week'), 'week')) {
+		else if (isSameMondayWeek(date, now.subtract(1, 'week'))) {
 			return date.format(i18n.t('[Last] dddd [at] h:mm A'));
 		}
 		// Older dates - just date format without time
