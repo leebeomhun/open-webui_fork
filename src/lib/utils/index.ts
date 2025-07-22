@@ -405,9 +405,29 @@ export const generateInitialsImage = (name) => {
 	return canvas.toDataURL();
 };
 
-export const formatDate = (inputDate) => {
+export const formatDate = (inputDate, i18n = null) => {
 	const date = dayjs(inputDate);
 
+	if (i18n && i18n.t) {
+		// Same day (Today)
+		if (date.isSame(now, 'day')) {
+			return date.format(i18n.t('[Today at] h:mm A'));
+		}
+		// Yesterday
+		else if (date.isSame(now.subtract(1, 'day'), 'day')) {
+			return date.format(i18n.t('[Yesterday at] h:mm A'));
+		}
+		// Same week (Last Monday, Last Tuesday, etc.)
+		else if (date.isSame(now, 'week')) {
+			return date.format(i18n.t('[Last] dddd [at] h:mm A'));
+		}
+		// Older dates - just date format without time
+		else {
+			return date.format(i18n.t('DD/MM/YYYY'));
+		}
+	}
+
+	// Fallback for when i18n is not available
 	if (date.isToday()) {
 		return `Today at {{LOCALIZED_TIME}}`;
 	} else if (date.isYesterday()) {

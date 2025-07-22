@@ -4,7 +4,7 @@
 
 	import dayjs from 'dayjs';
 	import localizedFormat from 'dayjs/plugin/localizedFormat';
-	import { getTimeRange } from '$lib/utils';
+	import { formatDate, getTimeRange } from '$lib/utils';
 	import ChevronUp from '$lib/components/icons/ChevronUp.svelte';
 	import ChevronDown from '$lib/components/icons/ChevronDown.svelte';
 	import Loader from '$lib/components/common/Loader.svelte';
@@ -159,7 +159,7 @@
 
 				<div class="hidden sm:flex sm:basis-2/5 items-center justify-end">
 					<div class=" text-gray-500 dark:text-gray-400 text-xs">
-						{dayjs(chat?.updated_at * 1000).calendar()}
+						{formatDate(chat?.updated_at * 1000, $i18n)}
 					</div>
 				</div>
 			</a>

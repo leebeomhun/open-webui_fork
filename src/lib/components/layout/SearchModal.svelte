@@ -12,7 +12,7 @@
 	import localizedFormat from 'dayjs/plugin/localizedFormat';
 	import calendar from 'dayjs/plugin/calendar';
 	import Loader from '../common/Loader.svelte';
-	import { createMessagesList } from '$lib/utils';
+	import { createMessagesList, formatDate } from '$lib/utils';
 	import { config, user } from '$lib/stores';
 	import Messages from '../chat/Messages.svelte';
 	import { goto } from '$app/navigation';
@@ -391,16 +391,7 @@
 							</div>
 
 							<div class=" pl-3 shrink-0 text-gray-500 dark:text-gray-400 text-xs">
-								{$i18n.t(
-									dayjs(chat?.updated_at * 1000).calendar(null, {
-										sameDay: '[Today]',
-										nextDay: '[Tomorrow]',
-										nextWeek: 'dddd',
-										lastDay: '[Yesterday]',
-										lastWeek: '[Last] dddd',
-										sameElse: 'L' // use localized format, otherwise dayjs.calendar() defaults to DD/MM/YYYY
-									})
-								)}
+								{formatDate(chat?.updated_at * 1000, $i18n)}
 							</div>
 						</a>
 					{/each}
