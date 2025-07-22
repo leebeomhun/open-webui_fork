@@ -20,6 +20,7 @@
 	import XMark from '../icons/XMark.svelte';
 	import ChevronUp from '../icons/ChevronUp.svelte';
 	import ChevronDown from '../icons/ChevronDown.svelte';
+	import { formatDate } from '$lib/utils';
 
 	const i18n = getContext('i18n');
 
@@ -245,16 +246,7 @@
 
 									<div class="basis-2/5 flex items-center justify-end">
 										<div class="hidden sm:flex text-gray-500 dark:text-gray-400 text-xs">
-											{$i18n.t(
-												dayjs(chat?.updated_at * 1000).calendar(null, {
-													sameDay: '[Today]',
-													nextDay: '[Tomorrow]',
-													nextWeek: 'dddd',
-													lastDay: '[Yesterday]',
-													lastWeek: '[Last] dddd',
-													sameElse: 'L' // use localized format, otherwise dayjs.calendar() defaults to DD/MM/YYYY
-												})
-											)}
+											{formatDate(chat?.updated_at * 1000, $i18n)}
 										</div>
 
 										<div class="flex justify-end pl-2.5 text-gray-600 dark:text-gray-300">
