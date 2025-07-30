@@ -62,7 +62,12 @@
 		}
 	});
 </script>
-
+<style>
+	:global(html.dark .tippy-box[data-theme~='dark']) {
+		background-color: #afafaf;
+		color: rgb(0, 0, 0);
+	}
+</style>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element this={as} bind:this={tooltipElement} class={className} on:click={onClick}>
 	<slot />
