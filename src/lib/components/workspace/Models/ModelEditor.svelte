@@ -18,6 +18,7 @@
 	import ActionsSelector from '$lib/components/workspace/Models/ActionsSelector.svelte';
 	import Capabilities from '$lib/components/workspace/Models/Capabilities.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
+	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import AccessControl from '../common/AccessControl.svelte';
 	import Spinner from '$lib/components/common/Spinner.svelte';
 	import XMark from '$lib/components/icons/XMark.svelte';
@@ -678,7 +679,11 @@
 							<div class="my-1">
 								<div class="flex items-center gap-2 text-xs font-semibold mb-2">
 									<span>{$i18n.t('System Prompt')}</span>
-									<div class="relative group">
+									<Tooltip
+										content={$i18n.t(
+											"System prompt defines the AI model's behavior and personality"
+										)}
+									>
 										<button
 											type="button"
 											class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 text-sm font-normal"
@@ -686,15 +691,7 @@
 										>
 											?
 										</button>
-										<div
-											class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 w-48 max-w-xs sm:whitespace-nowrap sm:w-auto text-center"
-										>
-											{$i18n.t("System prompt defines the AI model's behavior and personality")}
-											<div
-												class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"
-											></div>
-										</div>
-									</div>
+									</Tooltip>
 								</div>
 								<div>
 									<Textarea
