@@ -59,13 +59,6 @@
 	});
 </script>
 
-<style>
-	:global(html.dark .tippy-box[data-theme~='dark']) {
-		background-color: #afafaf;
-		color: rgb(0, 0, 0);
-	}
-</style>
-
 <div bind:this={tooltipElement} class={className}>
 	<slot />
 </div>
