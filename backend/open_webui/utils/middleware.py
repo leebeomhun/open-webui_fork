@@ -1901,6 +1901,44 @@ async def process_chat_payload(request, form_data, user, metadata, model):
             }
         )
 
+    # After RAG injection, optionally process tools so that
+    # tool outputs are appended after RAG context.
+    if tools_dict:
+        if metadata.get("function_calling") == "native":
+            # Native function calling: attach tool specs for the provider.
+            metadata["tools"] = tools_dict
+            form_data["tools"] = [
+                {"type": "function", "function": tool.get("spec", {})}
+                for tool in tools_dict.values()
+            ]
+        else:
+            # Non-native: execute tools now so outputs appear after RAG context.
+            try:
+                form_data, _flags = await chat_completion_tools_handler(
+                    request, form_data, extra_params, user, models, tools_dict
+                )
+                # Merge tool-derived sources with RAG sources for unified citation display
+                tool_sources = _flags.get("sources", [])
+                if tool_sources:
+                    sources.extend(tool_sources)
+                    # Update or append the unified sources event
+                    unified_sources = [
+                        source
+                        for source in sources
+                        if source.get("source", {}).get("name", "")
+                        or source.get("source", {}).get("id", "")
+                    ]
+                    updated = False
+                    for idx, ev in enumerate(events):
+                        if isinstance(ev, dict) and "sources" in ev:
+                            events[idx] = {"sources": unified_sources}
+                            updated = True
+                            break
+                    if not updated and len(unified_sources) > 0:
+                        events.append({"sources": unified_sources})
+            except Exception as e:
+                log.exception(e)
+
     return form_data, metadata, events
 
 
