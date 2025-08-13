@@ -3301,7 +3301,7 @@ async def process_chat_response(
                             f"Parsed args from {tool_args} to {tool_function_params}"
                         )
                         tool_call.setdefault("function", {})["arguments"] = json.dumps(
-                            tool_function_params
+                            tool_function_params, ensure_ascii=False
                         )
 
                         tool_result = None
