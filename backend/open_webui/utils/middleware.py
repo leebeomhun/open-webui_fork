@@ -4155,8 +4155,12 @@ async def streaming_chat_response_handler(response, ctx):
                                     continue
 
                         # Ensure arguments are valid JSON for downstream LLM integrations
-                        log.debug(f'Parsed args from {tool_args} to {tool_function_params}')
-                        tool_call.setdefault('function', {})['arguments'] = json.dumps(tool_function_params)
+                        log.debug(
+                            f"Parsed args from {tool_args} to {tool_function_params}"
+                        )
+                        tool_call.setdefault("function", {})["arguments"] = json.dumps(
+                            tool_function_params, ensure_ascii=False
+                        )
 
                         tool_result = None
                         tool = None
