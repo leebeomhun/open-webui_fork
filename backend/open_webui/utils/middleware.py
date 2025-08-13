@@ -242,7 +242,7 @@ async def chat_completion_tools_handler(
                             tool_result.remove(item)
 
                 if isinstance(tool_result, dict) or isinstance(tool_result, list):
-                    tool_result = json.dumps(tool_result, indent=2)
+                    tool_result = json.dumps(tool_result, indent=2, ensure_ascii=False)
 
                 if isinstance(tool_result, str):
                     tool = tools[tool_function_name]
@@ -2262,7 +2262,7 @@ async def process_chat_response(
                             f"Parsed args from {tool_args} to {tool_function_params}"
                         )
                         tool_call.setdefault("function", {})["arguments"] = json.dumps(
-                            tool_function_params
+                            tool_function_params, ensure_ascii=False
                         )
 
                         tool_result = None
