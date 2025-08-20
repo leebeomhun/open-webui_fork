@@ -265,6 +265,7 @@ async def generate_function_chat_completion(
         "__oauth_token__": oauth_token,
         "__request__": request,
     }
+    # Ensure tools are resolved by awaiting the async function
     extra_params["__tools__"] = await get_tools(
         request,
         tool_ids,
