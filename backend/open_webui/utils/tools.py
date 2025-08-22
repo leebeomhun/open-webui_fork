@@ -801,28 +801,15 @@ async def set_tool_servers(request: Request):
 
 
 async def get_tool_servers(request: Request):
-    # Prefer in-memory cache first to avoid repeated network calls
-    if hasattr(request.app.state, "TOOL_SERVERS") and request.app.state.TOOL_SERVERS:
-        return request.app.state.TOOL_SERVERS
     tool_servers = []
     if request.app.state.redis is not None:
         try:
-<<<<<<< HEAD
             tool_servers = json.loads(await request.app.state.redis.get("tool_servers"))
             request.app.state.TOOL_SERVERS = tool_servers
-=======
-            cached = await request.app.state.redis.get("tool_servers")
-            if cached:
-                tool_servers = json.loads(cached)
->>>>>>> a37160ca0 (tool 불러오지 못하던 문제 수정)
         except Exception as e:
             log.error(f'Error fetching tool_servers from Redis: {e}')
 
     if not tool_servers:
-<<<<<<< HEAD
-=======
-        # Populate from configured connections when cache is empty
->>>>>>> a37160ca0 (tool 불러오지 못하던 문제 수정)
         tool_servers = await set_tool_servers(request)
 
     return tool_servers
