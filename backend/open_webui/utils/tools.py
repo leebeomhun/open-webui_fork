@@ -755,6 +755,9 @@ async def set_tool_servers(request: Request):
 
 
 async def get_tool_servers(request: Request):
+        # Prefer in-memory cache first to avoid repeated network calls
+    if hasattr(request.app.state, "TOOL_SERVERS") and request.app.state.TOOL_SERVERS:
+        return request.app.state.TOOL_SERVERS
     tool_servers = []
     if request.app.state.redis is not None:
         try:
