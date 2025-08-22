@@ -1285,38 +1285,52 @@ async def update_rag_config(
 QUESTION_MARKER = "[질문]"
 ANSWER_MARKER = "[답변]"
 
+# 비정규식 스캐너로 처리 (str.find 기반)
+
 
 def _split_qa_pairs(docs: List[Document]) -> Iterator[Document]:
     """
     [질문]…[답변] 구조를 하나의 문서 덩어리로 분리합니다.
-    메모리 효율성을 위해 제너레이터를 사용합니다.
+    - 정규식 대신 str.find 기반 스캐너로 고성능 처리
+    - 문서 전체 strip()을 피하고, 추출된 부분만 trim
     """
-    # 정규식 패턴: [질문] 뒤에 [답변]이 오는 구조를 찾습니다
-    qa_pattern = re.compile(r'\[질문\]\s*(.*?)\s*\[답변\]\s*(.*?)(?=\[질문\]|$)', re.DOTALL)
-    
+    qm = QUESTION_MARKER
+    am = ANSWER_MARKER
+    qml = len(qm)
+    aml = len(am)
+
     for doc in docs:
         if not doc or not doc.page_content:
             continue
-            
-        text = doc.page_content.strip()
-        if not text:
-            continue
-            
-        # 정규식을 사용하여 QA 쌍을 찾습니다
-        matches = qa_pattern.findall(text)
-        
-        for question, answer in matches:
-            question = question.strip()
-            answer = answer.strip()
-            
-            # 빈 질문이나 답변은 건너뜁니다
-            if not question or not answer:
-                continue
-                
-            # 쌍을 깔끔하게 재구성합니다
-            combined = f"{QUESTION_MARKER}\n{question}\n\n{ANSWER_MARKER}\n{answer}"
-            yield Document(page_content=combined, metadata=doc.metadata.copy())
 
+        text = doc.page_content
+        pos = 0
+        text_len = len(text)
+
+        while pos < text_len:
+            qpos = text.find(qm, pos)
+            if qpos == -1:
+                break
+
+            qstart = qpos + qml
+            apos = text.find(am, qstart)
+            if apos == -1:
+                # [질문] 뒤에 [답변]이 없으면 종료 (정규식 동작과 동일)
+                break
+
+            astart = apos + aml
+            next_q = text.find(qm, astart)
+            aend = next_q if next_q != -1 else text_len
+
+            question = text[qstart:apos].strip()
+            answer = text[astart:aend].strip()
+
+            if question and answer:
+                combined = f"{QUESTION_MARKER}\n{question}\n\n{ANSWER_MARKER}\n{answer}"
+                yield Document(page_content=combined, metadata=doc.metadata.copy())
+
+            # 다음 [질문] 위치부터 계속 진행
+            pos = aend
 
 
 def save_docs_to_vector_db(
