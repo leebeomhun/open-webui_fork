@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "kcd": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcpo_kcd.mcp_server"
+      ]
+    }
+  }
+}
+

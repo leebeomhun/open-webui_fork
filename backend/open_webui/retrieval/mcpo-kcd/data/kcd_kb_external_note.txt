@@ -1,0 +1,237 @@
+1. 발생장소 분류코드 Place of occurence code
+다음 4단위 세분류는 관련 외인이 발생한 장소를 분류하기 위하여 W00-Y34항목에
+사용하려는 것이다.
+.0 주택 Home
+개인 : Private :
+주택 마당 Yard to home
+주택 정원 Garden to home
+주택 진입로 Driveway to home
+차고 Garage
+개인주택이나 정원에 있는 수영장 Swimming-pool in private house of garden
+농가 Farmhouse
+비집단주거장소 Noninstitutional place of residence
+아파트 Apartment
+이동주택단지 Caravan [trailer] park, residential
+주택 House(residential)
+주택구내 Home premises
+하숙집 Boarding-house
+제외 :유기된 또는 방치된 주택(8)Excludes :Abandoned or derelict house
+미점유의 건설중인 주택(6) Home under construction but yet occupied
+집단시설 주거지(1) Institutional place of residence
+.1 집단거주시설 Residential institution
+갱생원 Reform school
+고아원 Orphanage
+교도소 Prison
+군막사 Military camp
+기숙사 Dormitory
+호스피스 Hospice
+양로원 Old people’s home, Pensioner’s home
+요양소 Nursing home
+.2 학교, 기타 시설 및 공공행정 구역 School, other institution and public
+administrative area
+~(와)과 같은 일반대중 또는 특정집단이 Building(including adjacent grounds) used by the
+사용하는 건물(인접대지 포함) : general public or by a particular group of the
+public such as :
+공회당 Public hall
+교회 Church
+극장 Theatre
+대학 College, university
+고등교육기관 Institute for higher education
+도서관 Library
+무도장 Dancehall
+박물관 Museum
+법원 Court-house
+병원 Hospital
+보육원, 탁아소 Day nursury
+영화관 Cinema, movie-house
+오페라 극장 Opera-house
+우체국 Post office
+유치원 Kindergarten
+음악당 Music-hall
+의회 Assembly hall
+청소년회관 Youth centre
+캠퍼스 Campus
+클럽하우스 Clubhouse
+학교 School
+화랑 Gallery
+제외 :건설중인 건물(6)Excludes :Building under construction
+집단 주거시설(1) Residential institution
+운동 및 경기장(3) Sports and athletics area
+.3 운동 및 경기장 Sports and athletics area
+경기장 Stadium
+골프코스 Golf-course
+공공수영장 Swimming-pool, public
+농구장 Basketball-court
+스케이트링크 Skating-rink
+스쿼시코트 Squash-court
+승마장 Riding-school
+야구장 Baseball field
+체육관 Gymnasium
+축구장 Football field
+크리켓운동장 Criket ground
+테니스코트 Tennis-court
+하키장 Hockey field
+제외 :개인주택에 있는 테니스코트 및 수영장(0)Excludes :Swimming-pool or tennis-court in
+private home or garden
+.4 도로 및 고속도로 Street and highway
+도로 Road
+고속도로 Freeway
+보도, 인도 Sidewalk
+자동차도로 Motorway
+포장도로 Pavement
+.5 상업 및 서비스 구역 Trade and service area
+사무실 Office building
+공항 Airport
+도박장 Casino
+방송국 Radio or television station
+백화점 Store
+버스정류장 Bus station
+상점 Commercial shop
+쇼핑센터 Shopping mall
+슈퍼마켓 Supermarket
+시장 Market
+은행 Bank
+음식점 Restaurant
+주유소 Petrol, gas station
+차량정비소 Commercial garage, service station
+창고 Warehouse
+철도역 Railway station
+카페 Café
+호텔 Hotel
+제외 :개인주택의 차고(0)Excludes :Garage in private home
+.6 산업 및 건설지역 Industrial and construction area
+가스공장 Gasworks
+건설중인 [모든] 건물 Building [any] under construction
+건설중인 터널 Tunnel under construction
+산업단지 Industrial yard
+공장건물 Factory building
+공장구내 Factory premises
+광산 Mine
+드라이도크 Dry dock
+발전소 Power station
+부두 Dockyard
+유정 및 기타 해안 시설물 Oil rig and other offshore installations
+작업장 Workshop
+조선소 Shipyard
+채석장 Pit, gavel and sand
+.7 농장 Farm
+경작지 Farm land under cultivation
+농장건물 Farm buildings
+방목지 Ranch
+제외 :농가 및 농가구내(0)Excludes :Farmhouse and home premises of
+farm
+.8 기타 명시된 장소 Other specified places
+강 River
+공공장소 NOS Public place NOS
+공원 Park
+군사훈련장 Military training ground
+늪 Marsh
+대초원 Prairie
+도크 NOS Dock NOS
+동물원 Zoo
+바다 Sea
+방치 주택 Derelict house
+사막 Desert
+산 Mountain
+삼림(森林) Forest
+습지 Swamp
+개울 Stream
+야영지 Campsite
+언덕 Hill
+연못 Pond, pool
+운하 Canal
+저수지 Water reservoir
+주차장 Parking-lot, parking-place
+철로 Railway line
+카랴반용지 NOS Caravan site NOS
+항구 Harbour
+해변 Seashore
+해수욕장 Beach
+호수 Lake
+.9 상세불명 장소 Unspecified place
+
+2. 활동분류코드 Activity code
+주 : 다음 세분류는 사건이 발생한 시점의 다친 사람의 활동을 나타내기 위하여 V01-Y34 항목에 부가하여
+사용하도록 제공된다. 이 보조분류는 W00-Y34에 분류된 사건의 발생장소를 나타내기 위해 제공되는
+4단위 세분류와 혼동하거나 대신하여 사용해서는 안 된다.
+0 운동경기에 참여하는 동안 While engaged in sports activity
+~(와)과 같이 기술한 기능적 요소를 가진 Physical exercise with a described functional
+육체적 운동 : element such as :
+골프 Golf
+수상스키 Water-skiing
+수영 Swimming
+스키 Skiing
+승마 Riding
+조깅 Jogging
+트레킹 Trekking
+학교운동 School athletic
+1 여가활동 참여중 While engaged in leisure activity
+취미활동 Hobby activities
+영화관람, 춤 또는 파티참석 등과 같은 Leisure-time activities with an entertainment
+흥행요소를 가진 여가시간활동 element such as going to the cinema, to a dance
+or to a party
+자발적인 조직의 회기와 활동에 참여 Participation in sessions and activities of
+voluntary organizations
+제외 :스포츠활동(0)Excludes :Sports activities
+2 소득을 위한 작업중 While working for income
+임금 노동(육체노동, 전문직) Paid work (manual, professional)
+그러한 활동을 위한 통근(시간) Transportation (time) to and from such activities
+봉급, 상여금 및 기타 형태의 소득을 위한 Work for salary, bonus and other types of income
+작업
+3 기타 형태의 작업에 종사하는 중 While engaged in other types of work
+가정의 활동 : Domestic duties :
+가사정리 Household maintenance
+가족돌보기 Caring for children and relatives
+정원손질 Gardening
+조리 Cooking
+청소 Cleaning
+교육중 Undergoing education
+교육활동, 예를 들면 학기 또는 강의에 참여 Learning activities, e.g. attending school session
+or lesson
+정상적인 소득을 얻지 않는 사람의 일 Duties for which one would not normally gain an
+income
+4 휴식, 수면, 식사 또는 기타 생명 활동 While resting, sleeping, eating or engaging in
+중 other vital activities
+개인 위생 Personal hygiene
+8 기타 명시된 활동에 종사하는 중 While engaged in other specified activities
+9 상세불명의 활동 중 During unspecified activity
+
+3. 운수사고(V01–V99) 개요 및 제외
+범위: 주로 사람/화물 운송에 설계·사용되는 기계가 관여한 모든 사고.
+제외(다른 장으로 분류):
+– 정지(비가동) 운송장비의 정비·수리 중 사고(단, 다른 ‘가동 중’ 차량에 의해 손상되면 포함)
+– 운송수단과 무관한 싸움·문닫힘 끼임 등 일반 손상(W00–X59)
+– 자동차 충돌을 이용한 폭행(Y03), 의도불명(Y31–Y33), 자해(X81–X83)
+핵심 정의(분류 판단에 직접 영향)
+공로/가로: 공중에 개방된 길 전체 폭. 교통사고는 공로에서 발생한 차량사고(전부·부분 포함). 비교통사고는 공로 외.
+보행자: 운전자·승객·자전거·동물 탑승자가 아닌 자(휠체어/유모차/스케이트/스키·썰매·유모차·유모차·베이비카 등 ‘보행자 운반구’ 사용자 포함).
+운전자/승객: 운송차량 조종자/그 외 탑승자. 차량 외부에서 이동(지붕, 범퍼 매달림 등)은 별도 정의.
+자전거/자전거 탑승자: 페달 구동(삼륜 포함).
+모터사이클/탑승자: 모터사이클(사이드카 포함), 모터스쿠터·모페드 포함.
+3륜 동력차(동력 인력거, 모터 삼륜 등) ↔ (사이드카 부착 모터사이클은 모터사이클로 분류)
+승용차: 최대 약 10인, 트레일러·이동주택 견인은 승용차 일부로 간주.
+픽업/밴, 대형화물차(규정 중량 이상·특수면허 필요), 버스(11인↑).
+철도차량(전용선로), 전차(도시 도로 상 선로·교통신호 따름).
+특수차량: 산업장내, 농업용(트랙터/콤바인), 건설용(덤프·불도저·로드롤러), 전지형(ATV/스노모빌·호버크래프트-육지/습지).
+수상선박, 항공기.
+
+4. 운수사고 분류·코딩 지침(결정 규칙)
+교통/비교통 불명 시 자동 규정
+V10–V82, V87에 해당 → 교통사고
+V83–V86에 해당 → 비교통사고(보행자 또는 비도로용 차량 탑승자 범주)
+두 종류 이상 운송수단 관여 시 우선순위
+① 항공기·우주선(V95–V97) → ② 선박(V90–V94) → ③ 기타(V01–V89, V98–V99)
+피해자 역할 미기재 + ‘차량에 의해 끌림/치임/타격’ 등 표현 → **보행자(V01–V09)**로 분류
+(놀이용 차량, 동물견인차, 모터사이클, 버스, 트럭, 전차, 트랙터, 열차, 승용차, 자전거 등 어느 차량이든 해당)
+역할 불명 + “사고/충돌/압착/파손 NOS”와 특정 ‘차량 종류’만 언급 → 언급 차량의 탑승자/조종자로 코딩
+여러 차량이 동시에 언급되고 피해자 탑승 차량을 특정할 수 없으면, 규칙 (2)의 우선순위 고려하여 V87–V88, V90–V97 등 적정 범주로 코딩(임의 가정 금지).
+차량의 곡선 미이행/조정상실(과속·부품고장·졸음·펑크·부주의 등)
+**후속 ‘충돌’**이 발생 → 충돌사고로 코딩
+충돌이 아니면 → **관여 차량 종류별 ‘비충돌사고’**로 코딩
+운행 중 차량 관련 사건(배기가스 중독, 부품 파손·폭발, 추락/비의도적 밀림, 차량 내 화재, 던져진 물체 충돌, 구동부 손상, 낙하물 등)
+후속 ‘충돌’ 발생 시 충돌사고, 아니면 비충돌사고(차량 종류 기준)
+육상 운수사고의 세부 코딩 예시(공로 상)
+고정/이동 물체와 충돌(나무, 가드레일, 중앙분리대, 전신주, 안전지대, 낙석, 공사표지, 절개벽 등): V17·V27·V37·V47·V57·V67·V77
+전복(비충돌): V18·V28·V38·V48·V58·V68·V78
+동물과 충돌: V10·V20·V30·V40·V50·V60·V70(돌봄/비돌봄 불문)
+동물견인차/타는 동물과 충돌: V16·V26·V36·V46·V56·V66·V76

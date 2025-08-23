@@ -1,0 +1,18 @@
+# OS / IDE / caches
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.venv/
+node_modules/
+
+# Local configs and secrets
+.env
+**/.env
+
+# Python build
+dist/
+build/
+

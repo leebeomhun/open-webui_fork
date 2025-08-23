@@ -1,0 +1,167 @@
+다른 장에서 분류된 질환의 원인으로서의 연쇄구균 및 포도구균: B95
+다른 장에서 분류된 질환의 원인으로서의 연쇄알균 및 포도알균: B95
+Streptococcus and staphylococcus as the cause of diseases classified to other chapters: B95
+다른 장에서 분류된 질환의 원인으로서의 A군연쇄알균: B95.0
+Streptococcus, group A, as the cause of diseases classified to other chapters: B95.0
+다른 장에서 분류된 질환의 원인으로서의 A군연쇄구균: B95.0
+다른 장에서 분류된 질환의 원인으로서의 B군연쇄알균: B95.1
+Streptococcus, group B, as the cause of diseases classified to other chapters: B95.1
+다른 장에서 분류된 질환의 원인으로서의 B군연쇄구균: B95.1
+다른 장에서 분류된 질환의 원인으로서의 D군연쇄알균 및 장내알균: B95.2
+Streptococcus, group D and enterococcus, as the cause of diseases classified to other chapters: B95.2
+다른 장에서 분류된 질환의 원인으로서의 D군 연쇄구균: B95.2
+다른 장에서 분류된 질환의 원인으로서의 D군연쇄구균 및 장내구균: B95.2
+장구균 감염: B95.2
+대변 장구균 감염: B95.2
+반코마이신내성 장내구균 감염: B95.2
+Streptococcus,group D, as the cause of diseases classified to other chapters: B95.2
+Enterococcal infection: B95.2
+Enterococcus faecalis infection: B95.2
+Vencomycin-resistant enterococcus infection: B95.2
+VRE infection: B95.2
+다른 장에서 분류된 질환의 원인으로서의 폐렴연쇄알균: B95.3
+Streptococcus pneumoniae as the cause of diseases classified to other chapters: B95.3
+다른 장에서 분류된 질환의 원인으로서의 폐렴연쇄구균: B95.3
+다른 장에서 분류된 질환의 원인으로서의 기타 연쇄알균: B95.4
+Other streptococcus as the cause of diseases classified to other chapters: B95.4
+다른 장에서 분류된 질환의 원인으로서의 기타 연쇄구균: B95.4
+다른 장에서 분류된 질환의 원인으로서의 상세불명의 연쇄알균: B95.5
+Unspecified streptococcus as the cause of diseases classified to other chapters: B95.5
+다른 장에서 분류된 질환의 원인으로서의 상세불명의 연쇄구균: B95.5
+다른 장에서 분류된 질환의 원인으로서의 황색포도알균: B95.6
+Staphylococcus aureus as the cause of diseases classified to other chapters: B95.6
+메티실린저항 포도알균감염: B95.6
+다른 장에서 분류된 질환의 원인으로서의 황색포도구균: B95.6
+메티실린내성 황색포도구균 감염: B95.6
+반코마이신내성 황색포도구균: B95.6
+Methicillin-resistant staphylococcus aureus infection: B95.6
+MRSA infection: B95.6
+Vancomycin-resistant staphylococcus aureus: B95.6
+VRSA: B95.6
+다른 장에서 분류된 질환의 원인으로서의 기타 포도알균: B95.7
+Other staphylococcus as the cause of diseases classified to other chapters: B95.7
+다른 장에서 분류된 질환의 원인으로서의 기타 포도구균: B95.7
+표피포도알균 감염: B95.7
+Staphylococcus epidermidis infection: B95.7
+다른 장에서 분류된 질환의 원인으로서의 상세불명의 포도알균: B95.8
+Unspecified staphylococcus as the cause of diseases classified to other chapters: B95.8
+다른 장에서 분류된 질환의 원인으로서의 상세불명의 포도구균: B95.8
+다른 장에 분류된 질환의 원인이 되는 세균병원체: B95-B96
+Bacterial agents as the cause of diseases classified to other chapters: B95-B96
+세균, 바이러스 및 기타 감염체: B95-B98
+Bacterial, viral and other infectious agents: B95-B98
+Other bacterial agents as the cause of diseases classified to other chapters: B96
+다른 장에서 분류된 질환의 원인으로서의 폐렴마이코플라스마: B96.0
+다른 장에서 분류된 질환의 원인으로서의 흉막폐렴유사병원체[PPLO]: B96.0
+Mycoplasma pneumoniae [M.pneumoniae] as the cause of diseases classified to other chapters: B96.0
+Pleuro-pneumonia-like-organism [PPLO] as the cause of diseases classified to other chapters: B96.0
+다른 장에서 분류된 질환의 원인으로서의 흉막폐렴유사병원체 [PPLO]: B96.0
+흉막폐렴유사병원체[PPLO]: B96.0
+Pleuro-pneumonia-like-organism [PPLO] as the cause of disease classified to other chapters: B96.0
+Pleuro-pneumonia-like-organism [PPLO]: B96.0
+다른 장에서 분류된 질환의 원인으로서의 폐렴막대균: B96.1
+Klebsiella pneumoniae [K.pneumoniae] as the cause of diseases classified to other chapters: B96.1
+클레브시엘라 감염증: B96.1
+Klebsiella infection: B96.1
+다른 장에서 분류된 질환의 원인으로서의 대장균: B96.2
+Escherichia coli [E.coli] as the cause of diseases classified to other chapters: B96.2
+다른 장에서 분류된 질환의 원인으로서의 인플루엔자균: B96.3
+Haemophilus influenzae [H.influenzae] as the cause of diseases classified to other chapters: B96.3
+다른 장에서 분류된 질환의 원인으로서의 인플루엔지균: B96.3
+다른 장에서 분류된 질환의 원인으로서의 B형 헤모필루스 인플루엔자균: B96.3
+Hemophilus influenzae[H.influenzae] as the cause of diseases classified to other chapters: B96.3
+Type B hemophilus influenzae [H.influenzae type B] as the cause of diseases classified to other chapters: B96.3
+다른 장에서 분류된 질환의 원인으로서의 프로테우스 (미라빌리스)(모르가니): B96.4
+Proteus(mirabilis)(morganii) as the cause of diseases classified to other chapters: B96.4
+프로테우스 증후군: B96.4
+프로테우스 감염: B96.4
+Proteus Syndrome: B96.4
+Proteus infection: B96.4
+다른 장에서 분류된 질환의 원인으로서의 슈도모나스 (아에루기노사): B96.5
+Pseudomonas(aeruginosa) as the cause of diseases classified to other chapters: B96.5
+다른 장에서 분류된 질환의 원인으로서의 바실루스 프라질리스: B96.6
+Bacillus fragilis [B. fragilis] as the cause of diseases classified to other chapters: B96.6
+다른 장에서 분류된 질환의 원인으로서의 바실러스 프라질리스: B96.6
+Bacillus fragilis[B.fragilis] as the cause of diseases classified to other chapters: B96.6
+다른 장에서 분류된 질환의 원인으로서의 클로스트리듐 퍼프린젠스: B96.7
+Clostridium perfringens [C. perfringens] as the cause of diseases classified to other chapters: B96.7
+다른 장에서 분류된 질환의 원인으로서의 기타 명시된 세균감염체: B96.8
+Other specified bacterial agents as the cause of diseases classified to other chapters: B96.8
+다른 장에서 분류된 질환의 원인으로서의 세균 감염체: B96.8
+다른 장에서 분류된 질환의 원인으로서의 아시네토박터바우마니: B96.80
+Acinetobacter baumannii as the cause of diseases classified to other chapter: B96.80
+다른 장에서 분류된 질환의 원인으로서의 장내세균속균: B96.81
+Enterobacteriaceae as the cause of diseases classified to other chapter: B96.81
+다른 장에서 분류된 질환의 원인으로서의 기타 명시된 세균 감염체: B96.88
+기질특이성확장형 베타락타마제 감염: B96.88
+그람양성균 감염: B96.88
+ESBL infection: B96.88
+Extended spectrum beta-lactamase infection: B96.88
+Ggram positive bacteria infection: B96.88
+다른 장에서 분류된 질환의 원인으로서의 바이러스감염체: B97
+Viral agents as the cause of diseases classified to other chapters: B97
+다른 장에서 분류된 질환의 원인으로서의 아데노바이러스: B97.0
+Adenovirus as the cause of diseases classified to other chapters: B97.0
+다른 장에서 분류된 질환의 원인으로서의 엔테로바이러스: B97.1
+다른 장에서 분류된 질환의 원인으로서의 에코바이러스: B97.1
+다른 장에서 분류된 질환의 원인으로서의 콕사키바이러스: B97.1
+Enterovirus as the cause of diseases classified to other chapters: B97.1
+Echovirus as the cause of diseases classified to other chapters: B97.1
+Coxsackievirus as the cause of diseases classified to other chapters: B97.1
+콕사키바이러스: B97.1
+에코바이러스: B97.1
+Coxsackievirus: B97.1
+Echovirus: B97.1
+Enteric cytopathogenic human orphan virus: B97.1
+다른 장에서 분류된 질환의 원인으로서의 코로나바이러스: B97.2
+Coronavirus as the cause of diseases classified to other chapters: B97.2
+다른 장에서 분류된 질환의 원인으로서의 레트로바이러스: B97.3
+다른 장에서 분류된 질환의 원인으로서의 렌티바이러스: B97.3
+다른 장에서 분류된 질환의 원인으로서의 종양바이러스: B97.3
+Retrovirus as the cause of diseases classified to other chapters: B97.3
+Lentivirius as the cause of diseases classified to other chapters: B97.3
+Oncovirus as the cause of diseases classified to other chapters: B97.3
+종양바이러스: B97.3
+렌티바이러스: B97.3
+Oncovirius as the cause of diseases classified to other chapters: B97.3
+Oncovirus: B97.3
+Lentivirus: B97.3
+다른 장에서 분류된 질환의 원인으로서의 호흡기세포융합바이러스: B97.4
+Respiratory syncytial virus as the cause of diseases classified to other chapters: B97.4
+다른 장에서 분류된 질환의 원인으로서의 레오바이러스: B97.5
+Reovirus as the cause of diseases classified to other chapters: B97.5
+다른 장에서 분류된 질환의 원인으로서의 파르보바이러스: B97.6
+Parvovirus as the cause of diseases classified to other chapters: B97.6
+다른 장에서 분류된 질환의 원인으로서의 유두종바이러스: B97.7
+Papillomavirus as the cause of diseases classified to other chapters: B97.7
+다른 장에서 분류된 질환의 원인으로서의 기타 바이러스감염체: B97.8
+Other viral agents as the cause of diseases classified to other chapters: B97.8
+인체메타뉴모바이러스: B97.8
+Human metapneumovirus: B97.8
+다른 장에서 분류된 질환의 원인으로서의 엡스타인-바 바이러스: B97.80
+Ebstein-Bar virus as the cause of diseases classified to other chapters: B97.80
+Ebstein-Barr virus infection: B97.80
+다른 장에서 분류된 질환의 원인으로서의 사람메타뉴모바이러스: B97.88
+Human metapneumovirus as the cause of diseases classified to other chapters: B97.88
+다른 장에서 분류된 질환의 원인으로서의 인체 메타뉴모바이러스: B97.88
+다른 장에서 분류된 질환의 원인으로서의 기타 명시된 감염성 감염체: B98
+다른 장에서 분류된 질환의 원인으로서의 기타 명시된 감염체: B98
+Other sprcified infectious agents as the cause of disease classified to other chapters: B98
+Other specified infectious agents as the cause of diseases classified to other chapters: B98
+다른 장에서 분류된 질환의 원인으로서의 헬리코박터 파일로리균: B98.0
+Helicobacter pylori[H.pylori] as the cause of diseases classified to other chapters: B98.0
+위 나선균: B98.0
+위염균: B98.0
+헬리코박터필로리: B98.0
+다른 장에서 분류된 질환의 원으로서의 헬리코박터 파일로리균: B98.0
+헬리코박터 필로리: B98.0
+헬리코박터필로리 감염: B98.0
+헬리코박터 필로리 감염: B98.0
+Helicobacter pylori: B98.0
+Helicobacter pylori[H.pylori] as the cause of disease classified to other chapters: B98.0
+H. pylori: B98.0
+H. pylori infection: B98.0
+Helicobacter pylori infection: B98.0
+다른 장에서 분류된 질환의 원인으로서의 비브리오 불리피구스균: B98.1
+Vibrio vulnificus as the cause of diseases classified to other chapters: B98.1
+Vibrio vulnificus as the cause of disease classified to other chapters: B98.1

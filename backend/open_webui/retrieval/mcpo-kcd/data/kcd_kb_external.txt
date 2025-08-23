@@ -1,0 +1,3200 @@
+[제목]운수사고에서 다친 보행자 (V01-V09)Pedestrian injured in transport accident
+제외 :보행자(운반되는)와 보행자(운반되는)의Excludes :Collision of pedestrian (conveyance)
+충돌(W51.-) with other pedestrian (conveyance)
+보행자(운반되는)와 보행자(운반되는)의 Collision of pedestrian (conveyance) with other
+충돌로 인한 낙상(W03.-) pedestrian (conveyance) with subsequent fall
+주 : 다음과 같은 4단위 세분류는 V01-V06항목에 사용하려는 것이다.
+.0 비교통사고 Nontraffic accident
+.1 교통사고 Traffic accident
+.9 교통사고인지 또는 비교통사고인지 Unspecified whether traffic or nontraffic
+상세불명 accident
+V01자전거와 충돌로 다친 보행자 Pedestrian injured in collision with pedal cycle
+V02이륜 또는 삼륜자동차와 충돌로 다친 Pedestrian injured in collision with two- or
+보행자 three-wheeled motor vehicle
+V03승용차, 픽업트럭 또는 밴과 충돌로 Pedestrian injured in collision with car,
+다친 보행자 pick-up truck or van
+V04대형화물차 또는 버스와 충돌로 다친 Pedestrian injured in collision with heavy
+보행자 transport vehicle or bus
+V05열차 또는 철도차량과 충돌로 다친 Pedestrian injured in collision with railway
+보행자 train or railway vehicle
+V06기타 무동력 차량과 충돌로 다친 Pedestrian injured in collision with other
+보행자 nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V09기타 및 상세 불명의 운수사고에서 Pedestrian injured in other and unspecified
+다친 보행자 transport accidents
+포함 :특수차량에 의해 다친 보행자Includes :Pedestrian injured by special
+vehicle
+V09.0 기타 및 상세불명의 자동차에 관여된 Pedestrian injured in nontraffic accident
+비교통사고에서 다친 보행자 involving other and unspecified motor
+vehicles
+V09.1 상세 불명의 비교통 사고에서 다친 Pedestrian injured in unspecified nontraffic
+보행자 accident
+V09.2 기타 및 상세불명의 자동차에 관여된 Pedestrian injured in traffic accident involving
+교통사고에서 다친 보행자 other and unspecified motor vehicles
+V09.3 상세불명의 교통사고에서 다친 보행자 Pedestrian injured in unspecified traffic
+accident
+V09.9 상세불명의 운수사고에서 다친 보행자 Pedestrian injured in unspecified transport
+accident
+[제목]운수사고에서 다친 자전거 탑승자(V10-V19) Pedal cyclist injured in transport accident
+주 : 다음 4단위 세분류는 V10-V18의 항목에 사용된다 :
+.0 비교통사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통사고에서 다친 상세불명의 자전거 Unspecified pedal cyclist injured in nontraffic
+탑승자 accident
+.3 승하차중 다친 사람 Person injured while boarding or alighting
+.4 교통사고에서 다친 운전자 Driver injured in traffic accident
+.5 교통사고에서 다친 승객 Passenger injured in traffic accident
+.9 교통사고에서 다친 상세불명의 Unspecified pedal cyclist injured in traffic
+자전거탑승자 accident
+V10보행자 또는 동물과 충돌로 다친 Pedal cyclist injured in collision with
+자전거 탑승자 pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과의 충돌(V16.Excludes :Collision with animal-drawn vehicle
+-) or animal being ridden
+V11다른 자전거와 충돌로 다친 자전거 Pedal cyclist injured in collision with other
+탑승자 pedal cycle
+V12이륜 또는 삼륜자동차와 충돌로 다친 Pedal cyclist injured in collision with two- or
+자전거 탑승자 three-wheeled motor vehicle
+V13승용차, 픽업트럭 또는 밴과 충돌로 Pedal cyclist injured in collision with car,
+다친 자전거 탑승자 pick-up truck or van
+V14대형화물차 또는 버스와 충돌로 다친 Pedal cyclist injured in collision with heavy
+자전거 탑승자 transport vehicle or bus
+V15열차 또는 철도차량과 충돌로 다친 Pedal cyclist injured in collision with railway
+자전거 탑승자 train or railway vehicle
+V16기타 무동력차량과 충돌로 다친 자전거 Pedal cyclist injured in collision with other
+탑승자 nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V17고정 또는 정지된 물체와의 충돌로 Pedal cyclist injured in collision with fixed or
+다친 자전거 탑승자 stationary object
+V18비충돌 운수사고에서 다친 자전거 Pedal cyclist injured in noncollision transport
+탑승자 accident
+포함 :자전거로부터의 낙상 또는 던져짐(충돌이Includes :Fall or thrown from pedal cycle
+선행되지 않은) (without antecedent collision)
+전복 NOS Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V19기타 및 상세불명의 운수사고에서 다친 Pedal cyclist injured in other and unspecified
+자전거 탑승자 transport accidents
+V19.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V19.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V19.2 비교통사고에서 기타 및 상세불명의 Unspecified pedal cyclist injured in collision
+자동차와 충돌로 다친 상세불명의 with other and unspecified motor vehicles in
+자전거 탑승자 nontraffic accident
+비교통성 자전거 충돌 NOS Pedal cycle collision, nontraffic NOS
+V19.3 상세불명의 비교통사고에서 다친 Pedal cyclist [any] injured in unspecified
+[모든] 자전거 탑승자 nontraffic accident
+비교통성 자전거사고 NOS Pedal cycle accident, nontraffic NOS
+비교통사고에서 다친 자전거 탑승자 NOS Pedal cyclist injured in nontraffic accident NOS
+V19.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V19.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V19.6 교통사고에서 기타 및 상세불명의 Unspecified pedal cyclist injured in collision
+자동차와 충돌로 다친 상세불명의 with other and unspecified motor vehicles in
+자전거 탑승자 traffic accident
+자전거 충돌(교통성) NOS Pedal cycle collision (traffic) NOS
+V19.8 기타 명시된 운수사고에서 다친 [모든] Pedal cyclist [any] injured in other specified
+자전거 탑승자 transport accidents
+자전거의 일부에 의해 걸림 Trapped by part of pedal cycle
+V19.9 상세불명의 교통사고에서 다친 [모든] Pedal cyclist [any] injured in unspecified
+자전거 탑승자 traffic accident
+자전거 사고 NOS Pedal cycle accident NOS
+[제목]운수사고에서 다친 모터사이클 탑승자(V20-V29) Motorcycle rider injured in transport accident
+포함 :모터구동 자전거Includes :Motorized bicycle, moped
+모터스쿠터 Motor scooter
+사이드카 부착 모터사이클 Motorcycle with sidecar
+제외 :삼륜자동차(V30-V39)Excludes :Three-wheeled motor vehicle
+주 : 다음 4단위 세분류는 V20-V28 항목에 사용된다.
+.0 비교통 사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통 사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통 사고에서 다친 상세불명의 Unspecified motorcycle rider injured in
+모터사이클 탑승자 nontraffic accident
+.3 승하차중 다친 사람 Person injured while boarding or alighting
+.4 교통사고에서 다친 운전자 Driver injured in traffic accident
+.5 교통사고에서 다친 승객 Passenger injured in traffic accident
+.9 교통사고에서 다친 상세불명의 모터사이클 Unspecified motorcycle rider injured in traffic
+탑승자 accident
+V20보행자 또는 동물과 충돌로 다친 Motorcycle rider injured in collision with
+모터사이클 탑승자 pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과 충돌(V26.-)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V21자전거와 충돌로 다친 모터사이클 Motorcycle rider injured in collision with pedal
+탑승자 cycle
+V22이륜 또는 삼륜자동차와 충돌로 다친 Motorcycle rider injured in collision with two-
+모터사이클 탑승자 or three-wheeled motor vehicle
+V23승용차, 픽업트럭 또는 밴과 충돌로 Motorcycle rider injured in collision with car,
+다친 모터사이클 탑승자 pick-up truck or van
+V24대형화물차 또는 버스와 충돌로 다친 Motorcycle rider injured in collision with heavy
+모터사이클 탑승자 transport vehicle or bus
+V25열차 또는 철도차량과 충돌로 다친 Motorcycle rider injured in collision with
+모터사이클 탑승자 railway train or railway vehicle
+V26기타 무동력차량과 충돌로 다친 Motorcycle rider injured in collision with other
+모터사이클 탑승자 nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V27고정 또는 정지된 물체와의 충돌로 Motorcycle rider injured in collision with fixed
+다친 모터사이클 탑승자 or stationary object
+V28비충돌 운수사고에서 다친 모터사이클 Motorcycle rider injured in noncollision
+탑승자 transport accident
+포함 :모터사이클로부터의 낙상 또는 던져짐(충돌이Includes :Fall or thrown from motorcycle
+선행되지 않은) (without antecedent collision)
+전복 NOS Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V29기타 및 상세불명의 운수사고에서 다친 Motorcycle rider injured in other and
+모터사이클 탑승자 unspecified transport accidents
+V29.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V29.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V29.2 비교통사고에서 기타 및 상세불명의 Unspecified motorcycle rider injured in
+자동차와 충돌로 다친 상세불명의 collision with other and unspecified motor
+모터사이클 탑승자 vehicles in nontraffic accident
+비교통성 모터사이클 충돌 NOS Motorcycle collision, nontraffic NOS
+V29.3 상세불명의 비교통사고에서 다친 Motor-cycle rider [any] injured in unspecified
+[모든] 모터사이클 탑승자 nontraffic accident
+비교통성 모터사이클 사고 NOS Motorcycle accident, nontraffic NOS
+비교통사고에서 다친 모터사이클 탑승자 Motorcycle rider injured in nontraffic accident
+NOS NOS
+V29.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V29.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V29.6 교통사고에서 기타 및 상세불명의 Unspecified motorcycle rider injured in
+자동차와 충돌로 다친 상세불명의 collision with other and unspecified motor
+모터사이클 탑승자 vehicles in traffic accident
+모터사이클 충돌(교통성) NOS Motorcycle collision (traffic) NOS
+V29.8 기타 명시된 운수사고에서 다친 [모든] Motorcycle rider [any] injured in other
+모터사이클 탑승자 specified transport accident
+모터사이클 일부에 의해 걸림 Trapped by part of motorcycle
+V29.9 상세불명의 교통사고에서 다친 [모든] Motorcycle rider [any] injured in unspecified
+모터사이클 탑승자 traffic accident
+모터사이클 사고 NOS Motorcycle accident NOS
+[제목]운수사고에서 다친 삼륜자동차 탑승자(V30-V39) Occupant of three-wheeled motor vehicle injured in transport accident
+포함 :동력삼륜차Includes :Motorized tricycle
+제외 :사이드카 부착 모터사이클(V20-V29)Excludes :Motorcycle with sidecar
+주로 비도로용으로 설계된 차량(V86.-) Vehicle designed primarily for off-road use
+주 : 다음 4단위 세분류는 V30-V38 항목에 사용된다.
+.0 비교통 사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통 사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통 사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in
+nontraffic accident
+.3 비교통 사고에서 다친 상세불명의 Unspecified occupant of three-wheeled motor
+삼륜자동차 탑승자 vehicle injured in nontraffic accident
+.4 승하차중 다친 사람 Person injured while boarding or alighting
+.5 교통사고에서 다친 운전자 Driver injured in traffic accident
+.6 교통사고에서 다친 승객 Passenger injured in traffic accident
+.7 교통 사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in traffic
+accident
+.9 교통사고에서 다친 상세불명의 삼륜자동차 Unspecified occupant of three- wheeled motor
+탑승자 vehicle injured in traffic accident
+V30보행자 또는 동물과 충돌로 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in collision with pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과 충돌(V36.-)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V31자전거와 충돌로 다친 삼륜자동차 Occupant of three-wheeled motor vehicle
+탑승자 injured in collision with pedal cycle
+V32이륜 또는 삼륜자동차와 충돌로 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in collision with two- or
+three-wheeled motor vehicle
+V33승용차, 픽업트럭 또는 밴과 충돌로 Occupant of three-wheeled motor vehicle
+다친 삼륜자동차 탑승자 injured in collision with car, pick-up truck or
+van
+V34대형화물차 또는 버스와 충돌로 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in collision with heavy transport
+vehicle or bus
+V35열차 또는 철도차량과 충돌로 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in collision with railway train or
+railway vehicle
+V36기타 무동력차량과 충돌로 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in collision with other nonmotor
+vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V37고정 또는 정지된 물체와의 충돌로 Occupant of three-wheeled motor vehicle
+다친 삼륜자동차 탑승자 injured in collision with fixed or stationary
+object
+V38비충돌 운수사고에서 다친 삼륜자동차 Occupant of three-wheeled motor vehicle
+탑승자 injured in noncollision transport accident
+포함 :삼륜자동차 전복으로부터의 낙상 또는 던져짐Includes :Fall or thrown from three-wheeled
+NOS motor vehicle overturning NOS
+충돌이 없는 삼륜자동차 전복으로부터의 낙상 Fall or thrown from three-wheeled motor
+또는 던져짐 vehicle overturning without collision
+V39기타 및 상세불명의 운수사고에서 다친 Occupant of three-wheeled motor vehicle
+삼륜자동차 탑승자 injured in other and unspecified transport
+accidents
+V39.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V39.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V39.2 비교통사고에서 기타 및 상세불명의 Unspecified occupant of three-wheeled motor
+자동차와 충돌로 다친 상세불명의 vehicle injured in collision with other and
+삼륜자동차 탑승자 unspecified motor vehicles in nontraffic
+accident
+비교통성 삼륜자동차가 관여된 충돌 NOS Collision involving three-wheeled motor vehicle,
+nontraffic NOS
+V39.3 상세불명의 비교통사고에서 다친 Occupant [any] of three-wheeled motor
+[모든] 삼륜자동차 탑승자 vehicle injured unspecified nontraffic
+accident
+비교통성 삼륜자동차가 관여된 사고 NOS Accident NOS involving three-wheeled motor
+vehicle, nontraffic
+비교통 사고에서 다친 삼륜자동차 탑승자 Occupant of three-wheeled motor vehicle injured
+NOS in nontraffic accident NOS
+V39.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V39.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V39.6 교통사고에서 기타 및 상세불명의 Unspecified occupant of three-wheeled motor
+자동차와 충돌로 다친 상세불명의 vehicle injured in collision with other and
+삼륜자동차 탑승자 unspecified motor vehicles in traffic accident
+삼륜자동차가 관여된 상세불명의 Collision NOS involving three-wheeled motor
+충돌(교통성) vehicle (traffic)
+V39.8 기타 명시된 운수사고에서 다친 [모든] Occupant [any] of three-wheeled motor
+삼륜자동차 탑승자 vehicle injured in other specified transport
+accidents
+삼륜자동차의 문이나 다른 부분에 걸림 Trapped by door or other part of three-wheeled
+motor vehicle
+V39.9 상세불명의 교통사고에서 다친 [모든] Occupant [any] of three-wheeled motor
+삼륜자동차 탑승자 vehicle injured in unspecified traffic accident
+삼륜자동차가 관여된 사고 NOS Accident involving three-wheeled motor vehicle
+NOS
+[제목]운수사고에서 다친 승용차 탑승자(V40-V49) Car occupant injured in transportaccident
+포함 :미니버스Includes :Minibus
+주 : 다음 4단위 세분류는 V40-V48 항목에 사용하려는 것이다.
+.0 비교통사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in
+nontraffic accident
+.3 비교통사고에서 다친 상세불명의 승용차 Unspecified car occupant injured in nontraffic
+탑승자 accident
+.4 승하차중 다친 사람 Person injured while boarding or alighting
+.5 교통사고에서 다친 운전자 Driver injured in traffic accident
+.6 교통사고에서 다친 승객 Passenger injured in traffic accident
+.7 교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in traffic
+accident
+.9 교통사고에서 다친 상세불명의 승용차 Unspecified car occupant injured in traffic
+탑승자 accident
+V40보행자 또는 동물과의 충돌로 다친 Car occupant injured in collision with
+승용차 탑승자 pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과 충돌(V46.-)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V41자전거와 충돌로 다친 승용차 탑승자 Car occupant injured in collision with pedal
+cycle
+V42이륜 또는 삼륜자동차와의 충돌로 다친 Car occupant injured in collision with two- or
+승용차 탑승자 three-wheeled motor vehicle
+V43승용차, 픽업트럭 또는 밴과의 충돌로 Car occupant injured in collision with car,
+다친 승용차 탑승자 pick-up truck or van
+V44대형화물차 또는 버스와의 충돌로 다친 Car occupant injured in collision with heavy
+승용차 탑승자 transport vehicle or bus
+V45열차 또는 철도차량과의 충돌로 다친 Car occupant injured in collision with railway
+승용차 탑승자 train or railway vehicle
+V46기타 무동력 차량과의 충돌로 다친 Car occupant injured in collision with other
+승용차 탑승자 nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V47고정 또는 정지된 물체와의 충돌로 Car occupant injured in collision with fixed or
+다친 승용차 탑승자 stationary object
+V48비충돌 운수사고에서 다친 승용차 Car occupant injured in noncollision transport
+탑승자 accident
+포함 :전복 NOSIncludes :Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V49기타 및 상세불명의 운수사고에서 다친 Car occupant injured in other and unspecified
+승용차 탑승자 transport accidents
+V49.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와의 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V49.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와의 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V49.2 비교통사고에서 기타 및 상세불명의 Unspecified car occupant injured in collision
+자동차와의 충돌로 다친 상세불명의 with other and unspecified motor vehicles in
+승용차 탑승자 nontraffic accident
+비교통성 승용차 충돌 NOS Car collision, nontraffic NOS
+V49.3 상세불명의 비교통사고에서 다친 Car occupant [any] injured in unspecified
+[모든] 승용차 탑승자 nontraffic accident
+비교통성 승용차사고 NOS Car accident, nontraffic NOS
+비교통사고에서 다친 승용차 탑승자 NOS Car occupant injured in nontraffic accident NOS
+V49.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와의 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V49.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와의 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V49.6 교통사고에서 기타 및 상세불명의 Unspecified car occupant injured in collision
+자동차와의 충돌로 다친 상세불명의 with other and unspecified motor vehicles in
+승용차 탑승자 traffic accident
+승용차의 충돌(교통성) NOS Car collision (traffic) NOS
+V49.8 기타 명시된 운수사고에서 다친 [모든] Car occupant [any] injured in other specified
+승용차 탑승자 transport accidents
+승용차의 문이나 다른 부분에 걸림 Trapped by door or other part of car
+V49.9 상세불명의 교통사고에서 다친 [모든] Car occupant [any] injured in unspecified
+승용차 탑승자 traffic accident
+승용차 사고 NOS Car accident NOS
+[제목]운수사고에서 다친 픽업트럭 또는 밴 탑승자 (V50-V59) Occupant of pick-up truck or van injured in transport accident
+제외 :대형화물차(V60-V69)Excludes :Heavy transport vehicle
+주 : 다음 4단위 세분류는 V50-V58 항목에 사용된다.
+.0 비교통사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in
+nontraffic accident
+.3 비교통사고에서 다친 상세불명의 픽업트럭 Unspecified occupant of pick-up truck or van
+또는 밴 탑승자 injured in nontraffic accident
+.4 승하차중 다친 사람 Person injured while boarding or alighting
+.5 교통사고에서 다친 운전자 Driver injured in traffic accident
+.6 교통사고에서 다친 승객 Passenger injured in traffic accident
+.7 교통 사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in traffic
+accident
+.9 교통사고에서 다친 상세불명의 픽업트럭 Unspecified occupant of pick-up truck or van
+또는 밴 탑승자 injured in traffic accident
+V50보행자 또는 동물과의 충돌로 다친 Occupant of pick- up truck or van injured in
+픽업트럭 또는 밴탑승자 collision with pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과 충돌(V56.-)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V51자전거와의 충돌로 다친 픽업트럭 또는 Occupant of pick-up truck or van injured in
+밴탑승자 collision with pedal cycle
+V52이륜 또는 삼륜자동차와의 충돌로 다친 Occupant of pick-up truck or van injured in
+픽업트럭 또는 밴 탑승자 collision with two-or three-wheeled motor
+vehicle
+V53승용차, 픽업트럭 또는 밴과의 충돌로 Occupant of pick-up truck or van injured in
+다친 픽업트럭 또는 밴 탑승자 collision with car, pick-up truck or van
+V54대형화물차 또는 버스와의 충돌로 다친 Occupant of pick-up truck or van injured in
+픽업트럭 또는 밴 탑승자 collision with heavy transport vehicle or bus
+V55열차 또는 철도차량과의 충돌로 다친 Occupant of pick-up truck or van injured in
+픽업트럭 또는 밴 탑승자 collision with railway train or railway vehicle
+V56기타 무동력차량과의 충돌로 다친 Occupant of pick-up truck or van injured in
+픽업트럭 또는 밴 탑승자 collision with other nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V57고정 또는 정지된 물체와의 충돌로 Occupant of pick-up truck or van injured in
+다친 픽업트럭 또는 밴 탑승자 collision with fixed or stationary object
+V58비충돌 운수사고에서 다친 픽업트럭 Occupant of pick-up truck or van injured in
+또는 밴 탑승자 noncollision transport accident
+포함 :전복 NOSIncludes :Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V59기타 및 상세불명의 운수사고에서 다친 Occupant of pick-up truck or van injured in
+픽업트럭 또는 밴 탑승자 other and unspecified transport accidents
+V59.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V59.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V59.2 비교통사고에서 기타 및 상세불명의 Unspecified occupant of pick-up truck or van
+자동차와 충돌로 다친 상세불명의 injured in collision with other and unspecified
+픽업트럭 또는 밴 탑승자 motor vehicles in nontraffic accident
+비교통성 픽업트럭 또는 밴이 관여된 충돌 Collision involving pick-up truck or van,
+NOS nontraffic NOS
+V59.3 상세불명의 비교통사고에서 다친 Occupant [any] of pick-up truck or van
+[모든] 픽업트럭 또는 밴 탑승자 injured unspecified nontraffic accident
+비교통성 픽업트럭 또는 밴이 관여된 사고 Accident involving pick-up truck or van,
+NOS nontraffic NOS
+비교통 사고에서 다친 픽업트럭 또는 밴의 Occupant of pick-up truck or van injured in
+탑승자 NOS nontraffic accident NOS
+V59.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V59.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V59.6 교통사고에서 기타 및 상세불명의 Unspecified occupant of pick-up truck or van
+자동차와 충돌로 다친 상세불명의 injured in collision with other and unspecified
+픽업트럭 또는 밴의 탑승자 motor vehicles in traffic accident
+픽업트럭 또는 밴이 관여된 충돌(교통성) Collision NOS involving pick-up truck or van
+(traffic)
+V59.8 기타 명시된 운수사고에서 다친 [모든] Occupant [any] of pick-up truck or van
+픽업트럭 또는 밴 탑승자 injured in other specified transport accidents
+픽업트럭 또는 밴의 문이나 다른 부분에 Trapped by door or other part of pick-up truck or
+걸림 van
+V59.9 상세불명의 교통사고에서 다친 Occupant [any] of pick-up truck or van
+픽업트럭 또는 밴 탑승자 injured in unspecified traffic accident
+픽업트럭 또는 밴이 관여된 사고 NOS Accident involving pick-up truck or van NOS
+[제목]운수사고에서 다친 대형화물차 탑승자(V60-V69) Occupant of heavy transport vehicleinjured in transport accident
+주 : 다음 4단위 세분류는 V60-V68 항목에 사용하려는 것이다.
+.0 비교통사고에서 다친 운전자 Driver injured in nontraffic accidentt
+.1 비교통사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in
+nontraffic accident
+.3 비교통사고에서 다친 상세불명의 Unspecified occupant of heavy transport vehicle
+대형화물차 탑승자 injured in nontraffic accident
+.4 승하차중 다친 사람 Person injured while boarding or alighting
+.5 교통사고에서 다친 운전자 Driver injured in traffic accident
+.6 교통사고에서 다친 승객 Passenger injured in traffic accident
+.7 교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in traffic
+accident
+.9 교통사고에서 다친 상세불명의 대형화물차 Unspecified occupant of heavy transport vehicle
+탑승자 injured in traffic accident
+V60보행자 또는 동물과의 충돌로 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 collision with pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과의 충돌(V66.Excludes :Collision with animal-drawn vehicle
+-) or animal being ridden
+V61자전거와의 충돌로 다친 대형화물차 Occupant of heavy transport vehicle injured in
+탑승자 collision with pedal cycle
+V62이륜 또는 삼륜자동차와의 충돌로 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 collision with two- or three-wheeled motor
+vehicle
+V63승용차, 픽업트럭 또는 밴과의 충돌로 Occupant of heavy transport vehicle injured in
+다친 대형화물차 탑승자 collision with car, pick-up truck or van
+V64대형화물차 또는 버스와의 충돌로 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 collision with heavy transport vehicle or bus
+V65열차 또는 철도차량과의 충돌로 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 collision with railway train or railway vehicle
+V66기타 무동력차량과의 충돌로 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 collision with other nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V67고정 또는 정지된 물체와의 충돌로 Occupant of heavy transport vehicle injured in
+다친 대형화물차 탑승자 collision with fixed or stationary object
+V68비충돌 운수사고에서 다친 대형화물차 Occupant of heavy transport vehicle injured in
+탑승자 noncollision transport accident
+포함 :전복 NOSIncludes :Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V69기타 및 상세불명의 운수사고에서 다친 Occupant of heavy transport vehicle injured in
+대형화물차 탑승자 other and unspecified transport accidents
+V69.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와의 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V69.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와의 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V69.2 비교통사고에서 기타 및 상세불명의 Unspecified occupant of heavy transport
+자동차와의 충돌로 다친 상세불명의 vehicle injured in collision with other and
+대형화물차 탑승자 unspecified motor vehicles in nontraffic
+accident
+비교통성 대형화물차가 관여된 충돌 NOS Collision involving heavy transport vehicle,
+nontraffic NOS
+V69.3 상세불명의 비교통사고에서 다친 Occupant [any] of heavy transport vehicle
+[모든] 대형화물차 탑승자 injured unspecified nontraffic accident
+비교통성 대형화물차가 관여된 사고 NOS Accident involving heavy transport vehicle,
+nontraffic NOS
+비교통사고에서 다친 대형화물차 탑승자 Occupant of heavy transport vehicle injured in
+NOS nontraffic accident NOS
+V69.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와의 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V69.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와의 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V69.6 교통사고에서 기타 및 상세불명의 Unspecified occupant of heavy transport
+자동차와의 충돌로 다친 상세불명의 vehicle injured in collision with other and
+대형화물차 탑승자 unspecified motor vehicles in traffic accident
+대형화물차가 관여된 충돌(교통성) NOS Collision involving heavy transport vehicle
+(traffic) NOS
+V69.8 기타 명시된 운수사고에서 다친 [모든] Occupant [any] of heavy transport vehicle
+대형화물차 탑승자 injured in other specified transport accidents
+대형화물차의 문이나 다른 부분에 걸림 Trapped by door or other part of heavy transport
+vehicle
+V69.9 상세불명의 교통사고에서 다친 Occupant [any] of heavy transport vehicle
+대형화물차 탑승자 injured in unspecified traffic accident
+대형화물차가 관여된 사고 NOS Accident involving heavy transport vehicle NOS
+[제목]운수사고에서 다친 버스 탑승자(V70-V79) Bus occupant injured in transportaccident
+제외 :미니버스(V40-V49)Excludes :Minibus
+주 : 다음 4단위 세분류는 V70-V78 항목에 사용한다.
+.0 비교통사고에서 다친 운전자 Driver injured in nontraffic accident
+.1 비교통사고에서 다친 승객 Passenger injured in nontraffic accident
+.2 비교통사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in
+nontraffic accident
+.3 비교통사고에서 다친 상세불명의 버스 Unspecified bus occupant injured in nontraffic
+탑승자 accident
+.4 승하차중 다친 사람 Person injured while boarding or alighting
+.5 교통사고에서 다친 운전자 Driver injured in traffic accident
+.6 교통사고에서 다친 승객 Passenger injured in traffic accident
+.7 교통 사고에서 다친 차량 밖의 사람 Person on outside of vehicle injured in traffic
+accident
+.9 교통사고에서 다친 상세불명의 버스 탑승자 Unspecified bus occupant injured in traffic
+accident
+V70보행자 또는 동물과의 충돌로 다친 Bus occupant injured in collision with
+버스 탑승자 pedestrian or animal
+제외 :동물-견인차량 또는 타는 동물과 충돌(V76.-)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V71자전거와 충돌로 다친 버스 탑승자 Bus occupant injured in collision with pedal
+cycle
+V72이륜 또는 삼륜자동차와 충돌로 다친 Bus occupant injured in collision with two- or
+버스 탑승자 three-wheeled motor vehicle
+V73승용차, 픽업트럭 또는 밴과 충돌로 Bus occupant injured in collision with car,
+다친 버스 탑승자 pick-up truck or van
+V74대형화물차 또는 버스와 충돌로 다친 Bus occupant injured in collision with heavy
+버스 탑승자 transport vehicle or bus
+V75열차 또는 철도차량과의 충돌로 다친 Bus occupant injured in collision with railway
+버스 탑승자 train or railway vehicle
+V76기타 무동력차량과 충돌로 다친 버스 Bus occupant injured in collision with other
+탑승자 nonmotor vehicle
+포함 :동물 견인차량, 타는 동물, 전차와 충돌Includes :Collision with animal-drawn vehicle,
+animal being ridden, streetcar
+V77고정 또는 정지된 물체와의 충돌로 Bus occupant injured in collision with fixed or
+다친 버스 탑승자 stationary object
+V78비충돌 운수사고에서 다친 버스 탑승자 Bus occupant injured in noncollision transport
+accident
+포함 :전복 NOSIncludes :Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V79기타 및 상세불명의 운수사고에서 다친 Bus occupant injured in other and unspecified
+버스 탑승자 transport accidents
+V79.0 비교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와의 충돌로 다친 운전자 unspecified motor vehicles in nontraffic
+accident
+V79.1 비교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와의 충돌로 다친 승객 unspecified motor vehicles in nontraffic
+accident
+V79.2 비교통사고에서 기타 및 상세불명의 Unspecified bus occupant injured in collision
+자동차와의 충돌로 다친 상세불명의 with other and unspecified motor vehicles in
+버스 탑승자 nontraffic accident
+비교통성 버스충돌 NOS Bus collision, nontraffic NOS
+V79.3 상세불명의 비교통사고에서 다친 Bus occupant [any] injured in unspecified
+[모든] 버스 탑승자 nontraffic accident
+비교통성 버스 사고 NOS Bus accident, nontraffic NOS
+비교통사고에서 다친 버스 탑승자 NOS Bus occupant injured in nontraffic accident NOS
+V79.4 교통사고에서 기타 및 상세불명의 Driver injured in collision with other and
+자동차와 충돌로 다친 운전자 unspecified motor vehicles in traffic accident
+V79.5 교통사고에서 기타 및 상세불명의 Passenger injured in collision with other and
+자동차와 충돌로 다친 승객 unspecified motor vehicles in traffic accident
+V79.6 교통사고에서 기타 및 상세불명의 Unspecified bus occupant injured in collision
+자동차와 충돌로 다친 상세불명의 버스 with other and unspecified motor vehicles in
+탑승자 traffic accident
+버스 충돌(교통성) NOS Bus collision (traffic) NOS
+V79.8 기타 명시된 운수사고에서 다친 [모든] Bus occupant [any] injured in other specified
+버스 탑승자 transport accidents
+버스의 문이나 다른 부분에 걸림 Trapped by door or other part of bus
+V79.9 상세불명의 교통사고에서 다친 [모든] Bus occupant [any] injured in unspecified
+버스 탑승자 traffic accident
+버스 사고 NOS Bus accident NOS
+[제목]기타 육상 운수사고 (V80-V89)Other land transport accidents
+V80운수사고에서 다친 동물 또는 Animal-rider or occupant of animal-drawn
+동물-견인차량 탑승자 vehicle injured in transport accident
+V80.0 비충돌사고로 동물 또는 동물 Rider or occupant injured by fall from or being
+견인차량에서 떨어지거나 던져져서 thrown from animal or animal-drawn vehicle
+다친 탑승자 in noncollision accident
+전복 NOS Overturning NOS
+충돌이 없는 전복 Overturning without collision
+V80.1 보행자 또는 동물과의 충돌로 다친 Rider or occupant injured in collision with
+탑승자 pedestrian or animal
+제외 :동물 견인차량 또는 타는 동물과의Excludes :Collision with animal-drawn vehicle
+충돌(V80.7) or animal being ridden
+V80.2 자전거와 충돌로 다친 탑승자 Rider or occupant injured in collision with
+pedal cycle
+V80.3 이륜 또는 삼륜자동차와 충돌로 다친 Rider or occupant injured in collision with
+탑승자 two- or three-wheeled motor vehicle
+V80.4 승용차, 픽업트럭, 밴, 대형화물차 또는 Rider or occupant injured in collision with car,
+버스와 충돌로 다친 탑승자 pick-up truck, van, heavy transport vehicle
+or bus
+V80.5 기타 명시된 자동차와 충돌로 다친 Rider or occupant injured in collision with
+탑승자 other specified motor vehicle
+V80.6 열차 또는 철도차량과 충돌로 다친 Rider or occupant injured in collision with
+탑승자 railway train or railway vehicle
+V80.7 기타 무동력차량과 충돌로 다친 탑승자 Rider or occupant in collision with other
+nonmotor vehicle
+~와 충돌 : Collision with :
+타는 동물 Animal being ridden
+동물 견인차량 Animal-drawn vehicle
+전차 Streetcar
+V80.8 고정 또는 정지된 물체와의 충돌로 Rider or occupant injured in collision with
+다친 탑승자 fixed or stationary object
+V80.9 기타 및 상세불명의 운수사고에서 다친 Rider or occupant injured in other and
+탑승자 unspecified transport accidents
+동물-견인차량 사고 NOS Animal-drawn vehicle accident NOS
+동물-탑승자 사고 NOS Animal-rider accident NOS
+V81운수사고에서 다친 열차 또는 철도차량 Occupant of railway train or railway vehicle
+탑승자 injured in transport accident
+포함 :열차 외부에 있는 사람Includes :Person on outside of train
+V81.0 비교통사고에서 자동차와 충돌로 다친 Occupant of railway train or railway vehicle
+열차 또는 철도차량 탑승자 injured in collision with motor vehicle in
+nontraffic accident
+V81.1 교통사고에서 자동차와 충돌로 다친 Occupant of railway train or railway vehicle
+열차 또는 철도차량 탑승자 injured in collision with motor vehicle in
+traffic accident
+V81.2 철도차량과 충돌 또는 타격에 의해서 Occupant of railway train or railway vehicle
+다친 열차 또는 철도차량 탑승자 injured in collision with or hit by rolling stock
+V81.3 기타 물체와 충돌로 다친 열차 또는 Occupant of railway train or railway vehicle
+철도차량 탑승자 injured in collision with other object
+철도충돌 NOS Railway collision NOS
+V81.4 열차 또는 철도차량 승하차시 다친 Person injured while boarding or alighting
+사람 from railway train or railway vehicle
+V81.5 열차 또는 철도로 추락하여 다친 열차 Occupant of railway train or railway vehicle
+또는 철도차량 탑승자 injured by fall in railway train or railway
+vehicle
+제외 :선행된 충돌로 탈선중 추락(V81.0-V81.3)Excludes :Fall during derailment with
+antecedent collision
+선행된 충돌이 없는 탈선중 추락(V81.7) Fall during derailment without antecedent
+collision
+승하차시 추락(V81.4) Fall while boarding or alighting
+V81.6 열차 또는 철도차량에서 추락하여 다친 Occupant of railway train or railway vehicle
+열차 또는 철도차량 탑승자 injured by fall from railway train or railway
+vehicle
+제외 :선행된 충돌로 탈선중 추락(V81.0-V81.3)Excludes :Fall during derailment with
+antecedent collision
+선행된 충돌이 없는 탈선중 추락(V81.7) Fall during derailment without antecedent
+collision
+승하차시 추락(V81.4) Fall while boarding or alighting
+V81.7 선행된 충돌없는 탈선으로 다친 열차 Occupant of railway train or railway vehicle
+또는 철도차량 탑승자 injured in derailment without antecedent
+collision
+V81.8 기타 명시된 철도사고에서 다친 열차 Occupant of railway train or railway vehicle
+또는 철도차량 탑승자 injured in other specified railway accidents
+폭발 또는 화재 Explosion or fire
+추락에 의한 타격 : Hit by falling :
+나무 Tree
+바위 Rock
+땅 Earth
+제외 :선행된 충돌에 의한 탈선(V81.0-V81.3)Excludes :Derailment with antecedent collision
+선행된 충돌이 없는 탈선(V81.7) Derailment without antecedent collision
+V81.9 상세불명의 철도사고에서 다친 열차 Occupant of railway train or railway vehicle
+또는 철도차량 탑승자 injured in unspecified railway accident
+철도사고 NOS Railway accident NOS
+V82운수사고에서 다친 전차 탑승자 Occupant of streetcar injured in transport
+accident
+포함 :전차 외부에 있는 사람Includes :Person on outside of streetcar
+V82.0 비교통사고에서 자동차와 충돌로 다친 Occupant of streetcar injured in collision with
+전차 탑승자 motor vehicle in nontraffic accident
+V82.1 교통사고에서 자동차와 충돌로 다친 Occupant of streetcar injured in collision with
+전차 탑승자 motor vehicle in traffic accident
+V82.2 철도차량과 충돌 또는 타격에 의해서 Occupant of streetcar injured in collision with
+다친 전차 탑승자 or hit by rolling stock
+V82.3 기타 물체와 충돌로 다친 전차 탑승자 Occupant of streetcar injured in collision with
+other object
+제외 :동물 견인차량 또는 타는 동물과 충돌(V82.8)Excludes :Collision with animal-drawn vehicle
+or animal being ridden
+V82.4 전차 승하차시 다친 사람 Person injured while boarding or alighting
+from streetcar
+V82.5 전차로 추락하여 다친 전차 탑승자 Occupant of streetcar injured by fall in
+streetcar
+제외 :선행된 충돌로 추락(V82.0-V82.3)Excludes :Fall with antecedent collision
+승하차시 추락(V82.4) Fall while boarding or alighting
+V82.6 전차에서 추락하여 다친 전차 탑승자 Occupant of streetcar injured by fall from
+streetcar
+제외 :선행된 충돌로 추락(V82.0-V82.3)Excludes :Fall with antecedent collision
+승하차시 추락(V82.4) Fall while boarding or alighting
+V82.7 선행된 충돌없는 탈선으로 다친 전차 Occupant of streetcar injured in derailment
+탑승자 without antecedent collision
+V82.8 기타 명시된 운수사고에서 다친 전차 Occupant of streetcar injured in other
+탑승자 specified transport accident
+열차 또는 기타 무동력차량과 충돌 Collision with train or other nonmotor vehicle
+V82.9 상세불명의 교통사고에서 다친 전차 Occupant of streetcar injured in unspecified
+탑승자 traffic accident
+전차사고 NOS Streetcar accident NOS
+V83운수사고에서 다친 주로 산업구내에서 Occupant of special vehicle mainly used on
+사용되는 특수차량 탑승자 industrial premises injured in transport
+accident
+제외 :고정용 또는 정비중인 차량(W31.-)Excludes :Vehicle in stationary use or
+maintenance
+V83.0 교통사고에서 다친 특수산업용 차량의 Driver of special vehicle injured in traffic
+운전자 accident
+V83.1 교통사고에서 다친 특수산업용차량의 Passenger of special industrial vehicle injured
+승객 in traffic accident
+V83.2 교통사고에서 다친 특수산업용 차량의 Person on outside of special industrial vehicle
+외부에 있는 사람 injured in traffic accident
+V83.3 교통사고에서 다친 상세불명의 Unspecified occupant of special industrial
+특수산업용 차량 탑승자 vehicle injured in traffic accident
+V83.4 특수산업용 차량 승하차시 다친 사람 Person injured while boarding or alighting
+from special industrial vehicle
+V83.5 비교통사고에서 다친 특수산업용 차량 Driver of special industrial vehicle injured in
+운전자 nontraffic accident
+V83.6 비교통사고에서 다친 특수산업용 Passenger of special industrial vehicle injured
+차량의 승객 in nontraffic accident
+V83.7 비교통사고에서 다친 특수산업용 Person on outside of special industrial vehicle
+차량의 외부에 있는 사람 injured in nontraffic accident
+V83.9 비교통사고에서 다친 상세불명의 Unspecified occupant of special industrial
+특수산업용 차량 탑승자 vehicle injured in nontraffic accident
+특수산업용 차량 사고 NOS Special-industrial-vehicle accident NOS
+V84운수사고에서 다친 주로 농업에 Occupant of special vehicle mainly used in
+사용되는 특수차량의 탑승자 agriculture injured in transport accident
+제외 :고정용 또는 정비중인 차량(W30.-)Excludes :Vehicle in stationary use or
+maintenance
+V84.0 교통사고에서 다친 특수농업용 차량 Driver of special agricultural vehicle injured in
+운전자 traffic accident
+V84.1 교통사고에서 다친 특수농업용 차량의 Passenger of special agricultural vehicle
+승객 injured in traffic accident
+V84.2 교통사고에서 다친 특수농업용 차량의 Person on outside of special agricultural
+외부에 있는 사람 vehicle injured in traffic accident
+V84.3 교통사고에서 다친 상세불명의 Unspecified occupant of special agricultural
+특수농업용 차량 탑승자 vehicle injured in traffic accident
+V84.4 특수농업용 차량 승하차시 다친 사람 Person injured while boarding or alighting
+from special agricultural vehicle
+V84.5 비교통사고에서 다친 특수농업용 차량 Driver of special agricultural vehicle injured in
+운전자 nontraffic accident
+V84.6 비교통사고에서 다친 특수농업용 Passenger of special agricultural vehicle
+차량의 승객 injured in nontraffic accident
+V84.7 비교통사고에서 다친 특수농업용 차량 Person on outside of special agricultural
+외부에 있는 사람 vehicle injured in nontraffic accident
+V84.9 비교통사고에서 다친 상세불명의 Unspecified occupant of special agricultural
+특수농업용 차량 탑승자 vehicle injured in nontraffic accident
+특수농업용 차량 사고 NOS Special-agricultural-vehicle accident NOS
+V85운수사고에서 다친 특수건설용 차량 Occupant of special construction vehicle
+탑승자 injured in transport accident
+제외 :고정용 또는 정비중인 차량(W31.-)Excludes :Vehicle in stationary use or
+maintenance
+V85.0 교통사고에서 다친 특수건설용 차량 Driver of special construction vehicle injured
+운전자 in traffic accident
+V85.1 교통사고에서 다친 특수건설용 차량의 Passenger of special construction vehicle
+승객 injured in traffic accident
+V85.2 교통사고에서 다친 특수건설용 차량의 Person on outside of special construction
+외부에 있는 사람 vehicle injured in traffic accident
+V85.3 교통사고에서 다친 상세불명의 Unspecified occupant of special construction
+특수건설용 차량 탑승자 vehicle injured in traffic accident
+V85.4 특수건설용 차량 승하차시 다친 사람 Person injured while boarding or alighting
+from special construction vehicle
+V85.5 비교통사고에서 다친 특수건설용 차량 Driver of special construction vehicle injured
+운전자 in nontraffic accident
+V85.6 비교통사고에서 다친 특수건설용 Passenger of special construction vehicle
+차량의 승객 injured in nontraffic accident
+V85.7 비교통사고에서 다친 특수건설용 Person on outside of special construction
+차량의 외부에 있는 사람 vehicle injured in nontraffic accident
+V85.9 비교통사고에서 다친 상세불명의 Unspecified occupant of special construction
+특수건설용 차량 탑승자 vehicle injured in nontraffic accident
+특수건설용 차량 사고 NOS Special-construction-vehicle accident NOS
+V86운수사고에서 다친 주로 비도로 주행을 Occupant of special all-terrain or other motor
+위해 설계된 특수 전지형차량 또는 vehicle designed primarily for off-road use,
+기타 자동차 탑승자 injured in transport accident
+제외 :고정용 또는 정비중인 차량(W31.-)Excludes :Vehicle in stationary use or
+maintenance
+V86.0 교통사고에서 다친 전지형차량 또는 Driver of all-terrain or other off-road motor
+기타 비도로주행 자동차 운전자 vehicle injured in traffic accident
+V86.1 교통사고에서 다친 전지형차량 또는 Passenger of all-terrain or other off-road
+기타 비도로주행 자동차의 승객 motor vehicle injured in traffic accident
+V86.2 교통사고에서 다친 전지형차량 또는 Person on outside of all-terrain or other
+기타 비도로주행 자동차의 외부에 있는 off-road motor vehicle injured in traffic
+사람 accident
+V86.3 교통사고에서 다친 상세불명의 Unspecified occupant of all-terrain or other
+전지형차량 또는 기타 비도로주행 off-road motor vehicle injured in traffic
+자동차 탑승자 accident
+V86.4 전지형차량 또는 기타 비도로주행 Person injured while boarding or alighting
+자동차 승하차시 다친 사람 from all-terrain or other off-road motor
+vehicle
+V86.5 비교통사고에서 다친 전지형차량 또는 Driver of all-terrain or other off-road motor
+기타 비도로주행 자동차 운전자 vehicle injured in nontraffic accident
+V86.6 비교통사고에서 다친 전지형차량 또는 Passenger of all-terrain or other off-road
+기타 비도로주행 자동차의 승객 motor vehicle injured in nontraffic accident
+V86.7 비교통사고에서 다친 전지형차량 또는 Person on outside of all-terrain or other
+기타 비도로주행 자동차 외부에 있는 off-road motor vehicle injured in nontraffic
+사람 accident
+V86.9 비교통사고에서 다친 상세불명의 Unspecified occupant of all-terrain or other
+전지형차량 또는 기타 비도로주행 off-road motor vehicle injured in nontraffic
+자동차 탑승자 accident
+전지형차량 사고 NOS All-terrain motor-vehicle accident NOS
+비도로주행 자동차 사고 NOS Off-road motor-vehicle accident NOS
+V87피해자의 교통수단을 알지 못하는 Traffic accident of specified type but victim’s
+명시된 형태의 교통사고 mode of transport unknown
+제외 :자전거가 관여된 충돌(V10-V19)Excludes :Collision involving pedal cyclist
+보행자가 관여된 충돌(V01-V09) Collision involving pedestrian
+V87.0 승용차와 이륜 또는 삼륜 자동차와 Person injured in collision between car and
+충돌로 다친 사람 (교통성) two- or three-wheeled motor vehicle (traffic)
+V87.1 기타 자동차와 이륜 또는 삼륜 Person injured in collision between other
+자동차와 충돌로 다친 사람(교통성) motor vehicle and two- or three-wheeled
+motor vehicle (traffic)
+V87.2 승용차와 픽업트럭이나 밴과 충돌로 Person injured in collision between car and
+다친 사람(교통성) pick-up truck or van (traffic)
+V87.3 승용차와 버스의 충돌로 다친 Person injured in collision between car and
+사람(교통성) bus (traffic)
+V87.4 승용차와 대형화물차의 충돌로 다친 Person injured in collision between car and
+사람(교통성) heavy transport vehicle (traffic)
+V87.5 대형화물차와 버스의 충돌로 다친 Person injured in collision between heavy
+사람(교통성) transport vehicle and bus (traffic)
+V87.6 열차 또는 철도차량과 승용차의 충돌로 Person injured in collision between railway
+다친 사람(교통성) train or railway vehicle and car (traffic)
+V87.7 기타 명시된 자동차 충돌로 다친 Person injured in collision between other
+사람(교통성) specified motor vehicles (traffic)
+V87.8 자동차가 관여된 기타 명시된 비충돌 Person injured in other specified noncollision
+운수사고에서 다친 사람(교통성) transport accidents involving motor vehicle
+(traffic)
+V87.9 무동력차가 관여된 기타 명시된(충돌) Person injured in other specified (collision)
+(비충돌) 운수사고에서 다친 (noncollision) transport accidents involving
+사람(교통성) nonmotor vehicle (traffic)
+V88피해자의 교통수단을 알지 못하는 Nontraffic accident of specified type but
+명시된 형태의 비교통사고 victim’s mode of transport unknown
+제외 :보행자가 관여된 충돌(V01-V09)Excludes :Collision involving pedestrian
+자전거가 관여된 충돌(V10-V19) Collision involving pedal cyclist
+V88.0 비교통성 승용차와 이륜 또는 Person injured in collision between car and
+삼륜자동차와 충돌로 다친 사람 two- or three-wheeled motor vehicle,
+nontraffic
+V88.1 비교통성 기타 자동차와 이륜 또는 Person injured in collision between other
+삼륜자동차와 충돌로 다친 사람 motor vehicle and two- or three-wheeled
+motor vehicle, nontraffic
+V88.2 비교통성 승용차와 픽업트럭이나 밴과 Person injured in collision between car and
+충돌로 다친 사람 pick-up truck or van, nontraffic
+V88.3 비교통성 승용차와 버스의 충돌로 다친 Person injured in collision between car and
+사람 bus, nontraffic
+V88.4 비교통성 승용차와 대형화물차의 Person injured in collision between car and
+충돌로 다친 사람 heavy transport vehicle, nontraffic
+V88.5 비교통성 대형화물차와 버스의 충돌로 Person injured in collision between heavy
+다친 사람 transport vehicle and bus, nontraffic
+V88.6 비교통성 열차 또는 철도차량과 Person injured in collision between railway
+승용차의 충돌로 다친 사람 train or railway vehicle and car, nontraffic
+V88.7 비교통성 기타 명시된 자동차간의 Person injured in collision between other
+충돌로 다친 사람 specified motor vehicles, nontraffic
+V88.8 비교통성 자동차가 관여된 기타 명시된 Person injured in other specified noncollision
+비충돌 운수사고에서 다친 사람 transport accidents involving motor vehicle,
+nontraffic
+V88.9 비교통성 무동력차가 관여된 기타 Person injured in other specified (collision)
+명시된 (충돌)(비충돌)운수사고에서 (noncollision) transport accidents involving
+다친 사람 nonmotor vehicle, nontraffic
+V89상세불명 차량형태의 자동차 또는 Motor- or nonmotor-vehicle accident, type of
+무동력차 사고 vehicle unspecified
+V89.0 상세불명의 자동차 사고에서 다친 Person injured in unspecified motor-vehicle
+사람, 비교통성 accident, nontraffic
+비교통성 자동차사고 NOS Motor-vehicle accident, nontraffic NOS
+V89.1 상세불명의 무동력차 사고에서 다친 Person injured in unspecified
+사람, 비교통성 nonmotor-vehicle accident, nontraffic
+무동력차의 사고(비교통성)NOS Nonmotor-vehicle accident (nontraffic) NOS
+V89.2 상세불명의 자동차 사고에서 다친 Person injured in unspecified motor- vehicle
+사람, 교통성 accident, traffic
+자동차 사고 NOS Motor-vehicle accident [MVA] NOS
+도로(교통) 사고 NOS Road(traffic) accident [RTA] NOS
+V89.3 상세불명의 무동력차 사고에서 다친 Person injured in unspecified
+사람, 교통성 nonmotor-vehicle accident, traffic
+무동력차 교통사고 NOS Nonmotor-vehicle traffic accident NOS
+V89.9 상세불명의 차량사고에서 다친 사람 Person injured in unspecified vehicle accident
+충돌 NOS Collision NOS
+[제목]수상운수 사고 (V90-V94)Water transport accidents
+포함 :레크리에이션 활동 중의 선박사고Includes :Watercraft accidents in the course
+of recreational activities
+주 : 다음 4단위 세분류는 V90-V94 항목에 사용하려는 것이다.
+.0 상선 Merchant ship
+.1 여객선 Passenger ship
+연락선 Ferry-boat
+정기선 Liner
+.2 어선 Fishing boat
+.3 기타 동력선 Other powered watercraft
+제트스키 Jet skis
+호버크래프트(공수면) Hovercraft (on open water)
+.4 범선 Sailboat
+요트 Yacht
+.5 카누 또는 카약 Canoe or kayak
+.6 부력선(비동력) Inflatable craft (nonpowered)
+.7 수상스키 Water-skis
+.8 기타 비동력선박 Other unpowered watercraft
+윈드서핑판 Windsurfer
+파도타기에 쓰는 판 Surf-board
+.9 상세불명의 선박 Unspecified watercraft
+보트 NOS Boat NOS
+선박 NOS Ship, watercraft NOS
+V90익사 및 익수의 원인이 된 선박사고 Accident to watercraft causing drowning and
+submersion
+포함 :~와 같은 원인에 의한 익사 및 익수 :Includes :Drowning and submersion due to :
+보트 전복 Boat overturning
+보트 침몰 Boat sinking
+충돌한 선박에서 추락 또는 뛰어내림 Falling or jumping from crushed watercraft
+불타는 선박에서 추락 또는 뛰어내림 Falling or jumping from burning ship
+기타 선박 사고 Other accident to watercraft
+제외 :선박사고가 없는 수상운수 관련 익사 및Excludes :Water-transport-related drowning
+익수(V92.-) or submersion without accident to watercraft
+V91기타 손상의 원인이 된 선박사고 Accident to watercraft causing other injury
+포함 :선박간 충돌에 의한 으깨짐Includes :Crushed between colliding ships
+선박 방기후 구명정에 의한 으깨짐 Crushed by lifeboat after abandoning ship
+선박 사고로 인한 떨어지는 물체에 의한 타격 Hit by falling object as a result of accident to
+watercraft
+선박사고의 결과로 일어난 익사 및 익수 이외의 Any injury except drowning and submersion as
+모든 손상 a result of an accident to watercraft
+선박의 충돌에 의한 선박 사고에서의 손상 Injured in watercraft accident involving
+collision of watercraft
+선박 화재시 화상 Burned while ship on fire
+충돌 또는 기타 선박 사고에 의한 추락 Fall due to collision or other accident to
+watercraft
+파손된 보트에서 떨어지거나 뛰어내린 후 보트 Struck by boat or part thereof after falling or
+또는 그 일부분에 의한 타격 jumping from damaged boat
+제외 :선상의 국소적 화재 또는 폭발에 의한Excludes :Burns from localized fire or
+화상(V93.-) explosion on board ship
+V92선박사고가 없는 수상운수 관련 익사 Water-transport-related drowning or
+및 익수 submersion without accident to watercraft
+포함 :~(와)과 같은 사고로 인한 익사 및 익수 :Includes :Drowning and submersion as a
+result of an accident such as :
+선박간의 건널판에서 추락 Fall from gangplank
+선박에서 추락 Fall from ship
+선박 밖으로 추락 fall overboard
+선박의 동요에 의해 배 밖으로 던져짐 Thrown overboard by motion of ship
+선박 밖으로 파도에 쓸려감 Washed overboard
+제외 :사고가 없는 선박에서 스스로 뛰어내린 수영자Excludes :Drowning or submersion of
+또는 잠수부의 익사 및 익수(W69.-, W73.-) swimmer or diver who voluntarily jumps from
+boat not involved in an accident
+V93익사 및 익수의 원인이 아닌 Accident on board watercraft without accident
+선박사고가 없는 선상사고 to watercraft, not causing drowning and
+submersion
+포함 :과열 :Includes :Excessive heat :
+보일러실 Boiler room, fire room
+기관실 Engine room
+증기실 Evaporator room
+~와 같은 용도의 기계로 인한 선박에서 손상 : Injured in watercraft caused by :
+갑판기계 Deck machinery
+기관실기계 Engine room machinery
+취사기계 Galley machinery
+세탁기계 Laundry machinery
+짐내리는기계 Loading machinery
+선박의 가스 또는 연기에 의한 불의의 중독 Accidental poisoning by gases or fumes on
+ship
+선박의 원자로 기능이상 Atomic reactor malfunction in watercraft
+선박에 떨어지는 물체에 의한 으깨짐 Crushed by falling object on ship
+선상 국소적 화재 Localized fire on ship
+선박에서 기계에 의한 사고 Machinery accident in watercraft
+수상운수에서 계단 또는 사다리에서의 추락 Fall on stairs or ladders in watercraft
+선박에서 높이가 다른 장소로부터 추락 Fall from one level to another in watercraft
+증기선의 보일러의 폭발 Explosive of boiler on steamship
+V94기타 및 상세불명의 수상 운수 사고 Other and unspecified water transport
+accidents
+포함 :선박 비승선자의 사고Includes :Accident to nonoccupant of
+watercraft
+수상스키중 보트에 의한 타격 Hit by boat while water-skiing
+[제목]항공 및 우주 운수 사고 (V95-V97)Air and space transport accidents
+V95탑승자가 다친 동력항공기사고 Accident to powered aircraft causing injury to
+occupant
+포함 :(동력)항공기의 또는 에서의 :Includes :Of or on (powered) aircraft :
+움직일수 있도록 또는 움직이게 설치된 모든 Collision with any object, fixed, movable or
+물체와의 충돌 moving
+폭발 Explosion
+화재 Fire
+강제착륙 Forced landing
+추락 Crash
+V95.0 탑승자가 다친 헬리콥터 사고 Helicopter accident injuring occupant
+V95.1 탑승자가 다친 극초경량, 초경량 또는 Ultralight, microlight or powered-glider
+동력-글라이더 사고 accident injuring occupant
+V95.2 탑승자가 다친 기타 개인용 Accident to other private fixed-wing aircraft,
+고정익항공기 사고 injuring occupant
+V95.3 탑승자가 다친 상업용 고정익항공기 Accident to commercial fixed-wing aircraft,
+사고 injuring occupant
+V95.4 탑승자가 다친 우주선사고 Spacecraft accident injuring occupant
+V95.8 탑승자가 다친 기타 항공기사고 Other aircraft accidents injuring occupant
+V95.9 탑승자가 다친 상세불명의 항공기사고 Unspecified aircraft accident injuring
+occupant
+항공기사고 NOS Aircraft accident NOS
+항공운수사고 NOS Air transport accident NOS
+V96탑승자가 다친 무동력항공기 사고 Accident to nonpowered aircraft causing
+injury to occupant
+포함 :무동력항공기의 또는 에서의 :Includes :Of or on nonpowered aircraft :
+움직일수 있도록 또는 움직이게 설치된 모든 Collision with any object, fixed, movable or
+물체와의 충돌 moving
+폭발 Explosion
+화재 Fire
+강제착륙 Forced landing
+추락 Crash
+V96.0 탑승자가 다친 기구(氣球) 사고 Balloon accident injuring occupant
+V96.1 탑승자가 다친 행글라이더 사고 Hang-glider accident injuring occupant
+V96.2 탑승자가 다친 (무동력)글라이더 사고 Glider (nonpowered) accident injuring
+occupant
+V96.8 탑승자가 다친 기타 무동력항공기 사고 Other nonpowered-aircraft accidents injuring
+occupant
+사람을 운반하는 연 Kite carrying a person
+V96.9 탑승자가 다친 상세불명의 Unspecified nonpowered-aircraft accident
+무동력항공기 사고 injuring occupant
+무동력항공기 사고 NOS Nonpowered-aircraft accident NOS
+V97기타 명시된 항공운수사고 Other specified air transport accidents
+포함 :항공기 비탑승자의 사고Includes :Accidents to nonoccupants of
+aircraft
+V97.0 기타 명시된 항공운수사고에서 다친 Occupant of aircraft injured in other specified
+항공기탑승자 air transport accidents
+항공운수사고에서 항공기안, 항공기 위 Fall in, on or from aircraft in air transport
+또는 항공기로 부터 추락 accident
+제외 :승선 또는 하선중 사고(V97.1)Excludes :Accident while boarding or alighting
+V97.1 항공기에 승선 또는 하선중 다친 사람 Person injured while boarding or alighting
+from aircraft
+V97.2 항공 운수사고에서 다친 낙하산강하자 Parachutist injured in air transport accident
+제외 :항공기에 사고가 발생한 후Excludes :Person making descent after
+낙하산하강자(V95-V96) accident to aircraft
+V97.3 항공운수사고에서 다친 지상의 사람 Person on ground injured in air transport
+accident
+항공기에서 떨어지는 물체에 의한 타격 Hit by object falling from aircraft
+회전프로펠라에 의한 손상 Injured by rotating propeller
+제트로 빨려들어감 Sucked into jet
+V97.8 달리 분류되지 않은 기타 항공운수사고 Other air transport accidents, NEC
+항공기의 기계에 의한 손상 Injury from machinery on aircraft
+제외 :항공기사고 NOS(V95.9)Excludes :Aircraft accident NOS
+상승이나 하강중 압력의 변화에 노출(W94.-) Exposure to exchanges in air pressure during
+ascent or descent
+[제목]기타 및 상세 불명의 운수사고(V98-V99) Other and unspecified transportaccidents
+제외 :상세불명 차량 형태의 차량사고(V89.-)Excludes :Vehicle accident, type of vehicle
+unspecified
+V98기타 명시된 운수사고 Other specified transport accidents
+포함 :~가 관여된 사고 :Includes :Accident to, on or involving :
+곤돌라가 달린 스키-리프트 Ski-lift with gondola
+빙상-요트 Ice-yacht
+스키 의자-리프트 Ski chair-lift
+육상-요트 Land-yacht
+궤도가 없는 케이블카 Cable-car, not on rails
+궤도가 없는 케이블카에 끼거나 끌려감 Caught or dragged by cable-car, not on rails
+궤도가 없는 케이블카에서 떨어지거나 Fall or jump from cable-car, not on rails
+뛰어내림
+궤도가 없는 케이블카에서 떨어진 물체 Object thrown from or in cable-car, not on
+rails
+V99상세불명의 운수사고 Unspecified transport accident
+[제목]낙상 (W00-W19)Falls
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :가해(Y01-Y02)Excludes :Assault
+(~에서의)(~로 부터의) 낙상 : Fall (in)(from) :
+동물(V80.-) Animal
+불타는 건물(X00.-) Burning building
+불속으로(X00-X04, X08-X09) Into fire
+물속(익사 및 익수)(W65-W74) Into water (with drowning or submersion)
+(작동중)기계(W28-W31) Machinery (in operation)
+사고로 유발되지 않은 반복적 넘어짐(R29.6) Repeated falls not resulting from accident
+운수 차량(V01-V99) Transport vehicle
+고의적 자해(X80-X81) Intentional self-harm
+W00얼음 또는 눈에 의한 동일 면상에서의 Fall on same level involving ice and snow
+낙상
+제외 :스케이트 및 스키에 대한 언급이 있는Excludes :Fall with mention of ice-skates and
+낙상(W02.-) skis
+계단에 대한 언급이 있는 낙상(W10.-) Fall with mention of stairs and steps
+W01미끄러짐, 걸림 및 헛디딤에 의한 동일 Fall on same level from slipping, tripping and
+면상에서의 낙상 stumbling
+제외 :얼음 또는 눈이 관여된 낙상(W00.-)Excludes :Fall involving ice or snow
+W02스케이트, 스키, 롤러-스케이트 또는 Fall involving ice-skates, skis, roller-skates
+스케이트보드에 의한 낙상 or skateboards
+W03타인과 충돌이나 타인의 밀치기에 의한 Other fall on same level due to collision with,
+동일면상에서의 기타 낙상 or pushing by, another person
+포함 :보행자(운반되는)와 다른보행자(운반되는)의Includes :Fall due to collision of pedestrian
+충돌로 인한 낙상 (conveyance) with another pedestrian
+(conveyance)
+제외 :군중에 의한 으깨짐 또는 떠밀림(W52.-)Excludes :Crushed or pushed by crowd or
+human stampede
+얼음이나 눈이 관여된 낙상(W00.-) Fall involving ice or snow
+W04타인에 의한 운반이나 지지를 받는 Fall while being carried or supported by other
+동안의 낙상 persons
+포함 :운반중 불의의 낙상Includes :Accidentally dropped while being
+carried
+W05휠체어가 관여된 낙상 Fall involving wheelchair
+W06침대가 관여된 낙상 Fall involving bed
+W07의자가 관여된 낙상 Fall involving chair
+W08기타 가구가 관여된 낙상 Fall involving other furniture
+W09운동장비가 관여된 낙상 Fall involving playground equipment
+제외 :레크리에이션용 기계가 관여된 추락(W31.-)Excludes :Fall involving recreational
+machinery
+W10계단에서의 낙상 Fall on and from stairs and steps
+포함 :(~에)(~에서) 낙상 :Includes :Fall (on)(from) :
+에스컬레이터 Escalator
+경사 Incline
+계단의 얼음 또는 눈이 관여된 Involving ice or snow on stairs and steps
+비탈길 Ramp
+W11사다리에서의 낙상 Fall on and from ladder
+W12비계발판에서의 낙상 Fall on and from scaffolding
+W13빌딩 또는 구조물에서의 낙상 Fall from, out of or through building or
+structure
+포함 :~로부터, ~을 통하여 또는 밖으로 추락 :Includes :Fall from, out of or through :
+건물 Building
+교량 Bridge
+깃대 Flag-pole
+난간 Railing
+바닥 Floor
+발코니 Balcony
+벽 Wall
+지붕 Roof
+창문 Window
+육교 Viaduct
+탑 Turret
+타워 Tower
+제외 :건물 또는 구조물의 붕괴(W20.-)Excludes :Collapse of a building or structure
+불타는 건물 또는 구조물에서 떨어지거나 Fall or jump from burning building or structure
+뛰어내림(X00.-)
+W14나무에서의 낙상 Fall from tree
+W15절벽에서의 낙상 Fall from cliff
+W16익사 및 익수 이외 손상의 원인인 물로 Diving or jumping into water causing injury
+다이빙 또는 뛰어듬 other than drowning or submersion
+포함 :얕은 물속으로 뛰어들거나 다이빙시 바닥에Includes :Striking or hitting against bottom
+부딪침 when jumping or diving into shallow water
+수영장의 벽이나 다이빙판에 부딪침 Striking or hitting wall or diving board of
+swimming-pool
+수면에 부딪침 Striking or hitting water surface
+제외 :불충분한 공기 공급으로 다이빙(W81.-)Excludes :Diving with insufficient air supply
+다이빙의 기압의 영향(W94.-) Effects of air pressure from diving
+불의의 익사 및 익수(W65-W74) Accidental drowning and submersion
+W17기타 한 면에서 다른 면으로 넘어짐 Other fall from one level to another
+포함 :~에서 또는 속으로 추락 :Includes :Fall from or into :
+건초더미 Haystack
+구덩이 Pit
+강(腔) Cavity
+도크 Dock
+이동식크레인 Cherry picker
+동굴 Hole
+인양장치 Lifting device
+고소작업대 Mobile elevated work platform [MEWP]
+스카이리프트 Sky lift
+탱크 Tank
+우물 Well
+채석장 Quarry
+통로 Shaft
+W18동일면상에서의 기타 낙상 Other fall on same level
+포함 :물체에 부딪쳐서 넘어짐Includes :Fall from bumping against object
+화장실 또는 화장실 밖에서 넘어짐 Fall from or off toilet
+동일면상에서 넘어짐 NOS Fall on same level NOS
+W19상세불명의 낙상 Unspecified fall
+포함 :사고낙상 NOSIncludes :Accidental fall NOS
+[제목]무생물성 기계적 힘에 노출 (W20-W49)Exposure to inanimate mechanical forces
+[발생장소의 4단위 분류는 936~939쪽 참조]
+단, W26은 5단위 세분류를 사용한다.
+제외 :가해(X85-Y09)Excludes :Assault
+동물 또는 사람과의 접촉 또는 Contact or collision with animals or persons
+충돌(W50-W64)
+고의적 자해(X60-X84) Intentional self-harm
+W20던져진, 쏘아진 또는 떨어지는 물체에 Struck by thrown, projected or falling object(s)
+의한 타격
+포함 :화재 이외의 건물의 붕괴Includes :Collapse of building except on fire
+질식을 초래하지 않은 붕괴 Cave-in without asphyxiation or suffocation
+떨어지는 : Falling :
+바위 Rock
+돌 Stone
+나무 Tree
+제외 :~에 의해 떨어지는 물체 :Excludes :Falling object in :
+지각변동(X34-X39) Cataclysm
+기계사고(W24, W28-W31) Machinery accident
+운수사고(V01-V99) Transport accident
+~에 의해 작동된 물체 : Object set in motion by :
+폭발(W35-W40) Explosion
+화기(W32-W34) Firearm
+스포츠장비(W21.-) Sports equipment
+불타는 건물의 붕괴(X00.-) Collapse of burning building
+W21스포츠장비에 의한 타격 Striking against or struck by sports equipment
+포함 :치거나 던진 공에 의한 타격Includes :Struck by hit or thrown ball
+하키채나 퍽에 의한 타격 Struck by hockey stick or puck
+W22다른 물체에 의한 타격 Striking against or struck by other object(s)
+포함 :벽에 부딪침Includes :Walked into wall
+W23물체 속이나 사이에 붙잡힘, 으깨짐, Caught, crushed, jammed or pinched in or
+뭉개짐 또는 끼임 between object(s)
+포함 :접는 물체와 같은 :Includes :Such as folding object :
+움직이는 물체 사이 붙잡힘 Caught between moving objects
+움직이는 물체 사이 으깨짐 Crushed between moving objects
+움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between moving objects
+정지 및 움직이는 물체 사이 붙잡힘 Caught between stationary and moving
+objects
+정지 및 움직이는 물체 사이 으깨짐 Crushed between stationary and moving
+objects
+정지 및 움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between stationary and
+moving objects
+물체속에 붙잡힘 Caught in object
+물체속에 으깨짐 Crushed in object
+물체속에 뭉개짐 및 끼임 Jammed or pinched in object
+여닫이 문 및 문틀과 같은 : Such as sliding door and door-frame :
+움직이는 물체 사이 붙잡힘 Caught between moving objects
+움직이는 물체 사이 으깨짐 Crushed between moving objects
+움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between moving objects
+정지 및 움직이는 물체 사이 붙잡힘 Caught between stationary and moving
+objects
+정지 및 움직이는 물체 사이 으깨짐 Crushed between stationary and moving
+objects
+정지 및 움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between stationary and
+moving objects
+물체속에 붙잡힘 Caught in object
+물체속에 으깨짐 Crushed in object
+물체속에 뭉개짐 및 끼임 Jammed or pinched in object
+손잡이를 놓친 후의 포장상자와 바닥과 같은 : Such packing crate and floor, after losing grip :
+움직이는 물체 사이 붙잡힘 Caught between moving objects
+움직이는 물체 사이 으깨짐 Crushed between moving objects
+움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between moving objects
+정지 및 움직이는 물체 사이 붙잡힘 Caught between stationary and moving
+objects
+정지 및 움직이는 물체 사이 으깨짐 Crushed between stationary and moving
+objects
+정지 및 움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between stationary and
+moving objects
+물체속에 붙잡힘 Caught in object
+물체속에 으깨짐 Crushed in object
+물체속에 뭉개짐 및 끼임 Jammed or pinched in object
+세탁기봉과 같은 : Such as washing-machine wringer :
+움직이는 물체 사이 붙잡힘 Caught between moving objects
+움직이는 물체 사이 으깨짐 Crushed between moving objects
+움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between moving objects
+정지 및 움직이는 물체 사이 붙잡힘 Caught between stationary and moving
+objects
+정지 및 움직이는 물체 사이 으깨짐 Crushed between stationary and moving
+objects
+정지 및 움직이는 물체 사이 뭉개짐 및 끼임 Jammed or pinched between stationary and
+moving objects
+물체속에 붙잡힘 Caught in object
+물체속에 으깨짐 Crushed in object
+물체속에 뭉개짐 및 끼임 Jammed or pinched in object
+제외 :~에 의해 야기된 손상 :Excludes :Injury caused by
+기계(W28-W31) Machinery
+무동력손공구(W27.-) Nonpowered hand tools
+운송수단으로 사용된 운송차량(V01-V99) Transport vehicle being used as a means of
+transportation
+인양 및 변속장치(W24.-) Lifting and transmission devices
+절단 또는 천공기(W25-W27) Cutting or piercing instruments
+던져진, 쏘아진 또는 떨어지는 물체에 의한 Struck by thrown, projected or falling object
+일격(W20.-)
+W24달리 분류되지 않은 인양 및 Contact with lifting and transmission device(s)
+변속장치와의 접촉 NEC
+포함 :도르래 장치Includes :Pulley block
+드라이브 벨트 Drive belt
+로프 Rope
+철사 Wire
+윈치 Winch
+변속벨트 또는 케이블 Transmission belt or cable
+사슬 기중기 Chain hoist
+제외 :운수사고(V01-V99)Excludes :Transport accidents
+W25날카로운 유리와 접촉 Contact with sharp glass
+제외 :유리가 관여된 넘어짐(W00-W19)Excludes :Fall involving glass
+폭발이나 화기발사로 날아온 유리(W32-W40) Flying glass due to explosion or firearm
+discharge
+피부에 박힌 유리(W45) Glass embedded in skin
+W26기타 날카로운 물체와 접촉 Contact with other sharp objects
+제외 :피부에 박힌 날카로운 물체(W45)Excludes :Sharp object(s) embedded in skin
+W26.0 나이프, 장도 및 단도와 접촉 Contact with knife, sword or dagger
+W26.8 달리 분류되지 않은 기타 날카로운 Contact with other sharp object(s), not
+물체와 접촉 elsewhere classified
+뻣뻣한 종이의 모서리 Edge of stiff paper
+깡통뚜껑 Tin can lid
+W26.9 상세불명의 날카로운 물체와 접촉 Contact with unspecified sharp object(s)
+W27무동력 손공구와 접촉 Contact with nonpowered hand tool
+포함 :가위Includes :Scissors
+갈퀴 Rake
+깡통따개 NOS Can-opener NOS
+끌 Chisel
+나사돌리개 Screwdriver
+도끼 Axe
+바늘 Needle
+삽 Shovel
+쇠스랑 Pitchfork
+얼음깨는 송곳 Ice-pick
+무동력 재봉틀 Sewing-machine, nonpowered
+재단기 Paper-cutter
+소형톱 Handsaw
+포크 Fork
+호미 Hoe
+제외 :피하주사바늘(W46.-)Excludes :Hypodermic needle
+W28동력잔디깎기와의 접촉 Contact with powered lawnmower
+제외 :전류에 노출(W86.-)Excludes :Exposure to electric current
+W29기타 동력손공구 및 가정용 기계류와의 Contact with other powered hand tools and
+접촉 household machinery
+포함 :동력 :Includes :Powered :
+깡통따개 Can-opener
+사슬톱 Chain saw
+가정용 조립공구 Do-it-yourself tool
+탈수기 Spin-drier
+정원용공구 Garden tool
+울타리손질하는 기계 Hedge-trimmer
+나이프 Knife
+재봉틀 Sewing-machine
+세탁기 Washing-machine
+믹서 Blender
+제외 :전류에의 노출(W86.-)Excludes :Exposure to electric current
+W30농업용기계와 접촉 Contact with agricultural machinery
+포함 :건초인양기Includes :Derrick, hay
+컴바인수확기 Combine harvester
+농사용기계류 NOS Farm machinery NOS
+동물-견인 농사용기계 Animal-powered farm machine
+수확기 Reaper
+탈곡기 Thresher
+제외 :자력이나 차량에 견인되는 운송중인 농업용Excludes :Contact with agricultural machinery
+기계와의 접촉(V01-V99) in transport under own power or being towed
+by vehicle
+전류에의 노출(W86.-) Exposure to electric current
+W31기타 및 상세불명의 기계류와 접촉 Contact with other and unspecified machinery
+포함 :기계 NOSIncludes :Machine NOS
+오락용기계류 Recreational machinery
+제외 :자력이나 차량에 견인되는 운송중인 농업용Excludes :Contact with agricultural machinery
+기계류와 접촉(V01-V99) in transport under own power or being towed
+by vehicle
+전류에 노출(W86.-) Exposure to electric current
+W32권총 발사 Handgun discharge
+포함 :리볼버Includes :Revolver
+피스톨 Pistol
+한손으로 사용하는 총 Gun for single hand use
+제외 :베리식 신호권총(W34.-)Excludes :Very pistol
+W33라이플, 엽총 및 기타 큰 화기발사 Rifle, shotgun and larger firearm discharge
+포함 :군용 라이플Includes :Army rifle
+엽총 Hunting rifle
+기관총 Machine gun
+제외 :공기총(W34.-)Excludes :Airgun
+W34기타 및 상세불명의 화기발사 Discharge from other and unspecifed firearms
+포함 :공기총Includes :Airgun
+베리식신호권총 Very pistol [flare]
+BB총 BB gun
+총상 NOS Gunshot wound NOS
+발포 NOS Shot NOS
+W35보일러 폭발 및 파열 Explosion and rupture of boiler
+W36가스통 폭발 및 파열 Explosion and rupture of gas cylinder
+포함 :공기탱크Includes :Air tank
+가압가스탱크 Pressurized-gas tank
+에어로솔깡통 Aerosol can
+W37압축 타이어, 파이프 또는 호스의 폭발 Explosion and rupture of pressurized tyre,
+및 파열 pipe or hose
+W38기타 명시된 가압장치의 폭발 및 파열 Explosion and rupture of other specified
+pressurized devices
+W39불꽃 발사 Discharge of firework
+W40기타 물질의 폭발 Explosion of other materials
+포함 :곡물창고내의 폭발Includes :Explosion in grain store
+공장내의 폭발 Explosion in factory
+덤프트럭내의 폭발 Explosion in dump
+군수품의 폭발 Explosion in munitions
+폭발물질 Blasting material
+폭발 NOS Explosion NOS
+폭발성 가스 Explosive gas
+W41고압분사에 노출 Exposure to high-pressure jet
+포함 :수압분사Includes :Hydraulic jet
+기압분사 Pneumatic jet
+W42소음에 노출 Exposure to noise
+포함 :음파Includes :Sound waves
+초음파 Supersonic waves
+W43진동에 노출 Exposure to vibration
+포함 :초저주파Includes :Infrasound waves
+W44눈 또는 인체의 개구부를 통하여 Foreign body entering into or through eye or
+들어온 이물 natural orifice
+제외 :부식성 액체(X49.-)Excludes :Corrosive fluid
+기도의 폐색을 가져온 이물의 흡입 또는 Inhalation or ingestion of foreign body with
+섭취(W78-W80) obstruction of respiratory tract
+W45피부를 통하여 들어온 이물 또는 물체 Foreign body or object entering through skin
+포함 :피부에 박힌 이물 또는 물체 :Includes :Foreign body or object embedded in
+skin :
+파편 Splinter
+못 Nail
+제외 :손공구와 접촉(무동력, 동력)(W27-W29)Excludes :Contact with hand
+tools(nonpowered, powered)
+피하주사바늘과 접촉(W46.-) Contact with hypodermic needle
+기타 날카로운 물체와 접촉(W26.-) Other sharp object(s)
+날카로운 유리와 접촉(W25.-) Contact with sharp glass
+물체에 의한 타격(W20-W22) Struck by objects
+W46피하주사바늘과 접촉 Contact with hypodermic needle
+W49기타 및 상세불명의 무생물성 기계적 Exposure to other and unspecified inanimate
+힘에 노출 mechanical forces
+포함 :이상중력Includes :Abnormal gravitational [G] forces
+[제목]생물성 기계적 힘에 노출 (W50-W64)Exposure to animate mechanical forces
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :독액성 물림(X20-X29)Excludes :Bites, venomous
+(독액성) 쏘임(X20-X29) Stings(venomous)
+W50타인에 의해 맞음, 부딪힘, 차임, Hit, struck, kicked, twisted, bitten or
+비틀림, 물림 또는 찰과 scratched by another person
+제외 :가해(X85-Y09)Excludes :Assault
+물체에 의한 타격(W20-W22) Struck by object
+W51타인에 부딪힘 또는 받힘 Striking against or bumped into by another
+person
+제외 :다른 보행자(운반되는)와 보행자(운반되는)의Excludes :Fall due to collision of pedestrian
+충돌로 인한 낙상(W03.-) (conveyance) with another pedestrian
+(conveyance)
+W52군중 또는 사람의 쇄도에 의한 으깨짐, Crushed, pushed or stepped on by crowd or
+밀림 또는 밟힘 human stampede
+W53쥐에 물림 Bitten by rat
+W54개에 물림 또는 부딪힘 Bitten or struck by dog
+W55기타 포유동물에 의한 물림 또는 Bitten or struck by other mammals
+부딪힘
+제외 :바다 포유동물과 접촉(W56.-)Excludes :Contact with marine mammals
+W56바다 동물과 접촉 Contact with marine animal
+바다동물에 물림 또는 부딪힘 Bitten or struck by marine animal
+W57무독액성 곤충 및 기타 무독액성 Bitten or stung by nonvenomous insect and
+절지동물에 물림 또는 쏘임 other nonvenomous arthropods
+W58악어에 물림 또는 부딪힘 Bitten or struck by crocodile or alligator
+W59기타 파충류에 물림 또는 으깨짐 Bitten or crushed by other reptiles
+포함 :도마뱀Includes :Lizard
+무독액성 뱀 Snake, nonvenomous
+W60식물의 가시 및 날카로운 잎사귀와 Contact with plant thorns, and spines and
+접촉 sharp leaves
+W64기타 및 상세불명의 생물성 기계적 Exposure to other and unspecified animate
+힘에 노출 mechanical forces
+[제목]우발적 익사 및 익수 (W65-W74)Accidental drowning and submersion
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :~에 의한 익사 및 익수 :Excludes :Drowning and submersion due to :
+지각변동(X34-X39) Cataclysm
+운수사고(V01-V99) Transport accident
+수상운수사고(V90.-, V92.-) Water transport accidents
+W65목욕통 안에 있는 동안의 익사 및 익수 Drowning and submersion while in bath-tub
+W66목욕통으로 떨어진 후의 익사 및 익수 Drowning and submersion following fall into
+bath-tub
+W67수영장 안에 있는 동안의 익사 및 익수 Drowning and submersion while in
+swimming-pool
+W68수영장으로 떨어진 후의 익사 및 익수 Drowning and submersion following fall into
+swimming-pool
+W69자연수 안에 있는 동안의 익사 및 익수 Drowning and submersion while in natural
+water
+포함 :강Includes :River
+공해(公海) Open sea
+개울 Stream
+호수 Lake
+W70자연수로 떨어진 후의 익사 및 익수 Drowning and submersion following fall into
+natural water
+W73기타 명시된 익사 및 익수 Other specified drowning and submersion
+포함 :담금질탱크Includes :Quenching tank
+저수조 Reservoir
+W74상세불명의 익사 및 익수 Unspecified drowning and submersion
+포함 :익사 NOSIncludes :Drowning NOS
+물로 떨어짐 NOS Fall into water NOS
+[제목]호흡과 관련된 기타 불의의 위협(W75-W84) Other accidental threats to breathing
+[발생장소의 4단위 분류는 936~939쪽 참조]
+W75침대에서의 우발적 질식 및 교액 Accidental suffocation and strangulation in
+bed
+포함 :~에 의한 질식 및 교액 :Includes :Suffocation and strangulation due to
+베개 Pillow
+어머니 몸 Mother’s body
+침대보 Bed linen
+W76기타 불의의 목맴 및 교액 Other accidental hanging and strangulation
+W77붕괴, 떨어지는 흙 및 기타 물질에 의한 Threats to breathing due to cave-in, falling
+호흡 위협 earth and other substances
+포함 :붕괴 NOSIncludes :Cave-in NOS
+제외 :지각변동에 의한 붕괴(X34-X39)Excludes :Cave-in caused by cataclysm
+질식이 없는 붕괴(W20.-) Cave-in without asphyxiation or suffocation
+W78위 내용물의 흡입 Inhalation of gastric contents
+포함 :구토물[역류하는 음식물]에 의한 :Includes :Vomitus [regurgitated food] :
+질식 Asphyxia by
+질식 Suffocation by
+질식 Choked on
+구토물의 (기도로) 흡입 NOS Aspiration and inhalation of vomitus (into
+respiratory tract) NOS
+식도내에서 구토물에 의한 : By vomitus in oesophagus :
+기관지 압박 Compression of trachea
+호흡의 중단 Interruption of respiratio
+호흡의 폐색 Obstruction of respiration
+제외 :구토물에 의한 기도의 질식이나 폐색 이외의Excludes :Injury, except asphyxia or
+손상(W44.-) obstruction of respiratory tract, caused by
+vomitus
+질식이나 기도의 폐색에 대한 언급이 없는 Obstruction of oesophagus by vomitus without
+구토물에 의한 식도폐색(W44.-) mention of asphyxia or obstruction of
+respiratory tract
+W79기도폐색의 원인이 된 음식물의 흡입 Inhalation and ingestion of food causing
+및 섭취 obstruction of respiratory tract
+포함 :음식물[뼈나 씨를 포함] 에 의한 :Includes :Food [including bone or seed] :
+질식 Asphyxia by
+질식 Suffocation by
+질식 Choked on
+[모든] 음식물의 (기도로) 흡입 NOS Aspiration and inhalation of food [any](into
+respiratory tract) NOS
+식도내에서 음식물에 의한 : By food in oesophagus :
+기관지 압박 Compression of trachea
+호흡의 중단 Interruption of respiration
+호흡의 폐색 Obstruction of respiration
+음식물(덩어리)에 의한 인두폐색 Obstruction of pharynx by food (bolus)
+제외 :구토물의 흡입(W78.-)Excludes :Inhalation of vomitus
+음식물에 의한 기도의 질식이나 폐색 이외의 Injury, except asphyxia or obstruction of
+손상(W44.-) respiratory tract, caused by food
+질식이나 기도의 폐색에 대한 언급이 없는 Obstruction of oesophagus by food without
+음식물에 의한 식도폐색(W44.-) mention of asphyxia or obstruction of
+respiratory tract
+W80기도 폐색의 원인이 된 기타 물건의 Inhalation and ingestion of other objects
+흡입 및 섭취 causing obstruction of respiratory tract
+포함 :음식물이나 구토물을 제외하고 코나 입으로Includes :Any object, except food or vomitus,
+들어가는 모든 물체에 의한 : entering by nose or mouth :
+질식 Asphyxia by
+질식 Suffocation by
+질식 Choked on
+흡인 NOS Aspiration NOS
+음식물이나 구토물 이외의 이물의 Aspiration and inhalationof foreign body,
+흡입(기도로) NOS except food or vomitus (into respiratory
+tract) NOS
+식도속의 이물에 의한 : By foreign body in oesophagus :
+기관지 압박 Compression of trachea
+호흡의 중단 Interruption of respiration
+호흡의 폐색 Obstruction of respiration
+코속의 이물 Foreign object in nose
+이물에 의한 인두폐색 Obstruction of pharynx by foreign body
+제외 :구토물이나 음식물의 흡입(W78-W79)Excludes :Inhalation of vomitus or food
+이물에 의한 기도의 질식이나 폐색 이외의 Injury, except asphyxia or obstruction of
+손상(W44.-) respiratory tract, caused by foreign body
+질식이나 기도의 폐쇄에 대한 언급이 없는 Obstruction of oesophagus by foreign body
+이물에 의한 식도폐색(W44.-) without mention of asphyxia or obstruction of
+respiratory tract
+W81저산소환경에 갇힘 Confined to or trapped in a low-oxygen
+environment
+포함 :냉장고 속이나 기타 밀폐된 장소에Includes :Accidentally shut in refrigerator or
+불의에 갇힘 other airtight space
+공기 공급이 불충분한 다이빙 Diving with insufficient air supply
+제외 :플라스틱백에 의한 질식(W83-)Excludes :Suffocation by plastic bag
+W83호흡의 기타 명시된 위협 Other specified threats to breathing
+포함 :플라스틱백에 의한 질식Includes :Suffocation by plastic bag
+W84호흡의 상세불명 위협 Unspecified threat to breathing
+포함 :질식 NOSIncludes :Asphyxiation NOS
+질식 NOS Suffocation NOS
+[제목]전류, 방사선 및 극단적 기온 및 기압에의 노출(W85-W99) Exposure to electric current, radiation and extreme ambient air temperature and pressure
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :재난에 대한 언급이 없는, 치료의 합병증에Excludes :Abnormal reaction to a complication
+대한 이상반응(Y84.2) of treatment, without mention of misadventure
+외과적 및 내과적 처치에서의 환자에 대한 Misadventure to patient in surgical and medical
+재난(Y63.2-Y63.5) procedures
+더위에 노출(X30) Exposure to natural heat
+벼락에 의한 피해(X33.-) Victim of lightning
+자연방사선에 노출 NOS(X39.-) Exposure to natural radiation NOS
+한랭에 노출(X31.-) Exposure to natural cold
+햇볕에 노출(X32.-) Exposure to sunlight
+W85송전선에 노출 Exposure to electric transmission lines
+W86기타 명시된 전류에 노출 Exposure to other specified electric current
+W87상세불명의 전류에 노출 Exposure to unspecified electric current
+포함 :전류에 의한 화상 또는 기타손상 NOSIncludes :Burns or other injury from electric
+current NOS
+전기쇼크 NOS Electric shock NOS
+감전사 NOS Electrocution NOS
+W88이온화 방사선에 노출 Exposure to ionizing radiation
+포함 :방사성동위원소Includes :Radioactive isotopes
+X-선 X-rays
+W89인공 가시광선 및 자외선에 노출 Exposure to man-made visible and ultraviolet
+light
+포함 :용접광선Includes :Welding light (arc)
+W90기타 비이온화방사선에의 노출 Exposure to other nonionizing radiation
+포함 :적외선복사Includes :Infrared radiation
+레이저방사선 Laser radiation
+라디오주파수방사선 Radiofrequency radiation
+W91상세불명 형태의 방사선에 노출 Exposure to unspecified type of radiation
+W92인공적 과잉열에 노출 Exposure to excessive heat of man-made
+origin
+W93인공적 과잉한랭에 노출 Exposure to excessive cold of man-made
+origin
+포함 :~(와)과 접촉 또는 흡입 :Includes :Contact with or inhalation of :
+드라이아이스 Dry ice
+액체공기 Liquid air
+액체수소 Liquid hydrogen
+액체질소 Liquid nitrogen
+냉동고에 장기간노출 Prolonged exposure in deep-freeze unit
+W94고압 및 저압 및 기압의 변화에 노출 Exposure to high and low air pressure and
+changes in air pressure
+포함 :물속으로 급하강에 따른 고압Includes :High air pressure from rapid
+descent in water
+심해잠수에서 떠오르는 동안 기압의 감소 Reduction in atmospheric pressure while
+surfacing from deep-water diving
+지하에서 올라오는 중 기압의 감소 Reduction in atmospheric pressure while
+surfacing from underground
+~(와)과 같은 원인이 된 고지에서 거주 또는 Residence or prolonged visit at high altitude as
+장기간 체류 the cause of :
+고산병 Mountain sickness
+압력치통 Barodontalgi
+압력중이염 Barotitis
+무산소증 Anoxia
+저산소증 Hypoxia
+비행기의 상승 및 하강중 비행기 안의 기압의 Sudden change in air pressure in aircraft
+급속한 변화 during ascent or descent
+W99기타 및 상세불명의 인공환경 요인에 Exposure to other and unspecified
+노출 man-made environmental factors
+[제목]연기, 불 및 불꽃에 노출(X00-X09) Exposure to smoke, fire and flames
+[발생장소의 4단위 분류는 936~939쪽 참조]
+포함 :벼락에 의한 화재Includes :Fire caused by lightning
+제외 :방화(X97.-)Excludes :Arson
+운송사고(V01-V99) Transport accidents
+폭발에 의한 이차 화재(W35-W40) Secondary fire resulting from explosion
+X00건물 또는 구조물 안에서 통제되지 Exposure to uncontrolled fire in building or
+않은 불에 노출 structure
+포함 :불타는 건물이나 구조물(의)(에서) :Includes :Burning building or structure :
+붕괴 Collapse of
+추락 Fall from
+떨어지는 물건에 의한 타격 Hit by object falling from
+뛰어내림 Jump from
+대화재 Conflagration
+장치물 및 가구(의) : Fittings and furniture of :
+화재 Fire
+녹아내림 Melting
+연기 Smouldering
+X01건물 또는 구조물이 아닌 곳에서 Exposure to uncontrolled fire, not in building
+통제되지 않은 불에 노출 or structure
+포함 :산불Includes :Forest fire
+X02건물 또는 구조물안에서 통제된 불에 Exposure to controlled fire in building or
+노출 structure
+포함 :화로불Includes :Fire in fireplace
+난로불 Fire in stove
+X03건물 또는 구조물이 아닌 곳에서 Exposure to controlled fire, not in building or
+통제된 불에 노출 structure
+포함 :캠프 파이어Includes :Camp-fire
+X04높은 가연성 물질의 발화에 노출 Exposure to ignition of highly flammable
+material
+포함 :~의 발화 :Includes :Ignition of :
+가솔린 Gasoline
+등유 Kerosene
+석유 Petrol
+X05잠옷의 발화 또는 녹아내림에 노출 Exposure to ignition or melting of nightwear
+X06기타 의류의 발화 또는 녹아내림에 Exposure to ignition or melting of other
+노출 clothing and apparel
+포함 :플라스틱 장신구의 발화 및 녹아내림Includes :Ignition and melting of plastic
+jewellery
+X08기타 명시된 연기, 불 및 불꽃에 노출 Exposure to other specified smoke, fire and
+flames
+X09상세불명의 연기, 불 및 불꽃에의 노출 Exposure to unspecified smoke, fire and
+flames
+포함 :연소 NOSIncludes :Burning NOS
+소각 NOS Incineration NOS
+연기 흡입 NOS Smoke inhalation NOS
+[제목]열 및 가열된 물질과의 접촉(X10-X19) Contact with heat and hot substances
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :과도한 자연열에 노출(X30.-)Excludes :Exposure to excessive natural heat
+불 및 불꽃에 노출(X00-X09) Exposure to fire and flames
+X10뜨거운 음료 식품, 지방 및 조리용 Contact with hot drinks, food, fats and
+기름과 접촉 cooking oils
+X11뜨거운 수돗물과 접촉 Contact with hot tap-water
+포함 :~속의 뜨거운 물 :Includes :Hot water in :
+버킷 Bucket
+통 Tub
+욕조 Bath
+호스 및 수도꼭지에서 나오는 뜨거운 물 Hot water running out of hose and tap
+X12기타 뜨거운 용액과 접촉 Contact with other hot fluids
+포함 :난로위에서 데운 물Includes :Water heated on stove
+제외 :가열된 (액체)금속(X18.-)Excludes :Hot (liquid) metals
+X13증기 및 뜨거운 김과 접촉 Contact with steam and hot vapours
+X14뜨거운 공기 및 가스와 접촉 Contact with hot air and gases
+포함 :가열된 공기 및 가스 흡입Includes :Inhalation of hot air and gases
+X15뜨거운 가정기기와 접촉 Contact with hot household appliances
+포함 :화로(취사용)Includes :Stove (kitchen)
+냄비(유리, 금속) Saucepan (glass, metal)
+열판 Hotplate
+조리기 Cooker
+주전자 Kettle
+토스터 Toaster
+제외 :난방장치(X16.-)Excludes :Heating appliances
+X16뜨거운 난방장치, 방열기 및 파이프와 Contact with hot heating appliances,
+접촉 radiators and pipe
+X17뜨거운 엔진, 기계 및 공구와 접촉 Contact with hot engines, machinery and
+tools
+제외 :가열된 가정기기(X15.-)Excludes :Hot household appliances
+가열된 난방장치, 방열기 및 파이프(X16.-) Hot heating appliances, radiators and pipes
+X18기타 뜨거운 금속과 접촉 Contact with other hot metals
+포함 :액체금속Includes :Liquid metal
+X19기타 및 상세불명의 열 및 뜨거운 Contact with other and unspecified heat and
+물질과 접촉 hot substances
+제외 :통상 뜨겁지 않은 물체로서 예를 들면 주택의Excludes :Objects that are not normally hot,
+화재로 가열된 물체(X00-X09) e.g., an object made hot by a house fire
+[제목]독액성 동물 및 식물과의 접촉(X20-X29) Contact with venomous animals andplants
+[발생장소의 4단위 분류는 936~939쪽 참조]
+포함 :동물과 곤충이 방출한 화학물질Includes :Chemical released by animal and
+insect
+여러가지 독아, 독체모, 독촉수 및 기타 Rleased of venom through fangs, hairs, spines,
+독액장치를 통해서 독의 방출 tentacles and other venom apparatus
+독액성 물림 및 쏘임 Venomous bites and stings
+제외 :독액성 동물 또는 식물의 섭취(X49.-)Excludes :Ingestion of poisonous animals or
+plants
+X20독액성 뱀 및 도마뱀과 접촉 Contact with venomous snakes and lizards
+포함 :길라 몬스터Includes :Gila monster
+독사 Venomous snake
+바다뱀 Sea snake
+방울뱀 Rattlesnake
+살무사 Viper
+코브라 Cobra
+삿갓뱀 Krait
+훼드란스 Fer de lance
+제외 :(무독액성)도마뱀(W59.-)Excludes :Lizard (nonvenomous)
+무독액성 뱀(W59.-) Snake, nonvenomous
+X21독거미와 접촉 Contact with venomous spiders
+포함 :블랙위도우거미Includes :Black widow spider
+타란툴라거미 Tarantula
+X22전갈과 접촉 Contact with scorpions
+X23장수말벌, 말벌 및 꿀벌과 접촉 Contact with hornets, wasps and bees
+포함 :말벌Includes :Yellow jacket
+X24지네 및 독액성 노래기(열대성)와 접촉 Contact with centipedes and venomous
+millipedes (tropical)
+X25기타 독액성 절지동물과 접촉 Contact with other venomous arthropods
+포함 :개미Includes :Ant
+모충 Caterpillar
+X26독액성 해양동물 및 식물과 접촉 Contact with venomous marine animals and
+plants
+포함 :말미잘Includes :Sea anemone
+자포 Nematocysts
+산호 Coral
+성게 Sea urchin
+해삼 Sea cucumber
+해파리 Jellyfish
+제외 :무독액성 해양동물(W56.-)Excludes :Nonvenomous marine animals
+바다뱀(X20.-) Sea snakes
+X27기타 명시된 독액성 동물과 접촉 Contact with other specified venomous
+animals
+X28기타 명시된 독액성 식물과 접촉 Contact with other specified venomous plants
+포함 :식물의 가시 또는 기타 기구에 의하여 피부를Includes :Injection of poisons or toxins into or
+통하여 독소 주입 through skin by plant thorns, spines or other
+mechanisms
+제외 :유독식물의 섭취(X49.-)Excludes :Ingestion of poisonous plants
+식물 가시에 찔린 상처 NOS(W60.-) Puncture wound caused by plant thorns or
+spines NOS
+X29상세불명의 독액성 동물 또는 식물과 Contact with unspecified venomous animal or
+접촉 plant
+포함 :쏘임(독액성) NOSIncludes :Sting (venomous) NOS
+독액성 물림 NOS Venomous bite NOS
+[제목]자연의 힘에 노출(X30-X39) Exposure to forces of nature
+[발생장소의 4단위 분류는 936~939쪽 참조]
+X30과다한 자연열에 노출 Exposure to excessive natural heat
+포함 :일사병의 원인이 된 과열Includes :Excessive heat as the cause of
+sunstroke
+열노출 NOS Exposure to heat NOS
+제외 :인공의 과열(W92.-)Excludes :Excessive heat of man-made origin
+X31과다한 자연한랭에 노출 Exposure to excessive natural cold
+포함 :동창의 원인이 된 과다한 한랭 NOSIncludes :Excessive cold as the cause of
+chilblains NOS
+손발의 침수의 원인이 된 과다한 한랭 Excessive cold as the cause of immersion foot
+or hand
+한랭에 노출 NOS Exposure to cold NOS
+기후조건에 노출 Exposure to weather conditions
+제외 :인공의 한랭(W93.-)Excludes :Cold of man-made origin
+드라이 아이스 및 액화가스와 접촉 또는 Contact with or inhalation of dry ice and
+흡입(W93.-) liquefied gas
+X32일광에 노출 Exposure to sunlight
+X33벼락에 의한 피해 Victim of lightning
+제외 :벼락에 의한 화재(X00-X09)Excludes :Fire caused by lightning
+벼락에 의한 나무 또는 기타물체의 넘어짐에 Injury from fall of tree or other object caused
+의한 손상(W20.-) by lightning
+X34지진에 의한 피해 Victim of earthquake
+X34.0 지진에 의한 격변적 지각운동의 피해 Victim of cataclysmic earth movements
+caused by earthquake
+포함 :지진으로 인해 붕괴된 빌딩 또는 기타 구조물에Includes :Trapped in or injured by collapsing
+의한 갇힘 또는 손상 building or other structure due to earthquake
+X34 .1 지진해일에 의한 피해 Victim of tsunami
+X34.8 지진의 기타 명시된 영향의 피해 Victim of other specified effects of
+earthquake
+X34.9 지진의 상세불명 영향의 피해 Victim of unspecified effect of earthquake
+X35화산폭발에 의한 피해 Victim of volcanic eruption
+X36눈사태, 산사태 및 기타 지각운동에 Victim of avalanche, landslide and other earth
+의한 피해 movements
+포함 :지각변동에 의한 진흙 사태Includes :Mudslide of cataclysmic nature
+제외 :지진(X34.-)Excludes :Earthquake
+정지중인 눈사태나 산사태와의 충돌된 Transport accident involving collision with
+운수사고(V01-V99) avalanche or landslide not in motion
+X37지각변동 폭풍의 피해 Victim of cataclysmic storm
+포함 :폭풍Includes :Tornado
+눈보라 Blizzard
+몬순 Monsoon
+집중호우 Torrential rain
+폭풍에 의한 해일 Tidal wave caused by storm
+태풍 Cyclone,
+태풍 Hurricane
+태풍 Typhoon
+호우 Cloudburst
+폭설 Heavy snowfall
+폭풍으로 길에서 밀려나간 운수차량 Transport vehicle washed off road by storm
+제외 :지각운동을 일으킨 댐 또는 인공구조물의Excludes :Collapse of dam or man-made
+붕괴(X36.-) structure causing earth movement
+폭풍 후에 발생한 운수사고(V01-V99) Transport accident occurring after storm
+쓰나미 (X34.1) Tsunamiduwl
+X38홍수의 피해 Victim of flood
+포함 :먼 곳의 폭풍으로 인한 홍수Includes :Flood arising from remote storm
+눈이 녹아내려 생긴 지각변동 홍수 Flood of cataclysmic nature arising from
+melting snow
+폭풍으로 직접 생긴 홍수 Flood resulting directly from storm
+강의 홍수 Flood river
+만조 (홍수로 인한) High water (caused by flood)
+폭풍으로 인한 홍수 Flood caused by storm
+홍수로 불어난 물 Flood waters
+제외 :지각운동을 일으킨 댐 또는 인공구조물의Excludes :Collapse of dam or man- made
+붕괴(X36.-) structure causing earth movement
+해일 NOS(X39.-) Tidal wave NOS
+폭풍으로 야기된 해일(X37.-) Tidal wave caused by storm
+쓰나미 (X34.1) Tsunami
+X39자연의 기타 및 상세불명 힘에 노출 Exposure to other and unspecified forces of
+nature
+포함 :자연방사선 NOSIncludes :Natural radiation NOS
+해일 NOS Tidal wave NOS
+제외 :노출 NOS(X59.9)Excludes :Exposure NOS
+지진해일(X34.1) Tsunami
+[제목]유독성 물질에 의한 불의의 중독 및 노출(X40-X49) Accidental poisoning by and exposure to noxious substances
+[발생장소의 4단위 분류는 936~939쪽 참조]
+주 : 3단위 항목아래 분류되는 명시된 약물 및 기타 물질의 목록은 색인표의 약물 및 화학물표를 참조.
+이하에서 열거되는 물질과 복합하여 알코올이 관여된 증거가 있을 때는 보조분류코드Y90-Y91을 사용하여
+분류한다.
+포함 :불의의 약물과량투여, 잘못된 약제의 투여Includes :Accidental overdose of drug, wrong
+또는 잘못 복용 및 부주의로 약물 복용 drug given or takes in error, and drug takes
+inadvertently
+내과적 및 외과적 처치에서 약물, 약제 및 Accidents in the use of drugs, medicaments
+생물학적 물질의 사용에서 생긴 사고 and biological substances in medical and
+surgical procedures
+불의인지 고의적 손상인지 명시되지 않은 (self-inflicted)Poisoning, when not specified
+경우의 (자해)중독. 이용 가능한 적법한 whether accidental or with intent to harm.
+규정을 따를 것(Y10-Y34 주 참조) Follow legal rulings when available (see note
+at Y10-Y34)
+제외 :자살 또는 살상 또는 고의적인 가해 또는Excludes :Administration with suicidal or
+X60-X69, X85-X90, Y10-Y19 항목에 homicidal intent, or intent to harm, or in other
+분류될 성격의 기타 상황에서 투약 circumstances classifiable to X60-X69,
+X85-X90, Y10-Y19
+모든 유해작용의 원인이 된 치료 또는 예방적 Correct drug properly administered in
+용량으로 정당하게 투여된 올바른 therapeutic or prophylactic dosage as the
+약물(Y40-Y59) cause of any adverse effect
+X40비아편유사진통제, 해열제 및 Accidental poisoning by and exposure to
+항류마티스제에 의한 불의의 중독 및 nonopioid analgesics, antipyretics and
+노출 antirheumatics
+포함 :비스테로이드 항염증제Includes :Nonsteroidal anti-inflammatory
+drugs [NSAID]
+4-아미노페놀 유도체 4-aminophenol derivatives
+살리실산염 Salicylates
+피라졸론 유도체 Pyrazolone derivatives
+X41달리 분류되지 않은 항뇌전증제, Accidental poisoning by and exposure to
+진정제-수면제, 항파킨슨제, antiepileptic, sedative-hypnotic,
+정신작용제에 의한 불의의 중독 및 antiparkinsonism and psychotropic drugs,
+노출 NEC
+포함 :바비츄레이트Includes :Barbiturates
+메타쿠알론복합물 Metaqualone compounds
+석시니마이드와 옥사졸리딘에디온 Succinimides and oxazolidinediones
+신경이완제, 정온제 Neuroleptics, tranquillizers
+이미노스틸벤 Iminostilbenes
+정신자극제 Psychostimulants
+하이단토인유도체 Hydantoin derivatives
+항우울제 Antidepressants
+X42달리 분류되지 않은 마약 및 환각제에 Accidental poisoning by and exposure to
+의한 불의의 중독 및 노출 narcotics and
+psychodysleptics[hallucinogens], NEC
+포함 :라이서자이드Includes :Lysergide [LSD]
+메사돈 Methadone
+메스카린 Mescaline
+몰핀 Morphine
+아편(알칼로이드) Opium (alkaloids)
+대마초(유도체) Cannabis (derivatives)
+코데인 Codeine
+코카인 Cocaine
+헤로인 Heroin
+X43자율신경계통에 작용하는 기타 약물에 Accidental poisoning by and exposure to
+의한 불의의 중독 및 노출 other drugs acting on the autonomic nervous
+system
+포함 :교감신경차단제Includes :Sympatholytics [antiadrenergics]
+교감신경작용제 Sympathomimetics [adrenergics]
+부교감신경차단제(항콜린제 및 항무스카린제) Parasympatholytics [anticholinergics and
+및 연축억제제 antimuscarinics] and spasmolytics
+부교감신경작용제[콜린성] Parasympathomimetic [cholinergics]
+X44기타 및 상세불명의 약물, 약제 및 Accidental poisoning by and exposure to
+생물학적 물질에 의한 불의의 중독 및 other and unspecified drugs, medicaments
+노출 and biological substances
+포함 :국소제제Includes :Topical preparations
+마취제(전신)(국소) Anaesthetics (general)(local)
+백신 Vaccines
+수분-균형제제 및 무기질 및 요산대사에 Water-balance agents and drugs affecting
+영향을 주는 약물 mineral and uric acid metabolism
+심혈관계통에 작용하는 약물 Drugs affecting the cardiovascular system
+위장계통에 작용하는 약물 Drugs affecting the gastrointestinal system
+전신항생제 및 기타 항감염제 Systemic antibiotics and other anti- infectives
+전신 및 혈액에 작용하는 제제 Systemic and haematological agents
+일차적으로 평활근 및 골격근과 호흡계통에 Agents primarily acting on smooth and skeletal
+작용하는 약물 muscles and the respiratory system
+치료용 가스 Therapeutic gases
+호르몬 및 합성 대치물 Hormones and synthetic substitutes
+X45알코올에 의한 불의의 중독 및 노출 Accidental poisoning by and exposure to
+alcohol
+포함 :메틸알코올Includes :Methyl [methanol] alcohol
+부틸알코올 Butyl [1-butanol] alcohol
+알코올 NOS Alcohol NOS
+에틸알코올 Ethyl [ethanol] alcohol
+아이소프로필알코올 Isopropyl [2-propanol] alcohol
+푸로필알코올 Propyl [1-propanol] alcohol
+퓨우젤유 Fusel oil
+X46유기용제 및 할로겐화 탄화수소 및 Accidental poisoning by and exposure to
+그 휘발성 물질에 의한 불의의 중독 organic solvents and halogenated
+및 노출 hydrocarbons and their vapours
+포함 :벤젠과 동족체Includes :Benzene and homologue
+사염화탄소 Carbon tetrachloride [tetrachloromethane]
+석유(유도체) Petroleum (dervatives)
+클로로풀루오로카본 Chlorofluorocarbons
+X47일산화탄소 및 기타 가스 및 물질에 Accidental poisoning by and exposure to
+의한 불의의 중독 및 노출 carbon monoxide and other gases and vapours
+제외 :금속연무 및 물김(X49.-)Excludes :Metal fumes and vapours
+불 및 불꽃에 의한 연기 및 연무의 일산화탄소 Carbon monoxide from smoke and fumes due to fire
+(X00-X09) and flames
+[발생장소의 5단위 분류는 936~939쪽 참조]
+X47.0 연소기관 배기가스의 일산화탄소에 의한 Accidental poisoning by and exposure to carbon
+불의의 중독 및 노출 monoxide from combustion engine exhaust
+~의 배기(가스) : Exhaust (gas) from) :
+모든 유형의 내연 기관 Any type of combustion engine
+가스엔진 Gas engine
+모터펌프 Motor pump
+운송중이 아닌 자동차 Motor vehicle, not in transit
+제외 :운송 중인 자동차의 배기되는 일산화탄소에Excludes :Accidental poisoning by and exposure
+의한 불의의 중독 및 노출(V01-V99) to carbon monoxide from exhaust of motor vehicle
+while in Transit
+X47.1 연료가스의 일산화탄소에 의한 불의의 Accidental poisoning by and exposure to carbon
+중독 및 노출 monoxide from utility gas
+~의 일산화탄소 : Carbon monoxide from :
+조명, 난방, 조리에 사용되는 가스 NOS Gas NOS used for lighting, heating, cooking
+수성가스 Water gas
+X47.2 가정용 연료의 일산화탄소에 의한 Accidental poisoning by and exposure to carbon
+불의의 중독 및 노출 monoxide from other domestic fuels
+~의 일산화탄소, 가정용 스토브, 휴대용 Carbon monoxide from, in domestic stove, portable
+그릴, 바베큐 또는 난로(독립형)에 사용하는 : grill, barbecue or fireplace (free-standing) :
+숯 Charcoal
+석탄 Coal
+코크스 Coke
+등유 및 파라핀 Kerosine or paraffin
+목재 Wood
+X47.3 기타 원료의 일산화탄소에 의한 불의의 Accidental poisoning by and exposure to carbon
+중독 및 노출 monoxide from other sources
+~의 일산화탄소 : Carbon monoxide from :
+용광로 가스 Blast furnace gas
+공업용 연료 Fuels in industrial use
+가마 휘발성물질 Kiln vapour
+X47.4 상세불명 원료의 일산화탄소에 의한 Accidental poisoning by carbon monoxide from
+불의의 중독 unspecified sources
+X47.8 기타 명시된 가스 및 휘발성물질에 의한 Accidental poisoning by other specified gases
+불의의 중독 and vapours
+헬륨(비의약품) NEC Helium (nonmedicinal) NEC
+최루가스 Lacrimogenic gas [tear gas]
+질소화합물 Nitrogen oxides
+이산화황 Sulfur dioxide
+제외 :헬륨, 의약품 (X44.-)Excludes :Helium, medicinal
+X47.9 상세불명의 가스 및 휘발성물질에 의한 Accidental poisoning by unspecified gases and
+불의의 중독 vapours
+X48유해생물방제제(농약)에 의한 불의의 Accidental poisoning by and exposure to
+중독 및 노출 pesticides
+포함 :목재보존제Includes :Wood preservatives
+살서제 Rodenticides
+살진균제 Fungicides
+살충제 Insecticides
+제초제 Herbicides
+훈증제 Fumigants
+제외 :비료(X49.-)Excludes :Plant foods and fertilizers
+X49기타 및 상세불명의 화학물질 및 Accidental poisoning by and exposure to
+독성물질에 의한 불의의 중독 및 노출 other and unspecified chemicals and
+noxious substances
+포함 :연무 및 물김을 포함한 금속Includes :Metals including fumes and vapours
+부식성 방향제, 산 및 부식성 알칼리 Corrosive aromatics, acids and caustic alkalis
+비누 및 세제 Soaps and detergents
+비료 Plant foods and fertilizers
+아교 및 접착제 Glues and adhesives
+유독성 식품 및 유독성 식물 Poisonous foodstuffs, poisonous plants
+중독 NOS Poisoning NOS
+페인트 및 색소염료 Paints and dyes
+제외 :독액성 식물 및 동물과의 접촉(X20-X29)Excludes :Contact with venomous animals and
+plants
+[제목]과잉노력, 여행 및 결핍(X50-X57) Overexertion, travel and privation
+[발생장소의 4단위 분류는 936~939쪽 참조]
+제외 :가해(X85-Y09)Excludes :Assault
+운수사고(V01-V99) Transport accidents
+X50과잉노력 및 격심한 또는 반복적 운동 Overexertion and strenuous or repetitive
+movements
+포함 :노젓기Includes :Rowing
+마라톤 Marathon running
+무거운 물체나 중량을 들어올림 Lifting heavy objects and weights
+X51여행 및 이동 Travel and motion
+X52무중력환경에서의 장기간 체류 Prolonged stay in weightless environment
+포함 :우주선(모의장치)에서의 무중력Includes :Weightless in spacecraft (simulator)
+X53식량부족 Lack of food
+포함 :~의 원인이 된 식량결핍 :Includes :Lack of food as the cause of :
+기아 Starvation
+불충분한 영양 Insufficient nourishment
+무기력 Inanition
+제외 :다른 사람들에 의한 방치 또는 유기(Y06.-)Excludes :Neglect or abandonment by others
+(자기무시에 의한) 음식의 불충분한 섭취(R63.6) Insufficient intake of food (due to self neglect)
+자기무시 NOS(R46.8) Self neglect NOS
+X54물부족 Lack of water
+포함 :영양실조의 원인이 된 물부족Includes :Lack of water as the cause of
+inanition
+탈수의 원인이 된 물부족 Lack of water as the cause of dehydration
+제외 :다른 사람들에 의한 방치 또는 유기(Y06.-)Excludes :Neglect or abandonment by others
+(자기무시에 의한) 물의 불충분한 섭취(R63.6) Insufficient intake of water (due to self neglect)
+자기무시 NOS(R46.8) Self neglect NOS
+X57상세불명의 결핍 Unspecified privation
+포함 :빈곤Includes :Destitution
+[제목]기타 및 상세불명의 요인에 대한 사고피폭(X58-X59) Accidental exposure to other and unspecified factors
+[발생장소의 4단위 분류는 936~939쪽 참조]
+단, X59는 5단위 세분류를 사용한다.
+X58기타 명시된 요인에 노출 Exposure to other specified factors
+X59상세불명의 요인에 노출 Exposure to unspecified factor
+X59.0 골절을 초래하는 상세불명의 요인에 Exposure to unspecified factor causing
+노출 fracture
+X59.9 기타 및 상세불명의 손상을 초래하는 Exposure to unspecified factor causing other
+상세불명의 요인에 노출 and unspecified injury
+포함 :사고 NOSIncludes :Accident NOS
+노출 NOS Exposure NOS
+[제목]고의적 자해 (X60-X84)Intentional self-harm
+[발생장소의 4단위 분류는 936~939쪽 참조]
+포함 :의도적인 자해에 의한 중독 또는 손상Includes :Purposely self-inflicted poisoning
+or injury
+자살(기도) Suicide (attempted)
+X60비아편유사진통제, 해열제, Intentional self-poisoning by and exposure to
+항류마티스제에 의한 자의적 중독 및 nonopioid analgesics, antipyretics and
+노출 antirheumatics
+포함 :비스테로이드항염증제Includes :Nonsteroidal anti-inflammatory
+drugs [NSAID]
+4-아미노페놀유도체 4-aminophenol derivatives
+살리실산염 Salicylates
+피라졸론유도체 Pyrazolone derivatives
+X61달리 분류되지 않은 항뇌전증제, Intentional self-poisoning by and exposure to
+진정제-수면제, 항파킨슨제 및 antiepileptic, sedative-hypnotic,
+정신작용제에 의한 자의의 중독 및 antiparkinsonism and psychotropic drugs,
+노출 NEC
+포함 :바비츄레이트Includes :Barbiturates
+메타쿠알론복합물 Metaqualone compounds
+석시니마이드 및 옥사졸리딘에디온 Succinimide and oxazolidinediones
+신경이완제 Neuroleptics, tranquillizers
+이미노스틸벤 Iminostilbenes
+정신자극제 Psychostimulants
+하이단토인유도체 Hydantoin derivatives
+항우울제 Antidepressants
+X62달리 분류되지 않은 마약 및 환각제에 Intentional self-poisoning by and exposure to
+의한 자의의 중독 및 노출 narcotics and psychodysleptics
+[hallucinogens], NEC
+포함 :라이서자이드Includes :Lysergide [LSD]
+메사돈 Methadone
+메스카린 Mescaline
+몰핀 Morphine
+아편 Opium
+대마초(유도체) Cannabis (derivatives)
+코데인 Codeine
+코카인 cocaine
+헤로인 Heroin
+X63자율신경계통에 작용하는 기타 약물에 Intentional self- poisoning by and exposure to
+의한 자의의 중독 및 노출 other drugs acting on the autonomic nervous
+system
+포함 :교감신경차단제Includes :Sympatholytics [antiadrenergics]
+교감신경작용제 Sympathomimetics [adrenergics]
+부교감신경차단제[항콜린제 및 항무스카린제] Parasympatholytics [anticholinergics and
+및 연축억제제 antimuscarinics] and spasmolytics
+부교감신경작용제[콜린성] Parasympathomimetic [cholinergics]
+X64기타 및 상세불명의 약물, 약제 및 Intentional self-poisoning by and exposure to
+생물학적 물질에 의한 자의의 중독 및 other and unspecified drugs, medicaments
+노출 and biological substances
+포함 :국소제제Includes :Topical preparations
+마취제(전신)(국소) Anaesthetics (general)(local)
+백신 Vaccines
+수분-균형제제, 무기질 및 요산 대사에 영향을 Water-balance agents and drugs affecting
+주는 약물 mineral and uric acid metabolism
+심혈관계통에 작용하는 약물 Drugs affecting the cardiovascular system
+위장계통에 작용하는 약물 Drugs affecting the gastrointestinal system
+전신항생제 및 기타 항감염제 Systemic antibiotics and other anti-infectives
+전신 및 혈액에 작용하는 제제 Systemic and haematological agents
+주로 평활근 및 골격근과 호흡계통에 작용하는 Agents primarily acting on smooth and skeletal
+제제 muscles and the respiratory system
+치료용 가스 Therapeutic gases
+호르몬 및 합성 대치물 Hormones and synthetic substitutes
+X65알코올에 의한 자의의 중독 및 노출 Intentional self-poisoning by and exposure to
+alcohol
+포함 :메틸알코올Includes :Methyl [metanol] alcohol
+부틸알코올 Butyl [1-butanol] alcohol
+알코올 NOS Alcohol NOS
+에틸알코올 Ethyl [ethanol] alcohol
+아이소프로필알코올 Isopropyl [2-propanol] alcohol
+푸로필알코올 Propyl [1-propanol] alcohol
+퓨우젤유 Fusel oil
+X66유기용제 및 할로겐화 탄화수소 및 Intentional self-poisoning by and exposure to
+그 휘발성 물질에 의한 자의의 중독 organic solvents and halogenated
+및 노출 hydrocarbons and their vapours
+포함 :벤젠과 동족체Includes :Benzene and homologues
+사염화탄소 Carbon tetrachloride [tetrachloromethane]
+석유(유도체) Petroleum (derivatives)
+클로로풀루오로카본 Chlorofluorocarbons
+X67기타 가스 및 휘발성 물질에 의한 Intentional self-poisoning by and exposure to
+자의의 중독 및 노출 other gases and vapours
+[발생장소의 5단위 분류는 936~939쪽 참조]
+제외 :금속 연무 및 물김(X69.-)Excludes :Metal fumes and vapours
+연기, 불 및 불꽃의 일산화탄소 (X76) Carbon monoxide from smoke, fire and flames
+X67.0 연소기관 배기가스의 일산화탄소에 의한 Intentional self-poisoning by and exposure to
+자의의 중독 및 노출 carbon monoxide from combustion engine
+~의 배기(가스) : Exhaust (gas) from :
+모든 유형의 내연 기관 Any type of combustion engine
+가스엔진 Gas engine
+모터펌프 Motor pump
+운송중이 아닌 자동차 Motor vehicle, not in transit
+X67.1 연료가스의 일산화탄소에 의한 자의의 Intentional self-poisoning by and exposure to
+중독 및 노출 carbon monoxide from utility gas
+~의 일산화탄소 : Carbon monoxide from :
+조명, 난방, 조리에 사용되는 가스 NOS Gas NOS used for lighting, heating, cooking
+수성가스 Water gas
+X67.2 기타 가정용연료의 일산화탄소에 의한 Intentional self-poisoning by and exposure to
+자의의 중독 및 노출 carbon monoxide from other domestic fuels
+~의 일산화탄소, 가정용 스토브, 휴대용 Carbon monoxide from, in domestic stove, portable
+그릴, 바베큐 또는 난로(독립형)에 사용하는 : grill, barbecue or fireplace (free-standing) :
+숯 Charcoal
+석탄 Coal
+코크스 Coke
+등유 및 파라핀 Kerosine or paraffin
+목재 Wood
+X67.3 기타 원료의 일산화탄소에 의한 Intentional self-poisoning by and exposure to
+자의의 중독 및 노출 carbon monoxide from other sources
+~의 일산화탄소 : Carbon monoxide from :
+용광로 가스 Blast furnace gas
+공업용 연료 Fuels in industrial use
+가마 휘발성물질 Kiln vapour
+X67.4 상세불명 원료의 일산화탄소에 의한 Intentional self-poisoning by carbon monoxide
+자의의 중독 from unspecified sources
+X67.8 기타 명시된 가스 및 휘발성물질에 의한 Intentional self-poisoning by other specified
+자의의 중독 gases and vapours
+헬륨(비의약품) NEC Helium (nonmedicinal) NEC
+최루가스 Lacrimogenic gas [tear gas]
+질소화합물 Nitrogen oxides
+이산화황 Sulfur dioxide
+제외 :헬륨, 의약품 (X64.-)Excludes :Helium, medicinal
+X67.9 상세불명의 가스 및 휘발성물질에 의한 Intentional self-poisoning by unspecified gases
+자의의 중독 and vapours
+X68유해생물방제제(농약)에 의한 자의의 Intentional self-poisoning by and exposure to
+중독 및 노출 pesticides
+포함 :목재보존제Includes :Wood preservatives
+살서제 Rodenticides
+살진균제 Fungicides
+살충제 Insecticides
+제초제 Herbicides
+훈증제 Fumigants
+제외 :비료(X69.-)Excludes :Plant foods and fertilizers
+X69기타 및 상세불명의 화학물질 및 Intentional self-poisoning by and exposure to
+독성물질에 의한 자의의 중독 및 노출 other and unspecified chemicals and
+noxious substances
+포함 :연무 및 물김을 포함한 금속Includes :Metals including fumes and vapours
+부식성 방향제, 산 및 부식성 알칼리 Corrosive aromatics, acids and caustic alkalis
+비누 및 세제 Soaps and detergents
+비료 Plant foods and fertilizers
+아교 및 접착제 Glues and adhesives
+유독성 식품 및 유독성 식물 Poisonous foodstuffs, poisonous plants
+페인트 및 색소염료 Paints and dyes
+X70목맴, 교액 및 질식에 의한 의도적 자해 Intentional self-harm by hanging,
+strangulation and suffocation
+X71익사 및 익수에 의한 의도적 자해 Intentional self-harm by drowning and
+submersion
+X72권총발사에 의한 의도적 자해 Intentional self-harm by handgun discharge
+X73라이플, 엽총 및 기타 큰 화기발사에 Intentional self-harm by rifle, shotgun and
+의한 의도적 자해 larger firearm discharge
+X74기타 및 상세불명의 화기발사에 의한 Intentional self-harm by other and
+의도적 자해 unspecified firearm discharge
+X75폭발성 물질에 의한 의도적 자해 Intentional self-harm by explosive material
+X76연기, 불 및 불꽃에 의한 의도적 자해 Intentional self-harm by smoke, fire and
+flames
+X77증기, 뜨거운 김 및 뜨거운 물체에 의한 Intentional self-harm by steam, hot vapours
+의도적 자해 and hot objects
+X78예리한 물체에 의한 의도적 자해 Intentional self-harm by sharp object
+X79둔한 물체에 의한 의도적 자해 Intentional self-harm by blunt object
+X80높은 곳에서 뛰어내림에 의한 의도적 Intentional self-harm by jumping from a high
+자해 place
+포함 :한 면에서 다른 면으로 의도적인 추락Includes :Intentional fall from one level to
+another
+X81움직이는 물체 앞에 뛰어들거나 누움에 Intentional self-harm by jumping or lying
+의한 의도적 자해 before moving object
+X82자동차의 충돌에 의한 의도적 자해 Intentional self-harm by crashing of motor
+vehicle
+포함 :~와의 의도적 충돌 :Includes :Intentional collision with :
+기차 Train
+자동차 Motor vehicle
+전차 Streetcar, tram
+제외 :항공기 충돌(X83.-)Excludes :Crashing of aircraft
+X83기타 명시된 수단에 의한 의도적 자해 Intentional self-harm by other specified
+means
+포함 :~에 의한 의도적 자해 :Includes :Intentional self-harm by :
+감전사 Electrocution
+독물 제외한 부식성 물질 Caustic substances, except poisoning
+항공기충돌 Crashing of aircraft
+X84상세불명의 수단에 의한 의도적 자해 Intentional self-harm by unspecified means
+[제목]가해 (X85-Y09)Assault
+[발생장소의 4단위 분류는 936~939쪽 참조]
+단, Y06, Y07은 5단위 세분류를 사용한다.
+포함 :타살Includes :Homicide
+살해 또는 상해 목적으로 모든 수단을 동원해 Injuries inflicted by another person with intent
+타인이 가한 손상 to injure or kill, by any means
+제외 :법적 개입에 의한 손상(Y35.-)Excludes :Injuries due to legal intervention
+전쟁 행위에 의한 손상(Y36.-) Injuries due to operations of war
+X85약물, 약제 및 생물학적 물질에 의한 Assault by drugs, medicaments and
+가해 biological substances
+포함 :~에 의한 타살성 중독 :Includes :Homicidal poisoning by (any) :
+생물학적 물질 Biological substance
+약물 Drug
+약제제 Medicament
+X86부식성 물질에 의한 가해 Assault by corrosive substance
+제외 :부식성 가스(X88.8)Excludes :Corrosive gas
+X87유해생물방제제(농약)에 의한 가해 Assault by pesticides
+포함 :목재보존제Includes :Wood preservatives
+제외 :비료(X89.-)Excludes :Plant food and fertilizers
+X88일산화탄소, 기타 가스 및 휘발성 Assault by carbon monoxide and other gases and
+물질에 의한 가해 vapours
+[발생장소의 5단위 분류는 936~939쪽 참조]
+제외 :불 및 불꽃에 의한 연기 및 연무의Excludes :Carbon monoxide from smoke, fire and
+일산화탄소 (X97) flames
+X88.0 연소기관 배기가스의 일산화탄소에 Assault by carbon monoxide from combustion
+의한 가해 engine exhaust
+~의 배기(가스) : Exhaust (gas) from :
+모든 유형의 내연 기관 Any type of combustion engine
+가스엔진 Gas engine
+모터펌프 Motor pump
+운송중이 아닌 자동차 Motor vehicle, not in transit
+X88.1 연료가스의 일산화탄소에 의한 가해 Assault by carbon monoxide from utility gas
+~의 일산화탄소 : Carbon monoxide from :
+조명, 난방, 조리에 사용되는 가스 NOS Gas NOS used for lighting, heating, cooking
+수성가스 Water gas
+X88.2 가정용 연료의 일산화탄소에 의한 가해 Assault by carbon monoxide from other domestic
+fuels
+~의 일산화탄소, 가정용 스토브, 휴대용 Carbon monoxide from, in domestic stove, portable
+그릴, 바베큐 또는 난로(독립형)에 사용하는 : grill, barbecue or fireplace (free-standing) :
+숯 Charcoal
+석탄 Coal
+코크스 Coke
+등유 및 파라핀 Kerosine or paraffin
+목재 Wood
+X88.3 기타 원료의 일산화탄소에 의한 가해 Assault by carbon monoxide from other sources
+~의 일산화탄소 : Carbon monoxide from :
+용광로 가스 Blast furnace gas
+공업용 연료 Fuels in industrial use
+가마 휘발성물질 Kiln vapour
+X88.4 상세불명 원료의 일산화탄소에 의한 Assault by carbon monoxide from unspecified
+가해 sources
+X88.8 기타 명시된 가스 및 휘발성물질에 Assault by other specified gases and vapours
+의한 가해
+헬륨(비의약품) NEC Helium (nonmedicinal) NEC
+최루가스 Lacrimogenic gas [tear gas]
+질소화합물 Nitrogen oxides
+이산화황 Sulfur dioxide
+X88.9 상세불명의 가스 및 휘발성물질에 Assault by unspecified gases and vapours
+의한 가해
+X89기타 명시된 화학물질 및 독성물질에 Assault by other specified chemicals and
+의한 가해 noxious substances
+포함 :비료Includes :Plant food and fertilizers
+X90상세불명의 화학물질 또는 독성물질에 Assault by unspecified chemical or noxious
+의한 가해 substances
+포함 :타살성 중독 NOSIncludes :Homicidal poisoning NOS
+X91목맴, 교액 및 질식에 의한 가해 Assault by hanging, strangulation and
+suffocation
+X92익사 및 익수에 의한 가해 Assault by drowning and submersion
+X93권총발사에 의한 가해 Assault by handgun discharge
+X94라이플, 엽총 및 기타 소화기발사에 Assault by rifle, shotgun and larger firearm
+의한 가해 discharge
+X95기타 및 상세불명의 화기발사에 의한 Assault by other and unspecified firearm
+가해 discharge
+X96폭발성 물질에 의한 가해 Assault by explosive material
+제외 :방화장치(X97-)Excludes :Incendiary device
+X97연기, 불 및 불꽃에 의한 가해 Assault by smoke, fire and flames
+포함 :담배Includes :Cigarettes
+방화 Arson
+방화장치 Incendiary device
+X98증기, 뜨거운 김 및 뜨거운 물체에 의한 Assault by steam, hot vapours and hot
+가해 objects
+X99예리한 물체에 의한 가해 Assault by sharp object
+포함 :칼에 찔림 NOSIncludes :Stabbed NOS
+Y00둔한 물체에 의한 가해 Assault by blunt object
+Y01높은 곳에서 떠밀음에 의한 가해 Assault by pushing from high place
+Y02피해자를 움직이는 물체앞에 밀거나 Assault by pushing or placing victim before
+놓이게 하여 가해 moving object
+Y03자동차충돌에 의한 가해 Assault by crashing of motor vehicle
+포함 :자동차로 고의적으로 충돌 또는 치는 것Includes :Deliberately hitting or running over
+with motor vehicle
+Y04완력에 의한 가해 Assault by bodily force
+포함 :주먹싸움Includes :Unarmed brawl or fight
+제외 :~에 의한 가해 :Excludes :Assault by :
+무기사용(X93-X95, X99.-, Y00.-) Use of weapon
+교액(X91.-) Strangulation
+익수(X92.-) Submersion
+완력에 의한 성폭행(Y05.-) Sexual assault by bodily force
+Y05완력에 의한 성적 학대 Sexual assault by bodily force
+포함 :강간(기도)Includes :Rape (attempted)
+수간(기도) Sodomy (attempted)
+Y06방치 및 유기 Neglect and abandonment
+Y06.0 배우자 또는 동거자에 의한 By spouse or partner
+Y06.1 부모에 의한 By parent
+Y06.2 아는 사람 또는 친구에 의한 By acquaintance or friend
+Y06.8 기타 명시된 사람에 의한 By other specified persons
+Y06.9 상세불명의 사람에 의한 By unspecified person
+Y07기타 학대 Other maltreatment
+포함 :고문Includes :Torture
+성적 학대 Sexual abuse
+신체적 학대 Physical abuse
+정신적 학대 Mental cruelty
+제외 :방치 및 유기(Y06.-)Excludes :Neglect and abandonment
+완력에 의한 성적 학대(Y05.-) Sexual assault by bodily force
+Y07.0 배우자 또는 동거자에 의한 By spouse or partner
+Y07.1 부모에 의한 By parent
+Y07.2 아는 사람 또는 친구에 의한 By acquaintance or friend
+Y07.3 공공당국에 의한 By official authorities
+Y07.8 기타 명시된 사람에 의한 By other specified persons
+Y07.9 상세불명의 사람에 의한 By unspecified person
+Y08기타 명시된 수단에 의한 가해 Assault by other specified means
+Y09상세불명의 수단에 의한 가해 Assault by unspecified means
+포함 :살인(우발적이 아닌)Includes :Manslaughter (nonaccidental)
+살인(기도) NOS Murder (attempt) NOS
+암살(기도) NOS Assassination (attempt) NOS
+타살(기도) NOS Homicide (attempt) NOS
+[제목]의도 미확인 사건(Y10-Y34) Event of undetermined intent
+[발생장소의 4단위 분류는 936~939쪽 참조]
+주 : 이 장은 이용 가능한 정보가 의료 또는 사법당국이 사고, 자해 및 가해 사이에서 구분을 할 수 있을 만큼
+충분하지 못한 사건을 다루는 것이다. 중독을 제외하고 자신에 의하여 다친 손상(self-inflicted
+injuries)이 불의인지 의도적인 가해인지 명시되지 않은 경우를 포함한다(X40-X49 포함 참조).
+이용가능한 적법한 규정을 따를 것.
+Y10의도 미확인의 비아편유사진통제, Poisoning by and exposure to nonopioid
+해열제, 항류마티스제에 의한 중독 및 analgesics, antipyretics and antirheumatics,
+노출 undetermined intent
+포함 :비스테로이드항염증제Includes :Nonsteroidal anti-inflammatory
+drugs [NSAID]
+4-아미노페놀유도체 4-aminophenol derivatives
+살리실산염 Salicylates
+피라졸론유도체 Pyrazolone derivatives
+Y11의도 미확인의 달리 분류되지 않은 Poisoning by and exposure to antiepileptic,
+항뇌전증제, 진정제-수면제, sedative-hypnotic, antiparkinsonism and
+항파킨슨제 및 정신작용제에 의한 중독 psychotropic drugs, undetermined intent,
+및 노출 NEC
+포함 :바비츄레이트Includes :Barbiturates
+메타쿠알론복합물 Metaqualone compounds
+석시니마이드와 옥사졸리딘에디온 Succinimide and oxazolidinediones
+신경이완제 Neuroleptics, tranquillizers
+이미노스틸벤 Iminostilbenes
+정신자극제 Psychostimulants
+하이단토인유도체 Hydantoin derivatives
+항우울제 Antidepressants
+Y12의도 미확인의 달리 분류되지 않은 Poisoning by and exposure to narcotics and
+마약 및 환각제에 의한 중독 및 노출 psychodysleptics [hallucinogens],
+undetermined intent, NEC
+포함 :라이서자이드Includes :Lysergide [LSD]
+메사돈 Methadone
+메스카린 Mescaline
+몰핀 Morphine
+아편 Opium (alkaloids)
+대마초(유도체) Cannabis (derivatives)
+코데인 Codeine
+코카인 Cocaine
+헤로인 Heroin
+Y13의도 미확인의 자율신경계통에 Poisoning by and exposure to other drugs
+작용하는 기타 약물에 의한 중독 및 acting on the autonomic nervous system,
+노출 undetermined intent
+포함 :교감신경차단제Includes :Sympatholytics [antiadrenergics]
+교감신경작용제 Sympathomimetics [adrenergics]
+부교감신경차단제[항콜린제 및 항무스카린제] Parasympatholytics [anticholinergics and
+및 연축억제제 antimuscarinics] and spasmolytics
+부교감신경작용제[콜린성] Parasympathomimetic [cholinergics]
+Y14의도 미확인의 기타 및 상세불명의 Poisoning by and exposure to other and
+약물, 약제 및 생물학적 물질에 의한 unspecified drugs, medicaments and
+중독 및 노출 biological substances, undetermined intent
+포함 :국소제제Includes :Topical preparations
+마취제(전신)(국소) Anaesthetics (general)(local)
+백신 Vaccines
+수분-균형제제, 무기질 및 요산 대사에 Water-balance agents and drugs affecting
+작용하는 제제 mineral and uric acid metabolism
+심혈관계통에 작용하는 약물 Drugs affecting the cardiovascular system
+위장계통에 작용하는 약물 Drugs affecting the gastrointestinal system
+전신항생제 및 기타 항감염제 Systemic antibiotics and other anti-infectives
+전신 및 혈액에 작용하는 제제 Systemic and haematological agents
+주로 평활근 및 골격근과 호흡계통에 작용하는 Agents primarily acting on smooth and skeletal
+제제 muscles and the respiratory system
+치료용 가스 Therapeutic gases
+호르몬 및 합성 대치물 Hormones and synthetic substitutes
+Y15의도 미확인의 알코올에 의한 중독 및 Poisoning by and exposure to alcohol,
+노출 undetermined intent
+포함 :메틸알코올Includes :Methyl [metanol] alcohol
+부틸알코올 Butyl [1-butanol] alcohol
+알코올 NOS Alcohol NOS
+에틸알코올 Ethyl [ethanol] alcohol
+아이소프로필알코올 Isopropyl [2-propanol] alcohol
+푸로필알코올 Propyl [1-propanol] alcohol
+퓨우젤유(油) Fusel oil
+Y16의도 미확인의 유기용제 및 할로젠화 Poisoning by and exposure to organic
+탄화수소 및 그 휘발성 물질에 의한 solvents and halogenated hydrocarbons and
+중독 및 노출 their vapours, undetermined intent
+포함 :벤젠과 동족체Includes :Benzene and homologue
+사염화탄소 Carbon tetrachloride [tetrachloromethane]
+석유(유도체) Petroleum (derivatives)
+클로로풀루오로카본 Chlorofluorocarbons
+Y17의도 미확인의 일산화탄소 및 기타 가스, Poisoning by and exposure to carbon monoxide
+휘발성 물질에 의한 중독 및 노출 and other gases and vapours, undetermined intent
+[발생장소의 5단위 분류는 936~939쪽 참조]
+제외 :금속 연무 및 물김(Y19.-)Excludes :Metal fumes and vapours
+의도 미확인의 연기, 불 및 불꽃의 Carbon monoxide from smoke, fire and flames,
+일산화탄소 (Y26) undetermined intent
+Y17.0 연소기관 배기가스의 일산화탄소에 Poisoning by and exposure to carbon monoxide
+의한 중독 및 노출 from combustion engine exhaust
+~의 배기(가스) : Exhaust (gas) from :
+모든 유형의 내연 기관 Any type of combustion engine
+가스엔진 Gas engine
+모터펌프 Motor pump
+운송중이 아닌 자동차 Motor vehicle, not in transit
+Y17.1 연료가스의 일산화탄소에 의한 Poisoning by and exposure to carbon monoxide
+중독 및 노출 from utility gas
+~의 일산화탄소 : Carbon monoxide from :
+조명, 난방, 조리에 사용되는 가스 NOS Gas NOS used for lighting, heating, cooking
+수성가스 Water gas
+Y17.2 가정용 연료의 일산화탄소에 의한 Poisoning by and exposure to carbon monoxide
+중독 및 노출 from other domestic fuels
+~의 일산화탄소, 가정용 스토브, 휴대용 Carbon monoxide from, in domestic stove, portable
+그릴, 바베큐 또는 난로(독립형)에 사용하는 : grill, barbecue or fireplace (free-standing) :
+숯 Charcoal
+석탄 Coal
+코크스 Coke
+등유 및 파라핀 Kerosine or paraffin
+목재 Wood
+Y17.3 기타 다른 원료의 일산화탄소에 의한 Poisoning by and exposure to carbon monoxide
+중독 및 노출 from other sources
+~의 일산화탄소 : Carbon monoxide from :
+용광로 가스 Blast furnace gas
+공업용 연료 Fuels in industrial use
+가마 휘발성물질 Kiln vapour
+Y17.4 상세불명 원료의 일산화탄소에 의한 Poisoning by and exposure to carbon monoxide
+중독 및 노출 from unspecified sources
+Y17.8 기타 특정 가스 및 휘발성 물질에 의한 Poisoning by and exposure to other specified
+중독 및 노출 gases and vapours
+헬륨(비의약품) NEC Helium (nonmedicinal) NEC
+최루가스 Lacrimogenic gas [tear gas]
+질소화합물 Nitrogen oxides
+이산화황 Sulfur dioxide
+제외 :헬륨, 의약품 (Y14.-)Excludes :Helium, medicinal
+Y17.9 상세불명의 가스 및 휘발성 물질에 의한 Poisoning by and exposure to unspecified gases
+중독 및 노출 and vapours
+Y18의도 미확인의 유해생물방제제(농약)에 Poisoning by and exposure to pesticides,
+의한 중독 및 노출 undetermined intent
+포함 :목재보존제Includes :Wood preservatives
+살서제 Rodenticides
+살진균제 Fungicides
+살충제 Insecticides
+제초제 Herbicides
+훈증제 Fumigants
+제외 :비료(Y19.-)Excludes :Plant foods and fertilizers
+Y19의도 미확인의 기타 및 상세불명의 Poisoning by and exposure to other and
+화학물질 및 유독성 물질에 의한 중독 unspecified chemicals and noxious
+및 노출 substances, undetermined intent
+포함 :연무 및 물김을 포함한 금속Includes :Metals including fumes and vapours
+부식성 방향제, 산 및 부식성 알칼리 Corrosive aromatics, acids and caustic alkalis
+비누 및 세제 Soaps and detergents
+비료 Plant foods and fertilizers
+아교 및 접착제 Flues and adhesives
+유독성 식품 및 유독성 식물 Poisonous foodstuffs, poisonous plants
+페인트 및 색소염료 Paints and dyes
+Y20의도 미확인의 목맴, 교액 및 질식 Hanging, strangulation and suffocation,
+undetermined intent
+Y21의도 미확인의 익사 및 익수 Drowning and submersion, undetermined
+intent
+Y22의도 미확인의 권총발사 Handgun discharge, undetermined intent
+Y23의도 미확인의 라이플, 엽총 및 기타 큰 Rifle, shotgun and larger firearm discharge,
+화기발사 undetermined intent
+Y24의도 미확인의 기타 및 상세불명의 Other and unspecified firearm discharge,
+화기발사 undetermined intent
+Y25의도 미확인의 폭발성 물질에 접촉 Contact with explosive material,
+undetermined intent
+Y26의도 미확인의 연기, 불 및 불꽃에 노출 Exposure to smoke, fire and flames,
+undetermined intent
+Y27의도 미확인의 증기, 뜨거운 김 및 Contact with steam, hot vapours and hot
+뜨거운 물체에 접촉 objects, undetermined intent
+Y28의도 미확인의 예리한 물체에 접촉 Contact with sharp object, undetermined
+intent
+Y29의도 미확인의 둔한 물체에 접촉 Contact with blunt object, undetermined
+intent
+Y30의도 미확인의 높은 곳에서 떨어짐, Falling, jumping or pushed from a high place,
+뛰어내림 또는 떠밀림 undetermined intent
+포함 :한 면에서 다른 면으로 떨어짐, 의도 미확인Includes :Victim falling from one level to
+another, undetermined intent
+Y31의도 미확인의 움직이는 물체 앞에 Falling, lying or running before or into moving
+또는 안으로 뛰어내림, 누움 또는 object, undetermined intent
+떨어짐
+Y32의도 미확인의 자동차의 충돌 Crashing of motor vehicle, undetermined
+intent
+Y33의도 미확인의 기타 명시된 사건 Other specified events, undetermined intent
+Y34의도 미확인의 상세불명의 사건 Unspecified event, undetermined intent
+[제목]법적 개입 및 전쟁행위(Y35-Y36) Legal intervention and operations of war
+Y35법적 개입 Legal intervention
+포함 :법위반자를 체포하거나, 체포하려고 시도하는,Includes :Injuries inflicted by the police or
+혼란을 제압하는, 질서를 유지하는, 그리고 other law-enforcing agents, including military
+기타 법적 행동의 과정에서 근무 중인 군인을 on duty, in the course of arresting or
+포함한 경찰 또는 기타 법집행인에 의해 attempting to arrest lawbreakers, suppressing
+가해진 손상 disturbances, maintaining order, and other
+legal action
+Y35.0 화기발사가 관여된 법적 개입 Legal intervention involving firearm discharge
+관여된 법적 개입 : Legal intervention with :
+기관총 Machine gun
+리볼버 Revolver
+라이플 탄환 또는 고무 탄환 Rifle pellet or rubber bullet
+Y35.1 폭발물이 관여된 법적 개입 Legal intervention involving explosives
+관여된 법적 개입 : Legal intervention with :
+다이나마이트 Dynamite
+박격포탄 Mortar bomb
+수류탄 Grenade
+폭탄 Explosive shell
+Y35.2 가스가 관여된 법적 개입 Legal intervention involving gas
+법적 개입으로 인한 : Due to legal Intervention :
+가스에 의한 질식 Asphyxiation by gas
+최루가스에 의한 손상 Injury by tear gas
+가스중독 Poisoning by gas
+Y35.3 둔한 물체가 관여된 법적 개입 Legal intervention involving blunt objects
+법적 개입 동안 : During legal intervention :
+배턴에 의한 타격 Hit, Struck by baton
+둔기에 의한 타격 Hit, Struck by blunt object
+막대기에 의한 타격 Hit, Struck by stave
+Y35.4 예리한 물체가 관여된 법적 개입 Legal intervention involving sharp object
+법적 개입 동안 : During legal intervention :
+절단 Cut
+총검에 의한 손상 Injury by bayonet
+칼에 찔림 Stabbed
+Y35.5 법적 처형 Legal execution
+~(와)과 같은 사법 또는 통치당국[상설 Any execution performed at the behest of the
+또는 임시불문]의 명령으로 집행되는 judiciary or ruling authority [whether permanent
+모든 처형 : or temporary], such as :
+가스에 의한 질식 Asphyxiation by gas
+교수형 Hanging
+사형(死型) Capital punishment
+전기사형 Electrocution
+독살 Poisoning
+참수(단두대에 의한) Beheading, decapitaion (by guillotine)
+총살 Shooting
+Y35.6 기타 명시된 수단이 관여된 법적 개입 Legal intervention involving other specified
+means
+폭행 Manhandling
+Y35.7 상세불명 수단의 법적 개입 Legal intervention, means unspecified
+Y36전쟁행위 Operations of war
+주 : 적대 행위의 중지 이후에 발생한 전쟁행위에 기인한 상해는 Y36.8에 분류한다.
+포함 :전쟁 및 시민 폭동에 기인된 군인 및 민간인Includes :Injuries due to military personnel
+상해 and civilians caused by war and civil
+insurrection
+Y36.0 해양병기의 폭발이 관여된 전쟁행위 War operations involving explosion of marine
+weapons
+기뢰 Marine mine
+바다 또는 항구의 기뢰 NOS Mine at sea or in harbour NOS
+수중폭발 Underwater blast
+수중폭탄 Depth-charge
+어뢰 Torpedo
+함포탄 Sea-based artillery shell
+Y36.1 항공기 파괴가 관여된 전쟁행위 War operations involving destruction of
+aircraft
+비행기 : Aircraft :
+격추 Shot down
+폭발 Exploded
+화재 Burned
+비행기 추락에 의한 으깨짐 Crushed by falling aircraft
+Y36.2 기타 폭발 및 파편이 관여된 전쟁행위 War operations involving other explosions and
+fragments
+전쟁행위 동안 : During war operations :
+전쟁에서 사용된 총탄의 불의의 폭발 Accidental explosion of munitions being
+used in war
+아군 무기의 불의의 폭발 Accidental explosion of own weapons
+대인살상용 폭탄(파편) Antipersonnel bomb (fragments)
+지뢰 NOS Mine NOS
+로케트 파편 Fragments from rocket
+수류탄 파편 Fragments from grenade
+유도미사일 파편 Fragments from guided missile
+유산탄 파편 Fragments from shrapnel
+유탄 파편 Fragments from shell
+지뢰 파편 Fragments from land-mine
+포탄 파편 Fragments from artillery shell
+폭탄 파편 Fragments from bomb
+박격포탄 폭발 Explosion of mortar bomb
+포미 뭉치 폭발 Explosion of breech-block
+포신 뭉치 폭발 Explosion of cannon block
+포탄 폭발 Explosion of artillery shell
+Y36.3 불, 대화재 및 뜨거운 물질이 관여된 War operations involving fires, conflagrations
+전쟁행위 and hot substances
+화염 방사기에 의해 직접 발생했거나 모든 Originating from fire caused directly by a
+재래식 병기에서 간접적으로 일어난 fire-producing device or indirectly by any
+화재로 인한 : conventional weapon :
+화상 Burns
+질식 Asphyxia
+기타 손상 Other injury
+가솔린폭탄 Petrol bomb
+Y36.4 화기발사 및 기타 재래식 전쟁방식이 War operations involving firearm discharge
+관여된 전쟁행위 and other forms of conventional warfare
+탄환 : Bullet :
+카빈 Carbin
+기관총 Machine gun
+피스톨 Pistol
+라이플 Rifle
+고무(라이플) Rubber (rifle)
+탄환(엽총) Pellets (shotgun)
+전상 Battle wounds
+전쟁행위중 익사 NOS Drowned in war operations NOS
+총검손상 Bayonet injury
+Y36.5 핵무기가 관여된 전쟁행위 War operations involving nuclear weapons
+열 Heat
+폭발효과 Blast effects
+핵무기에서 방출되는 전리방사선에 노출 Exposure to ionizing radiation from nuclear
+weapon
+화염효과 Fireball effects
+기타 핵무기의 직접 및 간접 효과 Other direct and secondary effects of nuclear
+weapons
+Y36.6 생물학적 무기가 관여된 전쟁행위 War operations involving biological weapons
+Y36.7 화학무기 및 비재래식 전쟁의 기타 War operations involving chemical weapons
+방식이 관여된 전쟁행위 and other forms of unconventional warfare
+가스, 연무 및 화학물질 Gas, fumes and chemicals
+레이저 Lasers
+Y36.8 휴전후에 발생한 전쟁행위 War operations occurring after cessation of
+hostilities
+전쟁행위 도중 설치한 폭탄이나 지뢰의 Injuries by explosion of bombs or mines placed in
+폭발에 의한 손상으로 그 폭발이 휴전후에 the course of operations of war, if the explosion
+발생한 것 occurred after cessation of hostilities
+전쟁행위로 인한 손상으로 Y36.0-Y36.7 Injuries due to operations of war and classifiable
+또는 Y36.9 에 분류되나 다만 휴전후에 to Y36.0-Y36.7 or Y36.9 but occurring after
+발생한 것 cessation of hostilities
+Y36.9 상세불명의 전쟁행위 War operations, unspecified
+[제목]내과적 및 외과적 치료의 합병증(Y40-Y84) Complications of medical and surgical care
+포함 :내과치료장치의 합병증Includes :Complications of medical devices
+외과적 및 내과적 치료 중 환자에게 발생한 Misadventures to patients during surgical and
+재난 medical care
+모든 유해작용의 원인이 된 치료 또는 예방적 Correct drug properly administered in
+용량으로 정당하게 투여된 올바른 약물 therapeutic or prophylactic dosage as the
+cause of any adverse effect
+처치 당시에는 재난에 대한 언급이 없었으나 Surgical and medical procedures as the cause
+환자의 이상반응 또는 이후 합병증의 원인이 of abnormal reaction of the patient, or of later
+된 외과적 및 내과적 처치 complication, without mention of
+misadventure at the time of the procedure
+제외 :불의의 약물과량투여, 잘못된 약물복용 또는Excludes :Accidental overdose of drug or
+착오복용(X40-X44) wrong drug given or taken in error
+[제목]치료용으로 사용시 유해작용을 나타내는약물, 약제 및 생물학 물질(Y40-Y59) Drugs, medicaments and biological substances causing adverse effects in therapeutic use
+주 : 4단위 세분류 아래 분류할 특정 약물의 목록은 색인표의 약물 및 화학물질표를 참조
+제외 :외과적 및 내과적 처치중 약물, 약제 및 생물학Excludes :Accidents in the technique of
+제제의 투약기술상 사고(Y60-Y69) administration of drugs, medicaments and
+biological substances in surgical and medical
+procedures
+Y40전신항생제 Systemic antibiotics
+제외 :국소용항생제(Y56-)Excludes :Antibiotics, topically used
+항신생물성 항생제(Y43.3) Antineoplastic antibiotics
+Y40.0 페니실린 Penicillins
+Y40.1 세팔로스포린 및 기타 베타락탐 항생제 Cefalosporins and other β-lactam antibiotics
+Y40.2 클로람페니콜군 Chloramphenicol group
+Y40.3 마크로리드 Macrolides
+Y40.4 테트라사이클린 Tetracyclines
+Y40.5 아미노글리코시드 Aminoglycosides
+스트렙토마이신 Streptomycin
+Y40.6 리파마이신 Rifamycins
+Y40.7 전신항진균항생제 Antifungal antibiotics, systemically used
+Y40.8 기타 전신항생제 Other systemic antibiotics
+Y40.9 상세불명의 전신항생제 Systemic antibiotic, unspecified
+Y41기타 전신 항감염제 및 항기생충제 Other systemic anti-infectives and
+antiparasitics
+제외 :국소용항감염제(Y56.-)Excludes :Anti-infectives, topically used
+Y41.0 설폰아마이드 Sulfonamides
+Y41.1 항마이코박테리아제 Antimycobacterial drugs
+제외 :리파마이신(Y40.6)Excludes :Rifamycins
+스트렙토마이신(Y40.5) Streptomycin
+Y41.2 항말라리아제 및 기타 혈액내 원충류에 Antimalarials and drugs acting on other blood
+작용하는 약물 protozoa
+제외 :하이드록시퀴노린 유도체(Y41.8)Excludes :Hydroxyquinoline derivatives
+Y41.3 기타 항원충제 Other antiprotozoal drugs
+Y41.4 구충제 Anthelminthics
+Y41.5 항바이러스제 Antiviral drugs
+제외 :아만타딘(Y46.7)Excludes :Amanthadine
+사이타라빈(Y43.1) Cytarabine
+Y41.8 기타 명시된 전신 항감염제 및 Other specified systemic anti-infectives and
+항기생충제 antiparasitics
+하이드록시퀴노린유도체 Hydroxyquinoline derivatives
+제외 :항말라리아제(Y41.2)Excludes :Antimalarial drugs
+Y41.9 상세불명의 전신 항감염제 및 Systemic anti-infective and antiparasitic,
+항기생충제 unspecified
+Y42달리 분류되지 않은 호르몬 및 그들의 Hormones and their synthetic substitutes and
+합성대치물 및 길항제 antagonists, NEC
+제외 :미네랄코르티코이드 및 그들의Excludes :Mineralocorticoids and their
+길항제(Y54.0-Y54.1) antagonists
+부갑상선호르몬 및 그 유도체(Y54.7) Parathyroid hormones and derivatives
+자궁수축호르몬(Y55.0) Oxytocic hormones
+Y42.0 글루코코티코이드 및 합성 유사체 Glucocorticoids and synthetic analogues
+제외 :국소용 글루코콜티코이드(Y56.-)Excludes :Glucocorticoids, topically used
+Y42.1 갑상선 호르몬 및 대치물 Thyroid hormones and substitutes
+Y42.2 항갑상선제 Antithyroid drugs
+Y42.3 인슐린 및 경구저혈당[항당뇨병]제 Insulin and oral hypoglycaemic [antidiabetic]
+drugs
+Y42.4 경구피임제 Oral contraceptives
+다성분 및 단일성분 제제 Multiple- and single-ingredient preparations
+Y42.5 기타 에스트로젠 및 프로제스토겐 Other estrogens and progestogens
+혼합물 및 대치물 Mixtures and substitutes
+Y42.6 달리 분류되지 않은 항고나도트로핀제, Antigonadotrophins, antiestrogens,
+항에스트로젠제, 항안드로젠제 antiandrogens, NEC
+타목시펜 Tamoxifen
+Y42.7 안드로젠 및 합성대사 유사물 Androgens and anabolic congeners
+Y42.8 기타 및 상세불명의 호르몬 및 합성 Other and unspecified hormones and their
+대치물 synthetic substitutes
+뇌하수체전엽호르몬 Anterior pituitary [adenohypophyseal] hormones
+Y42.9 기타 및 상세불명의 호르몬 길항제 Other and unspecified hormone antagonists
+Y43주로 전신에 작용하는 제제 Primarily systemic agents
+제외 :달리 분류되지 않은 비타민(Y57.7)Excludes :Vitamins NEC
+Y43.0 항알레르기제 및 항구토제 Antiallergic and antiemetic drugs
+제외 :페노티아진 계통의 신경이완제(Y49.3)Excludes :Phenothiazine-based neuroleptics
+Y43.1 항신생물성 대사억제제 Antineoplastic antimetabolites
+사이타라빈 Cytarabine
+Y43.2 항신생물성 천연산물 Antineoplastic natural products
+Y43.3 기타 항암제 Other antineoplastic drugs
+항신생물성 항생제 Antineoplastic antibiotics
+제외 :타목시펜(Y42.6)Excludes :Tamoxifen
+Y43.4 면역억제제 Immunosuppressive agents
+Y43.5 산성화제 및 알칼리화제 Acidifying and alkalizing agents
+Y43.6 달리 분류되지 않은 효소류 Enzymes, NEC
+Y43.8 달리 분류되지 않은 주로 전신에 Other primarily systemic agents, NEC
+작용하는 제제
+중금속길항제 Heavy-metal antagonists
+Y43.9 상세불명의 주로 전신에 작용하는 제제 Primarily systemic agent, unspecified
+Y44주로 혈액성분에 영향을 주는 제제 Agents primarily affecting blood constituents
+Y44.0 철제제 및 기타 항저혈색소성 빈혈제제 Iron preparations and other anti-
+hypochromic-anaemia preparations
+Y44.1 비타민 B12, 엽산 및 기타 Vitamin B12, folic acid and other
+항거대적모구성 빈혈제제 anti-megaloblastic-anaemia preparations
+Y44.2 항응고제 Anticoagulants
+Y44.3 항응고성 길항제, 비타민 K 및 기타 Anticoagulant antagonists, vitamin K and
+혈액응고제 other coagulants
+Y44.4 항혈전제[혈소판응집억제제] Antithrombotic drugs [platelet-aggregation
+inhibitors]
+제외 :아세틸살리실산(Y45.1)Excludes :Acetylsalicylic acid
+디피리다몰(Y52.3) Dipyridamole
+Y44.5 혈전용해제 Thrombolitic drugs
+Y44.6 자연혈액 및 혈액제제 Natural blood and blood products
+제외 :면역글로불린(Y59.3)Excludes :Immunoglobin
+Y44.7 혈장대체제 Plasma substitutes
+Y44.9 혈액성분에 영향을 주는 기타 및 Other and unspecified agent affecting blood
+상세불명의 제제 constituents
+Y45진통제, 해열제 및 항염증제 Analgesics, antipyretics and
+anti-inflammatory drugs
+Y45.0 아편 및 관련 진통제 Opioids and related analgesics
+Y45.1 살리실산염 Salicylates
+Y45.2 프로피온산유도체 Propionic acid derivatives
+프로판산유도체 Propanoic acid derivatives
+Y45.3 기타 비스테로이드항염증제 Other nonsteroidal anti-inflammatory drugs
+[NSAID]
+Y45.4 항류마티스제 Antirheumatics
+제외 :클로로퀸(Y41.2)Excludes :Chloroquine
+살리실산염(Y45.1) Salicylates
+글루코코티코이드(Y42.0) Glucocorticoids
+Y45.5 4-아미노페놀유도체 4-Aminophenol derivatives
+Y45.8 기타 진통제 및 해열제 Other analgesics and antipyretics
+Y45.9 상세불명의 진통제, 해열제 및 Analgesics, antipyretics and
+항염증제 anti-inflammatory drug, unspecified
+Y46항뇌전증제 및 항파킨슨제 Antiepileptics and antiparkinsonism drugs
+제외 :아세타졸아마이드(Y54.2)Excludes :Acetalzolamide
+달리 분류되지 않은 바비츄레이트(Y47.0) Barbiturates NEC
+벤조다이아제핀(Y47.1) Benzodiazepines
+파라알데하이드(Y47.3) Paraldehyde
+Y46.0 석시니마이드 Succinimides
+Y46.1 옥사졸리디네디온 Oxazolidinediones
+Y46.2 하이단토인유도체 Hydantoin derivative
+Y46.3 데옥시바비츄레이트 Deoxybarbiturate
+Y46.4 이미노스틸벤 Iminostilbenes
+카바마제핀 Carbamazepine
+Y46.5 발프로산 Valproic acid
+Y46.6 기타 및 상세불명의 항뇌전증제 Other and unspecified antiepileptics
+Y46.7 항파킨슨제 Antiparkinsonism drugs
+아만타딘 Amantadin
+Y46.8 항강직제 Antispasticity drugs
+제외 :벤조디아제핀(Y47.1)Excludes :Benzodiazepines
+Y47진정제, 수면제 및 항불안제 Sedatives, hypnotics and antianxiety drugs
+Y47.0 달리 분류되지 않은 바비츄레이트 Barbiturates, NEC
+제외 :데옥시바비츄레이트(Y46.3)Excludes :Deoxybarbiturate
+타이오바비츄레이트(Y48.1) Thiobarbiturate
+Y47.1 벤조디아제핀 Benzodiazepines
+Y47.2 클로랄유도체 Cloral derivatives
+Y47.3 파라알데하이드 Paraldehyde
+Y47.4 브롬복합물 Bromine compounds
+Y47.5 달리 분류되지 않은 혼합 진정제 및 Mixed sedatives and hypnotics, NEC
+수면제
+Y47.8 기타 진정제, 수면제 및 항불안제 Other sedatives, hypnotics and antianxiety
+drugs
+메타쿠알론 Methaqualone
+Y47.9 상세불명의 진정제, 수면제 및 Sedatives, hypnotics and antianxiety drug,
+항불안제 unspecified
+수면제 NOS Sleeping draught, drug and tablet NOS
+Y48마취제 및 각종 치료용 가스 Anaesthetics and therapeutic gases
+Y48.0 흡입마취제 Inhaled anaesthetics
+Y48.1 비경구마취제 Parenteral anaesthetics
+타이오바비츄레이트 Thiobarbiturate
+Y48.2 기타 및 상세불명의 전신마취제 Other and unspecified general anaesthetics
+Y48.3 국소마취제 Local anaesthetic
+Y48.4 상세불명의 마취제 Anaesthetics, unspecified
+Y48.5 치료용 가스 Therapeutic gases
+Y49달리 분류되지 않은 정신작용제 Psychotropic drugs, NEC
+제외 :식욕억제제(Y57.0)Excludes :Appetite depressants [anorectics]
+달리 분류되지 않은 바비츄레이트(Y47.0) Barbiturates NEC
+벤조다이아제핀(Y47.1) Benzodiazepines
+카페인(Y50.2) Caffeine
+코카인(Y48.3) Cocaine
+메타쿠알론(Y47.8) Methaqualone
+Y49.0 트리사이클릭 및 Tricyclic and tetracyclic antidepressants
+테트라사이클릭항우울제
+Y49.1 모노아민-옥시데이스 억제성 항우울제 Monoamine-oxidase-inhibitor antidepressants
+Y49.2 기타 및 상세불명의 항우울제 Other and unspecified antidepressants
+Y49.3 페노디아진 항정신병 약제 및 Phenothiazine antipsychotics and neuroleptics
+신경이완제
+Y49.4 부티로페논 및 타이오산틴 신경이완제 Butyrophenone and thioxanthene neuroleptics
+Y49.5 기타 항정신병약제 및 신경이완제 Other antipsychotics and neuroleptics
+제외 :라우월피아(Y52.5)Excludes :Rauwolfia
+Y49.6 환각제 Psychodysleptics [hallucinogens]
+Y49.7 남용의 잠재성이 있는 정신자극제 Psychostimulants with abuse potential
+Y49.8 달리 분류되지 않은 기타 정신작용제 Other psychotropic drugs, NEC
+Y49.9 상세불명의 정신작용제 Psychotropic drug, unspecified
+Y50달리 분류되지 않은 중추신경계통 Central nervous system stimulants, NEC
+흥분제
+Y50.0 각성제 Analeptics
+Y50.1 아편수용체길항제 Opioid reactor antagonists
+Y50.2 달리 분류되지 않은 메틸산틴 Methylxanthines, NEC
+카페인 Caffeine
+제외 :아미노필린(Y55.6)Excludes :Aminophylline
+티오부로민(Y55.6) Theobromine
+테오필린(Y55.6) Theophylline
+Y50.8 기타 중추신경계통 흥분제 Other central nervous system stimulants
+Y50.9 상세불명의 중추신경계통 흥분제 Central nervous system stimulant, unspecified
+Y51주로 자율신경계통에 영향을 주는 약제 Drugs primarily affecting the autonomic
+nervous system
+Y51.0 항콜린에스트레이스제 Anticholinesterase agents
+Y51.1 기타 부교감신경작용제[콜린성] Other parasympathomimetics [cholinergics]
+Y51.2 달리 분류되지 않은 신경절차단제 Ganglionic blocking drugs, NEC
+Y51.3 달리 분류되지 않은 기타 Other parasympatholytics [anticholinergics
+부교감신경차단제[항콜린제 및 and antimuscarinics] and spasmolytics,
+항무스카린제] 및 연축억제제 NEC
+파파베린 Papaverine
+Y51.4 달리 분류되지 않은 우세성 Predominantly α-adrenoreceptor agonists,
+알파-아드레날린수용체 작용제 NEC
+마타라미놀 Metaraminol
+Y51.5 달리 분류되지 않은 우세성 Predominantly β-adrenoreceptor agonists,
+베타-아드레날린수용체 작용제 NEC
+제외 :살부타몰(Y55.6)Excludes :Salbutamol
+Y51.6 달리 분류되지 않은 α-adrenoreceptor antagonists, NEC
+알파-아드레날린수용체 길항제
+제외 :맥각알카로이드(Y55.0)Excludes :Ergot alkaloids
+Y51.7 달리 분류되지 않은 β-adrenoreceptor antagonists, NEC
+베타-아드레날린수용체 길항제
+Y51.8 달리 분류되지 않은 중추작용성 및 Centrally acting and
+아드레날린-신경세포-차단성 제제 adrenergic-neuron-blocking agents, NEC
+제외 :클로니딘(Y52.5)Excludes :Clonidine
+구아니티딘(Y52.5) Guanethidine
+Y51.9 주로 자율신경계통에 작용하는 기타 및 Other and unspecified drugs primarily
+상세불명의 약제 affecting the autonomic nervous system
+알파 및 베타 아드레나린 수용체 모두를 Drugs stimulating both α- and β-adrenoreceptors
+자극하는 약제
+Y52주로 심혈관계통에 영향을 주는 제제 Agents primarily affecting the cardiovascular
+system
+제외 :메타라미놀(Y51.4)Excludes :Metaraminol
+Y52.0 심장자극 글리코시드 및 유사작용 약물 Cardiac-stimulant glycosides and drugs of
+similar action
+Y52.1 칼슘통로차단제 Calcium-channel blockers
+Y52.2 달리 분류되지 않은 기타 항부정맥제 Other antidysrhythmic drugs, NEC
+제외 :베타-아드레날린수용체 길항제(Y51.7)Excludes :β-adrenoreceptor antagonists
+Y52.3 달리 분류되지 않은 관상동맥확장제 Coronary vasodilators, NEC
+디피리다몰 Dipyridamole
+제외 :베타-아드레날린수용체 길항제(Y51.7)Excludes :β-adrenoreceptor antagonists
+칼슘통로차단제(Y52.1) Calcium-channel blockers
+Y52.4 안지오텐신전환효소억제제 Angiotensin-converting-enzyme inhibitors
+Y52.5 달리 분류되지 않은 기타 항고혈압제 Other antihypertensive drugs, NEC
+크로니딘 Clonidine
+구아네티딘 Guanethidine
+라우월피아 Rauwolfia
+제외 :베타-아드레날린수용체 길항제(Y51.7)Excludes :β-adrenoreceptor antagonists
+칼슘통로차단제(Y52.1) Calcium-channel blockers
+이뇨제(Y54.0-Y54.5) Diuretics
+Y52.6 항고지질혈증 및 항동맥경화증 약물 Antihyperlipidaemic and antiarteriosclerotic
+drugs
+Y52.7 말초혈관확장제 Peripheral vasodilators
+니코틴산유도체 Nicotinic acid derivatives
+제외 :파파베린(Y51.3)Excludes :Papaverine
+Y52.8 항정맥류제, 경화제 포함 Antivaricose drugs, including sclerosing
+agents
+Y52.9 주로 심혈관계통에 영향을 주는 기타 Other and unspecified agents primarily
+및 상세불명의 약물 affecting the cardiovascular system
+Y53주로 위장계통에 영향을 주는 제제 Agents primarily affecting the gastrointestinal
+system
+Y53.0 히스타민H2-수용체길항제 Histamine H2-receptor antagonists
+Y53.1 기타 항산제 및 항위산분비제 Other antacids and anti-gastric-secretion
+agents
+Y53.2 흥분성 설사제 Stimulant laxative
+Y53.3 염류와 삼투성 설사제 Saline and osmotic laxatives
+Y53.4 기타 설사제 Other laxatives
+장무긴장성 약물 Intestinal atonia drugs
+Y53.5 소화제 Digestants
+Y53.6 지사제 Antidiarrhoeal drugs
+제외 :전신항생제와 기타 항감염제(Y40-Y41)Excludes :Systemic antibiotics and other
+anti-infectives
+Y53.7 구토제 Emetics
+Y53.8 주로 위장계통에 영향을 주는 기타 Other agents primarily affecting the
+제제 gastrointestinal system
+Y53.9 주로 위장계통에 영향을 주는 Agents primarily affecting the gastrointestinal
+상세불명의 제제 system, unspecified
+Y54주로 수분균형과 무기물 및 요산 Agents primarily affecting water-balance and
+대사에 영향을 주는 제제 mineral and uric acid metabolism
+Y54.0 미네랄코티코이드 Mineralocorticoid
+Y54.1 미네랄코티코이드길항제[알도스테론길 Mineralocorticoid antagonists [aldosterone
+항제] antagonists]
+Y54.2 탄산안히드라제억제제 Carbonic-anhydrase inhibitors
+아세타졸아마이드 Acetazolamide
+Y54.3 벤조티아디아진유도체 Benzothiadiazine derivatives
+Y54.4 [고리]이뇨제 Loop [High-ceiling] diuretics
+Y54.5 기타 이뇨제 Other diuretics
+Y54.6 전해질, 칼로리 및 수분균형 제제 Electrolytic, caloric and water-balance
+agents
+구강 재수화염분 Oral rehydration salts
+Y54.7 석회화에 영향을 주는 제제 Agents affecting calcification
+부갑상선호르몬 및 유도체 Parathyroid hormones and derivatives
+비타민D군 Vitamin D group
+Y54.8 요산대사에 영향을 주는 제제 Agents affecting uric acid metabolism
+Y54.9 달리 분류되지 않은 무기염분 Mineral salts, NEC
+Y55주로 평활근 및 골격근과 호흡계통에 Agents primarily acting on smooth and
+작용하는 제제 skeletal muscles and the respiratory system
+Y55.0 자궁수축제 Oxytocic drugs
+맥각알카로이드 Ergot alkaloids
+제외 :에스트로겐, 프로제스토겐 및Excludes :Estrogens, progestogens and
+길항제(Y42.5-42.6) antagonists
+Y55.1 골격근이완제[신경근육차단제] Skeletal muscle relaxants [neuromusclular
+blocking agents]
+제외 :항경련약물(Y46.8)Excludes :Antispasticity drugs
+Y55.2 주로 근육에 작용하는 기타 및 Other and unspecified agents primarily acting
+상세불명의 제제 on muscles
+Y55.3 기침약 Antitussives
+Y55.4 가래약 Expectorants
+Y55.5 감기약 Anti-common-cold drugs
+Y55.6 달리 분류되지 않은 항천식제 Antiasthmatics, NEC
+아미노필린 Aminophylline
+살부타몰 Salbutamol
+티오부로민 Theobromine
+테오필린 Theophylline
+제외 :하수체전엽호르몬(Y42.8)Excludes :Anterior pituitary
+[adenohypophyseal] hormones
+베타-아드레날린수용체 작용제(Y51.5) β-adrenoreceptor agonists
+Y55.7 주로 호흡계통에 작용하는 기타 및 Other and unspecified agents primarily acting
+상세불명의 제제 on the respiratory system
+Y56주로 피부 및 점막에 영향을 주는 Topical agents primarily affecting skin and
+국소약제와 안과, 이비인후과 및 치과 mucous membrane and ophthalmological,
+약물 otorhinolaryngological and dental drugs
+포함 :국소적으로 사용된 글루코코르티코이드Includes :Glucocorticoids, topically used
+Y56.0 달리 분류되지 않은 국소 항진균제, Local antifungal, anti-infective and
+항감염제 및 항염증제 anti-inflammatory drugs, NEC
+Y56.1 항가려움제 Antipruritics
+Y56.2 국소수렴제 및 국소세제 Local astringents and local detergents
+Y56.3 완화제, 윤활제 및 보호제 Emollients, demulcents and protectants
+Y56.4 각질용해제, 각질형성제 및 기타 Keratolytics, keratoplastics and other hair
+모발치료 약물 및 제제 treatment drugs and preparations
+Y56.5 안과 약물 및 제제 Ophthalmological drugs and preparations
+Y56.6 이비인후과 약물 및 제제 Otorhinolaryngological drugs and preparations
+Y56.7 국소적으로 바르는 치과약물 Dental drugs, topically applied
+Y56.8 기타 국소제제 Other topical agents
+살정자제 Spermicides
+Y56.9 상세불명의 국소제제 Topical agent, unspecified
+Y57기타 및 상세불명의 약물 및 약제 Other and unspecified drugs and
+medicaments
+Y57.0 식욕억제제 Appetite depressants [anorectics]
+Y57.1 지방친화제제 Lipotropic drugs
+Y57.2 달리 분류되지 않은 해독제 및 Antidote and chelating agents, NEC
+킬레이트제제
+Y57.3 알코올억제제 Alcohol deterrents
+Y57.4 부형제 Pharmaceutical excipients
+Y57.5 X-선 대조물질 X-ray contrast media
+Y57.6 기타 진단제제 Other diagnostic agents
+Y57.7 달리 분류되지 않은 비타민 Vitamins, NEC
+제외 :니코틴산(Y52.7)Excludes :Nicotinic acid
+비타민K(Y44.3) Vitamin K
+비타민B12(Y44.1) Vitamin B12
+비타민D(Y54.7) Vitamin D
+Y57.8 기타 약물 및 약제 Other drugs and medicaments
+Y57.9 상세불명의 약물 또는 약제 Drug or medicament, unspecified
+Y58세균백신 Bacterial vaccines
+Y58.0 BCG백신 BCG vaccine
+Y58.1 장티푸스와 파라티푸스 백신 Typhoid and paratyphoid vaccine
+Y58.2 콜레라백신 Cholera vaccine
+Y58.3 페스트백신 Plague vaccine
+Y58.4 파상풍백신 Tetanus vaccine
+Y58.5 디프테리아백신 Diphtheria vaccine
+Y58.6 백일해 성분을 가진 복합제를 포함한 Pertussis vaccine, including combinations
+백일해백신 with a pertussis component
+Y58.8 백일해 성분을 가진 복합제 제외한 Mixed bacterial vaccines, except
+혼합세균백신 combinations with a pertussis component
+Y58.9 기타 및 상세불명의 세균백신 Other and unspecified bacterial vaccines
+Y59기타 및 상세불명의 백신 및 생물학적 Other and unspecified vaccines and
+물질 biological substances
+Y59.0 바이러스백신 Viral vaccines
+Y59.1 리케챠백신 Rickettsial vaccines
+Y59.2 원충백신 Protozoal vaccines
+Y59.3 면역글로부린 Immunoglobulin
+Y59.8 기타 명시된 백신 및 생물학적 물질 Other specified vaccines and biological
+substances
+Y59.9 상세불명의 백신 및 생물학적 물질 Vaccine or biological substance, unspecified
+[제목]외과적 및 내과적 치료 중 환자의 재난(Y60-Y69) Misadventures to patients during surgical and medical care
+제외 :의료장치의 고장 또는 기능이상(처치 중)(이식Excludes :breakdown or malfunctioning of
+후)(지속적 사용)(Y70-Y82) medical device (during procedure)(after
+implantation)(ongoing use)
+처치 당시에는 재난에 대한 언급이 없었으나 Surgical and medical procedures as the cause
+환자의 이상반응의 원인이 된 외과적 및 of abnormal reaction of the patient, without
+내과적 처치(Y83-Y84) mention of misadventure at the time of the
+procedure
+달리 분류된 외인에 의한 유해사건과 관련된 Medical devices associated with adverse
+의료장치(V01-Y59, Y85-Y87, Y89) incidents due to external causes classified
+elsewhere
+Y60외과적 및 내과적 치료 중 생긴 Unintentional cut, puncture, perforation or
+비의도적 절단, 천자, 천공 또는 출혈 haemorrhage during surgical and medical
+care
+Y60.0 외과적 수술 도중 During surgical operation
+Y60.1 주입 또는 수혈 도중 During infusion or transfusion
+Y60.2 신장투석 또는 기타 관류 도중 During kidney dialysis or other perfusion
+Y60.3 주사 또는 예방접종 도중 During injection or immunization
+Y60.4 내시경검사 도중 During endoscopic examination
+Y60.5 심장카테터삽입 도중 During heart catheterization
+Y60.6 흡인, 천자 및 기타 카테터삽입 도중 During aspiration, puncture and other
+catheterization
+Y60.7 관장 도중 During administration of enema
+Y60.8 기타 외과적 및 내과적 치료 도중 During other surgical and medical care
+Y60.9 상세불명의 외과적 및 내과적 치료 During unspecified surgical and medical care
+도중
+Y61외과적 및 내과적 치료 중에 체내에 Foreign object accidentally left in body during
+불의로 남겨진 이물 surgical and medical care
+Y61.0 외과적 수술 도중 During surgical operation
+Y61.1 주입 또는 수혈 도중 During infusion or transfusion
+Y61.2 신장투석 또는 기타 관류 도중 During kidney dialysis or other perfusion
+Y61.3 주사 또는 예방접종 도중 During injection or immunization
+Y61.4 내시경검사 도중 During endoscopic examination
+Y61.5 심장카테터삽입 도중 During heart catheterization
+Y61.6 흡인, 천자 및 기타 카테터삽입 도중 During aspiration, puncture and other
+catheterization
+Y61.7 카테터 또는 패킹 제거 도중 During removal of catheter or packing
+Y61.8 기타 외과적 및 내과적 치료 도중 During other surgical and medical care
+Y61.9 상세불명의 외과적 및 내과적 치료 During unspecified surgical and medical care
+도중
+Y62외과적 및 내과적 치료 중 무균예방의 Failure of sterile precautions during surgical
+실패 and medical care
+Y62.0 외과적 수술 도중 During surgical operation
+Y62.1 주입 또는 수혈 도중 During infusion or transfusion
+Y62.2 신장투석 또는 기타 관류 도중 During kidney dialysis or other perfusion
+Y62.3 주사 또는 예방접종 도중 During injection or immunization
+Y62.4 내시경검사 도중 During endoscopic examination
+Y62.5 심장카테터삽입 도중 During heart catheterization
+Y62.6 흡인, 천자 및 기타 카테터삽입 도중 During aspiration, puncture and other
+catheterization
+Y62.8 기타 외과적 및 내과적 치료 도중 During other surgical and medical care
+Y62.9 상세불명의 외과적 및 내과적 치료 During unspecified surgical and medical care
+도중
+Y63외과적 및 내과적 치료 중 용량 착오 Failure in dosage during surgical and medical
+care
+제외 :불의의 약물과량투여 또는 착오로 다른 약Excludes :Accidental overdose of drug or
+투여(X40-X44) wrong drug given in error
+Y63.0 수혈 또는 주입 도중 투입한 과다한 Excessive amount of blood or other fluid
+양의 혈액 또는 기타 수액 given during transfusion or infusion
+Y63.1 주입 도중 사용한 수액의 부정확한 Incorrect dilution of fluid used during infusion
+희석
+Y63.2 치료 중 방사선 과량 조사 Overdose of radiation given during therapy
+Y63.3 의학적 치료 중 방사선에 환자의 Inadvertent exposure of patient to radiation
+우발적 노출 during medical care
+Y63.4 전기쇼크 또는 인슐린쇼크 요법에서 Failure in dosage in electroshock or
+용량 착오 insulin-shock therapy
+Y63.5 국소적용 및 패킹에서 부적합한 온도 Inappropriate temperature in local application
+and packing
+Y63.6 필요한 약물, 약제 및 생물학 물질의 Nonadministration of necessary drug,
+미투여 medicament or biological substance
+Y63.8 기타 외과적 및 내과적 치료 중 용량 Failure in dosage during other surgical and
+착오 medical care
+Y63.9 상세불명의 외과적 및 내과적 치료 중 Failure in dosage during unspecified surgical
+용량 착오 and medical care
+Y64오염된 의료제제 또는 생물학적 물질 Contaminated medical or biological
+substances
+Y64.0 오염된 의료제제 또는 생물학적 물질의 Contaminated medical or biological
+수혈 또는 주입 substance, transfused or infused
+Y64.1 주사 또는 예방접종으로 사용한 오염된 Contaminated medical or biological
+의료제제 또는 생물학적 물질 substance, injected or used for
+immunization
+Y64.8 기타 수단으로 투입된 오염된 의료제제 Contaminated medical or biological
+또는 생물학적 물질 substance administered by other means
+Y64.9 상세불명의 수단으로 투입된 오염된 Contaminated medical or biological
+의료제제 또는 생물학적 물질 substance administered by unspecified
+means
+투입된 오염된 의료제제 또는 생물학적 Administered contaminated medical or biological
+물질 NOS substance NOS
+Y65외과적 및 내과적 치료 중 기타 재난 Other misadventures during surgical and
+medical care
+Y65.0 맞지 않는 혈액의 수혈 Mismatched blood used in transfusion
+Y65.1 잘못 주입된 수액 Wrong fluid used in infusion
+Y65.2 외과수술 도중 결찰 또는 봉합의 실패 Failure in suture or ligature during surgical
+operation
+Y65.3 마취시술 도중 잘못 들어간 기관내 관 Endotracheal tube wrongly placed during
+anaesthetic procedure
+Y65.4 기타 관 또는 기구의 삽입 또는 제거에 Failure to introduce or to remove other tube or
+실패 instrument
+Y65.5 부적절한 수술의 수행 Performance of inappropriate operation
+Y65.8 외과적 및 내과적 치료 중 발생한 기타 Other specified misadventures during surgical
+명시된 재난 and medical care
+Y66외과적 및 내과적 치료의 불이행 Nonadministration of surgical and medical
+care
+외과적 및 내과적 치료의 조기중단 Premature cessation of surgical and medical care
+Y69외과적 및 내과적 치료 중 상세불명의 Unspecified misadventures during surgical
+재난 and medical care
+[제목]진단 및 치료용으로 사용시 유해사건과 관련된 의료장치(Y70-Y82) Medical devices associated with adverseincidents in diagnostic and therapeutic use
+포함 :의료장치의 고장 또는 기능이상(처치 중)(이식Includes :Breakdown or malfunctioning of
+후)(지속적 사용) medical device (during procedure)(after
+implantation)(ongoing use)
+제외 :Y60-Y69에 분류될 수 있는, 외과적 및 내과적Excludes :Misadventures to patient during
+치료 중인 환자에 대한 재난(Y60-Y69) surgical and medical care, calssifiable to
+Y60-Y69
+의료장치의 고장 또는 기능이상에 대한 언급 Later complications following use of medical
+없는, 의료장치의 사용에 따른 이후 devices without mention of breakdown or
+합병증(Y83-Y84) malfunctioning of medical device
+달리 분류된 외인에 의한 유해사건과 관련된 Medical devices associated with adverse
+의료장치(V01-Y59, Y85-Y87, Y89) incidents due to external causes classified
+elsewhere
+주 : 다음 4단위 세분류는 Y70-Y82 항목에 사용된다.
+.0 진단 및 모니터 장치 Diagnostic and monitoring devices
+.1 치료(비외과적) 및 재활용 장치 Therapeutic (nonsurgical) and rehabilitative
+devices
+.2 인공삽입물 및 기타 이식물, 재료 및 Prosthetic and other implants, materials and
+부속장치 accessory devices
+.3 외과기구, 재료 및 장치, 봉합 포함 Surgical instruments, materials and devices,
+including sutures
+.8 달리 분류되지 않은 여러가지 장치 Miscellaneous devices, NEC
+Y70유해사건과 관련된 마취장치 Anaesthesiology devices associated with
+adverse incidents
+Y71유해사건과 관련된 심혈관장치 Cardiovascular devices associated with
+adverse incidents
+Y72유해사건과 관련된 이비인후과적 장치 Otorhinolaryngological devices associated
+with adverse incidents
+Y73유해사건과 관련된 소화기과 및 Gastroenterology and urology devices
+비뇨기과장치 associated with adverse incidents
+Y74유해사건과 관련된 일반병원 및 개인용 General hospital and personal- use devices
+장치 associated with adverse incidents
+Y75유해사건과 관련된 신경과적 장치 Neurological devices associated with adverse
+incidents
+Y76유해사건과 관련된 산과 및 부인과적 Obstetric and gynaecological devices
+장치 associated with adverse incidents
+Y77유해사건과 관련된 안과적 장치 Ophthalmic devices associated with adverse
+incidents
+Y78유해사건과 관련된 방사선과적 장치 Radiological devices associated with adverse
+incidents
+Y79유해사건과 관련된 정형외과적 장치 Orthopaedic devices associated with adverse
+incidents
+Y80유해사건과 관련된 물리치료장치 Physical medicine devices associated with
+adverse incidents
+Y81유해사건과 관련된 일반 및 성형외과적 General- and plastic-surgery devices
+장치 associated with adverse incidents
+Y82유해사건과 관련된 기타 및 상세불명의 Other and unspecified medical devices
+의료장치 associated with adverse incidents
+[제목]처치 당시에는 재난에 대한 언급이 없었으나 환자의 이상반응 또는 이후 합병증의 원인이 된 외과적 및 기타 내과적 처치 (Y83-Y84)
+Surgical and other medical procedures as the cause of abnormal reaction of the patient, or of later complication, without mention of misadventure at the time of the procedure
+제외 :Y60-Y69에 분류될 수 있는 외과적 및Excludes :Misadventures to patient during
+내과적 치료 중인 환자에 대한 재난(Y60-Y69) surgical and medical care, classifiable to
+Y60-Y69
+의료장치의 고장 또는 기능이상(처치 중)(이식 Breakdown or malfunctioning of medical device
+후)(지속적 사용)(Y70-Y82) (during procedure)(after implantation)
+(ongoing use)
+달리 분류된 외인에 의한 유해사건과 관련된 Medical devices associated with adverse
+의료장치(V01-Y59, Y85-Y87, Y89) incidents due to external causes classified
+elsewhere
+Y83처치 당시에는 재난에 대한 언급이 Surgical operation and other surgical
+없었으나 환자의 이상반응 또는 이후 procedures as the cause of abnormal
+합병증의 원인이 된 외과적 수술 및 reaction of the patient, or of later
+기타 외과적 처치 complication, without mention of
+misadventure at the time of the procedure
+Y83.0 전기관 이식의 외과적 수술 Surgical operation with transplant of whole
+organ
+Y83.1 인공 내부장치 이식의 외과적 수술 Surgical operation with implant of artificial
+internal device
+Y83.2 연결, 우회로 또는 이식의 외과적 수술 Surgical operation with anastomosis, bypass
+or graft
+Y83.3 외부스토마 형성의 외과적 수술 Surgical operation with formation of external
+stoma
+Y83.4 기타 재건수술 Other reconstructive surgery
+Y83.5 사지의 절단 Amputation of limbs
+Y83.6 기타 기관의 (부분)(전체)절제 Removal of other organ (partial)(total)
+Y83.8 기타 외과적 처치 Other surgical procedures
+Y83.9 상세불명의 외과적 처치 Surgical procedures, unspecified
+Y84처치 당시에는 재난에 대한 언급이 Other medical procedures as the cause of
+없었으나 환자의 이상반응 또는 이후 abnormal reaction of the patient, or of later
+합병증의 원인이 된 기타 내과적 처치 complication, without mention of
+misadventure at the time of the procedure
+Y84.0 심장카테터삽입 Cardiac catheterization
+Y84.1 신장투석 Kidney dialysis
+Y84.2 방사선과적 처치 및 방사선요법 Radiological procedure and radiotherapy
+Y84.3 쇼크요법 Shock therapy
+Y84.4 수액의 흡인 Aspiration of fluid
+Y84.5 위 또는 십이지장 더듬자의 삽입 Insertion of gastric or duodenal sound
+Y84.6 요로카테터삽입 Urinary catheterization
+Y84.7 혈액표본추출 Blood-sampling
+Y84.8 기타 의학적 처치 Other medical procedures
+Y84.9 상세불명의 의학적 처치 Medical procedure, unspecified
+[제목]질병이환과 사망의 외인의 후유증(Y85-Y89) Sequelae of external causes of morbidity and mortality
+주 : 항목 Y85-Y89는 그들 자체가 달리 분류된 후유증에 의한 사망, 장애 또는 불구의 원인이 된 상황을
+나타내기 위하여 사용된다. 후유증은 다음과 같이 보고된 병태나 최초 사건 이후 일년 이상 경과된 “후유
+효과”로 나타난 것을 포함한다.
+만성 중독 및 유해한 노출에는 사용하지 않는다. 이들은 현존 중독 및 유해한 노출로 분류한다.
+Y85운수사고의 후유증 Sequelae of transport accidents
+Y85.0 자동차사고의 후유증 Sequelae of motor-vehicle accidents
+Y85.9 기타 및 상세불명의 운수사고의 후유증 Sequelae of other and unspecified transport
+accidents
+Y86기타 사고의 후유증 Sequelae of other accidents
+Y87의도적 자해, 가해 및 의도 미확인 Sequelae of intentional self- harm, assault
+사건의 후유증 and events of undetermined intent
+Y87.0 의도적 자해의 후유증 Sequelae of intentional self-harm
+Y87.1 가해의 후유증 Sequelae of assault
+Y87.2 의도 미확인 사건의 후유증 Sequelae of events of undetermined intent
+Y88외인으로서의 외과적 및 내과적 치료의 Sequelae with surgical and medical care as
+후유증 external cause
+Y88.0 치료용 약물, 약제 및 생물학적 물질에 Sequelae of adverse effects caused by drugs,
+의한 부작용의 후유증 medicaments and biological substances in
+therapeutic use
+Y88.1 외과적 및 내과적 치료 중인 환자에 Sequelae of misadventures to patients during
+대한 재난의 후유증 surgical and medical procedures
+Y88.2 진단 및 치료용 의료장치에 의한 Sequelae of adverse incidents associated
+유해사건의 후유증 with medical devices in diagnostic and
+therapeutic use
+Y88.3 처치 당시에는 재난의 언급이 없었으나 Sequelae of surgical and medical procedures
+환자의 이상반응 또는 이후 합병증의 as the cause of abnormal reaction of the
+원인이 된 외과적 및 내과적 처치의 patient, or of later complication, without
+후유증 mention of misadventure at the time of the
+procedure
+Y89기타 외인의 후유증 Sequelae of other external causes
+Y89.0 법적 개입의 후유증 Sequelae of legal intervention
+Y89.1 전쟁행위의 후유증 Sequelae of war operations
+Y89.9 상세불명의 외인의 후유증 Sequelae of unspecified external cause
+[제목]달리 분류된 질병이환 및 사망원인에 관련된 보조요인(Y90-Y98) Supplementary factors related to causes of morbidity and mortality classified elsewhere
+주 : 이 항목은 필요하다면 질병이환 및 사망의 원인과 관련된 보조 정보를 작성하기 위하여 이용될 수 있다.
+이들은 질병이환 및 사망의 단일 병태 분류코드로는 사용될 수 없다.
+Y90혈액 알코올농도로 확인된 알코올 Evidence of alcohol involvement determined
+관여의 증거 by blood alcohol level
+Y90.0 혈액알코올농도 20mg/100ml 미만 Blood alcohol level of 20mg/100ml less than
+Y90.1 혈액알코올농도 20-39mg/100ml Blood alcohol level of 20-39mg/100ml
+Y90.2 혈액알코올농도 40-59mg/100ml Blood alcohol level of 40-59mg/100ml
+Y90.3 혈액알코올농도 60-79mg/100ml Blood alcohol level of 60-79mg/100ml
+Y90.4 혈액알코올농도 80-99mg/100ml Blood alcohol level of 80-99mg/100ml
+Y90.5 혈액알코올농도 100-119mg/100ml Blood alcohol level of 100-119mg/100ml
+Y90.6 혈액알코올농도 120-199mg/100ml Blood alcohol level of 120-199mg/100ml
+Y90.7 혈액알코올농도 200-239mg/100ml Blood alcohol level of 200-239mg/100ml
+Y90.8 혈액알코올농도 240mg/100ml 이상 Blood alcohol level of 240mg/100ml or more
+Y90.9 혈액내 알코올 존재, 농도미상 Presence of alcohol in blood, level not
+specified
+Y91중독의 농도가 확인된 알코올 관여의 Evidence of alcohol involvement determined
+증거 by level intoxication
+제외 :혈액알코올 함량으로 확인된 알코올 관여의Excludes :Evidence of alcohol involvement
+증거(Y90.-) determined by blood alcohol content
+Y91.0 경도 알코올중독 Mild alcohol intoxication
+숨쉴 때 알코올 냄새가 나고, 기능이나 반응에서 경미한 행동의 장애가 있거나 조절능력에
+경미한 어려움이 있는 것
+Y91.1 중등도 알코올중독 Moderate alcohol intoxication
+숨쉴때 알코올냄새가 나고, 기능 및 반응에서 중등도의 행동장애가 있거나 조절능력에
+중등도의 어려움이 있는 것
+Y91.2 중증 알코올중독 Severe alcohol intoxication
+기능 및 반응의 심한 장애, 조절능력의 심한 어려움, 협조능력의 손상
+Y91.3 최중증 알코올중독 Very severe alcohol intoxication
+기능과 반응의 대단히 심한 장애, 조절능력의 대단히 심한 어려움, 협조능력의 상실
+Y91.9 알코올 관여 NOS Alcohol involvement NOS
+의심스러운 알코올 관여 NOS Suspected alcohol involvement NOS
+Y95병원과 관련된 상태 Nosocomial condition
+Y96업무와 관련된 상태 Work-related condition
+Y97환경오염과 관련된 상태 Environmental-pollution-related condition
+Y98생활방식과 관련된 상태 Lifestyle-related condition

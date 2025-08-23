@@ -1,0 +1,90 @@
+페니실린 내성: U82.0
+아목시실린에 대한 내성: U82.0
+암피실린에 대한 내성: U82.0
+Resistance to penicillin: U82.0
+Resistance to amoxicillin: U82.0
+Resistance to ampicillin: U82.0
+메티실린 내성: U82.1
+클록사실린에 대한 내성: U82.1
+플루클록사실린에 대한 내성: U82.1
+옥사실린에 대한 내성: U82.1
+Resistance to methicillin: U82.1
+Resistance to cloxacillin: U82.1
+Resistance to flucloxacillin: U82.1
+Resistance to oxacillin: U82.1
+광범위 베타락탐계내성: U82.2
+Extended spectrum betalactamase(ESBL) resistance: U82.2
+기타 베타락탐항생제 내성: U82.8
+Resistance to other betalactam antibiotics: U82.8
+카바페넴계내성: U82.80
+Resistance to carbapenem: U82.80
+카바페넴계 분해효소생성: U82.81
+Producing carbapenemase: U82.81
+상세불명의 베타락탐항생제 내성: U82.9
+Resistance to betalactam antibiotics, unspecified: U82.9
+베타락탐항생제 내성: U82.9
+Resistance to betalactam antibiotics: U82.9
+항생제내성: U82-U83
+항생제 내성: U82-U83
+Antibiotic resistance: U82-U83
+Resistance to antibiotics: U82-U83
+항균제 및 항암제 내성: U82-U85
+Resistance to antimicrobial and antineoplastic drugs: U82-U85
+기타 항생제 내성: U83
+Resistance to other antibiotics: U83
+반코마이신 내성: U83.0
+Resistance to vancomycin: U83.0
+기타 반코마이신과 관련된 항생제 내성: U83.1
+Resistance to other vancomycin related antibiotics: U83.1
+퀴놀론계 내성: U83.2
+Resistance to quinolones: U83.2
+여러 항생제 내성: U83.7
+Resistance to multiple antibiotics: U83.7
+여러 항생제에만 내성: U83.7
+Resistance to multiple antibiotics only: U83.7
+기타 단일 특정 항생제 내성: U83.8
+Resistance to other single specified antibiotic: U83.8
+상세불명의 항생제 내성: U83.9
+항생제 내성 NOS: U83.9
+Resistance to unspecified antibiotic: U83.9
+Resistance to antibiotics NOS: U83.9
+기타 항균제 내성: U84
+Resistance to other antimicrobial drugs: U84
+항기생충제 내성: U84.0
+퀴닌 및 관련 복합물 내성: U84.0
+Resistance to antiparasitic drug(s): U84.0
+Resistance to quinine and related compounds: U84.0
+항진균제 내성: U84.1
+Resistance to antifungal drug(s): U84.1
+항바이러스제 내성: U84.2
+Resistance to antiviral drug(s): U84.2
+항결핵제 내성: U84.3
+Resistance to tuberculostatic drug(s): U84.3
+다약제내성 결핵: U84.30
+Multi-Drug resistance to tuberculostatic drug(s): U84.30
+여러 항생제에 내성을 보이는 감염체: U84.30
+다약제내성 항결핵제 내성: U84.30
+Agent resistant to multiple antibiotics: U84.30
+Multi-drug resistant tuberculosis: U84.30
+광범위약제내성 결핵: U84.31
+Extensively drug-resistance to tuberculostatic drug(s) : XDRTB: U84.31
+Extensively drug-resistant tuberculosis : XDRTB: U84.31
+상세불명의 항결핵제 내성: U84.39
+항결핵제 내성 NOS: U84.39
+Unspecified drug-resistance to tuberculostatic drug(s): U84.39
+Drug-resistant tuberculosis NOS: U84.39
+Unspecified drug-resistant tuberculosis: U84.39
+여러 항균제 내성: U84.7
+Resistance to multiple antimicrobial drugs: U84.7
+기타 명시된 항균제 내성: U84.8
+Resistance to other specified antimicrobial drug: U84.8
+상세불명의 항균제 내성: U84.9
+약제내성 NOS: U84.9
+Resistance to unspecified antimicrobial drugs: U84.9
+Drug resistance NOS: U84.9
+항암제에 대한 무반응성: U85
+불응성 암: U85
+Non-responsiveness to antineoplastic drugs: U85
+Refractory cancer: U85
+항암제 내성: U85
+Resistance to antineoplastic drugs: U85
