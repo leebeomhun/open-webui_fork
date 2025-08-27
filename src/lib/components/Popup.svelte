@@ -29,6 +29,17 @@
 		parseMarkdownContent();
 	});
 
+	// 구조화 파서에서 사용할 간단한 인라인 마크다운 링크 -> HTML 변환기
+	function mdInlineToHtml(s: string): string {
+		if (!s) return s;
+		// [text](url) 패턴을 a 태그로 변환 (http/https만 처리)
+		return s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_m, text, url) => {
+			const safeText = String(text);
+			const safeUrl = String(url);
+			return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="underline text-blue-600 dark:text-blue-400">${safeText}</a>`;
+		});
+	}
+
 	function parseMarkdownContent() {
 		try {
 			// YAML 설정 부분을 찾기 위해 주석을 기준으로 분리
@@ -101,11 +112,11 @@
 				continue;
 			}
 
-			const bMatch = line.match(bulletRe);
-			if (bMatch && currentVersion && currentSection) {
-				const text = bMatch[1].trim();
-				let title = '';
-				let content = '';
+				const bMatch = line.match(bulletRe);
+				if (bMatch && currentVersion && currentSection) {
+					const text = bMatch[1].trim();
+					let title = '';
+					let content = '';
 
 				// 굵은 제목 추출: **title**: content, 이모지 등 접두 포함
 				const strongMatch = text.match(/\*\*(.+?)\*\*/);
@@ -115,18 +126,18 @@
 					const prefix = text.slice(0, boldIndex).trim();
 					title = `${prefix ? prefix + ' ' : ''}${strongMatch[1].trim()}`.trim();
 					const after = text.slice(boldIndex + boldToken.length).trim();
-					content = after.replace(/^:\s*/, '').trim();
-				} else {
-					// 첫 콜론 기준 분리
-					const idx = text.indexOf(':');
-					if (idx !== -1) {
-						title = text.slice(0, idx).trim();
-						content = text.slice(idx + 1).trim();
+						content = mdInlineToHtml(after.replace(/^:\s*/, '').trim());
 					} else {
-						title = text;
-						content = '';
+						// 첫 콜론 기준 분리
+						const idx = text.indexOf(':');
+						if (idx !== -1) {
+							title = text.slice(0, idx).trim();
+							content = mdInlineToHtml(text.slice(idx + 1).trim());
+						} else {
+							title = text;
+							content = '';
+						}
 					}
-				}
 
 				// 이어지는 들여쓰기/빈 줄을 본문에 포함 (마크다운 스타일 여러 줄)
 				while (i + 1 < lines.length) {
@@ -142,9 +153,10 @@
 						content += (content ? '<br>' : '') + '';
 						continue;
 					}
-					// 앞쪽 들여쓰기 제거 후 추가
+					// 앞쪽 들여쓰기는 제거하되, 표시상 한 칸 들여쓰기 적용
 					const cont = lookaheadRaw.replace(/^\s{1,}/, '').trim();
-					content += (content ? '<br>' : '') + cont;
+					// 줄바꿈 시에도 일관된 들여쓰기를 위해 NBSP 대신 블록 패딩으로 처리
+					content += (content ? '<br>' : '') + mdInlineToHtml(cont);
 				}
 
 				// 인덱스 키 사용(ChangelogModal 구조에 맞춤)
@@ -197,7 +209,7 @@
 	</div>
 
 	<div class="w-full p-4 px-5 text-gray-700 dark:text-gray-100">
-		<div class="overflow-y-scroll max-h-96 scrollbar-hidden">
+		<div class="overflow-y-scroll max-h-96 scrollbar-hidden popup-content">
 			{#if hasStructuredContent && parsedChangelog}
 				<div class="mb-3">
 					{#each Object.keys(parsedChangelog) as version}
@@ -227,10 +239,10 @@
 									<div class="my-2.5 px-1.5">
 										{#each Object.keys(parsedChangelog[version][section]) as item}
 											<div class="text-sm mb-2">
-											<div class="font-semibold uppercase text-base">
+											<div class="font-semibold normal-case text-base">
 												{parsedChangelog[version][section][item].title}
 											</div>
-											<div class="mb-2 mt-1">
+											<div class="mb-2 mt-1 pl-2">
 												{@html parsedChangelog[version][section][item].content}
 											</div>
 											</div>
@@ -270,34 +282,13 @@
 	</div>
 </Modal>
 
-<!-- <style>
-	:global(.prose h1) {
-		font-size: 1.25rem; /* text-xl */
-		margin-bottom: 1rem;
+<style>
+	/* 팝업 콘텐츠 내 strong 강조 강화 */
+	:global(.popup-content strong) {
+		font-weight: 800; /* 더 두껍게 */
+		font-size: 1.05em; /* 주변 텍스트보다 약간 크게 */
 	}
-	:global(.prose strong) {
-		font-size: 1.125rem; /* text-lg */
-		font-weight: 600;
+	:global(.dark .popup-content strong) {
+		font-weight: 800;
 	}
-	:global(.prose p) {
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	:global(.prose ul) {
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	:global(.prose hr) {
-		border-color: #f3f4f6; /* gray-100 */
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	:global(.dark .prose hr) {
-		border-color: #2d2b35; /* gray-800 */
-	}
-	:global(.prose li) {
-		font-size: 0.95rem; /* text-sm */
-		margin-bottom: 0.125rem;
-		line-height: 1.5;
-	}
-</style> -->
+</style>
