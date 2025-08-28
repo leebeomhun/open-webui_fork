@@ -2648,8 +2648,79 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                         'server': tool_server,
                     }
 
-        if mcp_clients:
-            metadata['mcp_clients'] = mcp_clients
+    # Force a specific tool function when available: tool_kcd_query_post
+    # If present, pre-execute it on the server so results are always injected
+    # into the conversation, regardless of provider tool-calling support.
+    try:
+        FORCED_TOOL_FUNCTION = "tool_kcd_query_post"
+        if FORCED_TOOL_FUNCTION in tools_dict:
+            forced_tool = tools_dict[FORCED_TOOL_FUNCTION]
+
+            # Build minimal params using the user's latest prompt
+            user_message = get_last_user_message(form_data["messages"]) or ""
+            spec_props = forced_tool.get("spec", {}).get("parameters", {}).get(
+                "properties", {}
+            )
+            tool_function_params = {}
+            if "query" in spec_props:
+                tool_function_params["query"] = user_message
+            # Let server/tool defaults handle other params like top_k
+
+            # Execute the tool directly (server-side)
+            tool_function = forced_tool.get("callable")
+            tool_result = None
+            if tool_function:
+                try:
+                    tool_result = await tool_function(**tool_function_params)
+                except Exception as e:
+                    tool_result = str(e)
+
+            # Normalize result to string
+            tool_result_files = []
+            if isinstance(tool_result, list):
+                # Extract any data: URIs as files (consistent with non-native handler)
+                tool_result = list(tool_result)
+                for item in list(tool_result):
+                    if isinstance(item, str) and item.startswith("data:"):
+                        tool_result_files.append(item)
+                        tool_result.remove(item)
+
+            if isinstance(tool_result, (dict, list)):
+                tool_result_str = json.dumps(tool_result, indent=2, ensure_ascii=False)
+            else:
+                tool_result_str = str(tool_result)
+
+            # Compose a user-visible tool output message and append to messages
+            tool_id = forced_tool.get("tool_id", "")
+            tool_name = (
+                f"{tool_id}/{FORCED_TOOL_FUNCTION}" if tool_id else FORCED_TOOL_FUNCTION
+            )
+            form_data["messages"] = add_or_update_user_message(
+                f"\nTool `{tool_name}` Output: {tool_result_str}",
+                form_data["messages"],
+            )
+
+            # Also append as a citation-like source for UI rendering (optional)
+            sources.append(
+                {
+                    "source": {"name": f"TOOL:{tool_name}"},
+                    "document": [tool_result_str],
+                    "metadata": [
+                        {"source": f"TOOL:{tool_name}", "parameters": tool_function_params}
+                    ],
+                    "tool_result": True,
+                    **({"files": tool_result_files} if tool_result_files else {}),
+                }
+            )
+
+            # We already injected results; disable downstream tool processing to avoid
+            # double execution or provider-side tool calls
+            tools_dict = {}
+            if "tool_choice" in form_data:
+                del form_data["tool_choice"]
+    except Exception:
+        # Do not block chat on enforcement errors; fall back to normal behavior.
+        pass
 
         # Inject builtin tools for native function calling based on enabled features and model capability
         # Check if builtin_tools capability is enabled for this model (defaults to True if not specified)
@@ -2681,16 +2752,16 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                 form_data['tools'] = [
                     {'type': 'function', 'function': tool.get('spec', {})} for tool in tools_dict.values()
                 ]
-            else:
-                # If the function calling is not native, then call the tools function calling handler
-                try:
-                    form_data, flags = await chat_completion_tools_handler(
-                        request, form_data, extra_params, user, models, tools_dict
-                    )
-                    sources.extend(flags.get('sources', []))
-                except Exception as e:
-                    log.exception(e)
 
+        else:
+            # If the function calling is not native, then call the tools function calling handler
+            try:
+                form_data, flags = await chat_completion_tools_handler(
+                    request, form_data, extra_params, user, models, tools_dict
+                )
+                sources.extend(flags.get("sources", []))
+            except Exception as e:
+                log.exception(e)
     # Check if file context extraction is enabled for this model (default True)
     file_context_enabled = (model.get('info', {}).get('meta', {}).get('capabilities') or {}).get('file_context', True)
 
@@ -2735,7 +2806,9 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                 },
             }
         )
-
+        
+    if mcp_clients:
+        metadata["mcp_clients"] = mcp_clients
     # After RAG injection, optionally process tools so that
     # tool outputs are appended after RAG context.
     if tools_dict:
