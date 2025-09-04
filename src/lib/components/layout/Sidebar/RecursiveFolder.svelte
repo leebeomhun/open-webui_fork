@@ -476,8 +476,7 @@
 		<div class="w-full group">
 			<div
 				id="folder-{folderId}-button"
-				class="relative w-full py-1.5 px-2 rounded-lg flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500 font-medium hover:bg-gray-100 dark:hover:bg-gray-900 transition {$selectedFolder?.id ===
-				// class="relative w-full py-1.5 px-2 rounded-md flex items-center gap-1.5 text-xm text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-100 dark:hover:bg-gray-900 transition {$selectedFolder?.id === 
+				class="relative w-full py-1.5 px-2 rounded-md flex items-center gap-1.5 text-xm text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-100 dark:hover:bg-gray-900 transition {$selectedFolder?.id === 
 				folderId
 					? 'bg-gray-100 dark:bg-gray-900 selected'
 					: ''}"
