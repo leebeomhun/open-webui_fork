@@ -149,6 +149,15 @@
 			return str;
 		}
 	};
+
+	// 특정 소스 이름을 사용자 친화적인 라벨로 변환
+	const getSourceDisplayName = (name: string) => {
+		const decoded = decodeString(name);
+		if (decoded === 'TOOL:server:8/tool_kcd_query_post') {
+			return 'KCD 인용정보 확인';
+		}
+		return decoded;
+	};
 </script>
 
 <CitationModal
