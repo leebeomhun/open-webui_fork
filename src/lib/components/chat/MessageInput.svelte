@@ -493,6 +493,51 @@
 	let showToolsButton = false;
 	$: showToolsButton = ($tools ?? []).length > 0 || ($toolServers ?? []).length > 0;
 
+	// KCD 도구(서버:8) 사용/가용 상태 계산
+	const isKcdId = (id: string) =>
+		id === 'server:8' ||
+		(typeof id === 'string' && (id.startsWith('server:8/') || id.startsWith('TOOL:server:8')));
+	let isKcdToolEnabled = false;
+	$: isKcdToolEnabled = selectedToolIds?.some((id) => isKcdId(id));
+
+	let isKcdToolAvailable = false;
+	$: {
+		const modelIds = atSelectedModel?.id ? [atSelectedModel.id] : selectedModels;
+		const available = modelIds
+			.map((id) => $models.find((m) => m.id === id)?.info?.meta?.toolIds ?? [])
+			.flat();
+		isKcdToolAvailable = available?.some((id) => isKcdId(id));
+	}
+
+	function findKcdToolId(): string | undefined {
+		const modelIds = atSelectedModel?.id ? [atSelectedModel.id] : selectedModels;
+		const available = Array.from(
+			new Set(
+				modelIds.map((id) => $models.find((m) => m.id === id)?.info?.meta?.toolIds ?? []).flat()
+			)
+		);
+		// 우선 TOOL 접두 후보, 없으면 server:8 하위/정확 일치
+		let candidate = available.find(
+			(id) => typeof id === 'string' && id.startsWith('TOOL:server:8')
+		);
+		if (!candidate)
+			candidate = available.find((id) => typeof id === 'string' && id.startsWith('server:8/'));
+		if (!candidate) candidate = available.find((id) => id === 'server:8');
+
+		return candidate;
+	}
+
+	function addKcdTool() {
+		const candidate = findKcdToolId();
+		if (!candidate) {
+			toast.error($i18n.t('KCD 도구를 찾을 수 없습니다.'));
+			return;
+		}
+		if (!selectedToolIds?.includes(candidate)) {
+			selectedToolIds = [...selectedToolIds, candidate];
+		}
+	}
+
 	let showWebSearchButton = false;
 	$: showWebSearchButton =
 		(atSelectedModel?.id ? [atSelectedModel.id] : selectedModels).length ===
@@ -1705,7 +1750,24 @@
 											</Tooltip>
 										{/if}
 
-										{#each selectedFilterIds as filterId (filterId)}
+										{#if isKcdToolEnabled}
+											<span
+												class="px-2 py-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 dark:bg-sky-200/10 dark:text-sky-300"
+											>
+												KCD 자료 검색도구 사용중
+											</span>
+										{:else if isKcdToolAvailable}
+											<button
+												class="px-2 py-1 text-xs font-medium rounded-full bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 transition"
+												on:click={addKcdTool}
+												type="button"
+												aria-label="KCD 자료 검색도구 사용추가"
+											>
+												KCD 자료 검색도구 사용추가
+											</button>
+										{/if}
+
+										{#each selectedFilterIds as filterId}
 											{@const filter = toggleFilters.find((f) => f.id === filterId)}
 											{#if filter}
 												<Tooltip content={filter?.name} placement="top">
