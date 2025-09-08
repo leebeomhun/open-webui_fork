@@ -1114,6 +1114,9 @@
 				params = chatContent?.params ?? {};
 				chatFiles = chatContent?.files ?? [];
 
+				// Restore UI state from saved chat
+				selectedToolIds = chatContent?.selected_tool_ids ?? [];
+				selectedFilterIds = chatContent?.selected_filter_ids ?? [];
 				autoScroll = true;
 				await tick();
 
@@ -2322,7 +2325,12 @@
 					history: history,
 					messages: createMessagesList(history, history.currentId),
 					params: params,
-					files: chatFiles
+					files: chatFiles,
+					selected_tool_ids: selectedToolIds,
+					selected_filter_ids: selectedFilterIds,
+					web_search_enabled: webSearchEnabled,
+					image_generation_enabled: imageGenerationEnabled,
+					code_interpreter_enabled: codeInterpreterEnabled
 				});
 				currentChatPage.set(1);
 				await chats.set(await getChatList(localStorage.token, $currentChatPage));

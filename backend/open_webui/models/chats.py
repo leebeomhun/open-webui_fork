@@ -125,6 +125,8 @@ class ChatFileModel(BaseModel):
 class ChatForm(BaseModel):
     chat: dict
     folder_id: Optional[str] = None
+    selected_tool_ids: Optional[list[str]] = None
+    selected_filter_ids: Optional[list[str]] = None
 
 
 class ChatImportForm(ChatForm):
