@@ -168,7 +168,7 @@
 			{/if}
 			<div>
 				{#if citations.length === 1}
-					{$i18n.t('1 Source')}
+					{getSourceDisplayName(citations[0].source.name)}
 				{:else}
 					{$i18n.t('{{COUNT}} Sources', {
 						COUNT: citations.length
