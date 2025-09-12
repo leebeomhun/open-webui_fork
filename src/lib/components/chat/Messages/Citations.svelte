@@ -228,7 +228,7 @@
 					<div
 						class="flex-1 truncate hover:text-black dark:text-white/60 dark:hover:text-white transition text-left"
 					>
-						{decodeString(citation.source.name)}
+						{getSourceDisplayName(citation.source.name)}
 					</div>
 				</button>
 			{/each}
