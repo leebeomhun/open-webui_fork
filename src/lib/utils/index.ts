@@ -401,7 +401,9 @@ const isSameMondayWeek = (date1, date2) => {
 };
 
 export const formatDate = (inputDate, i18n = null) => {
-	const date = dayjs(inputDate);
+    const date = dayjs(inputDate);
+    // Define current time reference for comparisons
+    const now = dayjs();
 
 	if (i18n && i18n.t) {
 		// Same day (Today)
