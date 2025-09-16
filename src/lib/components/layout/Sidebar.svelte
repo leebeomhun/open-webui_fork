@@ -1137,6 +1137,24 @@
 							}
 						}}
 					>
+									<!-- 새폴더 생성 버튼 -->
+					<div class="px-2 mt-1">
+						<button
+							class="w-full flex items-center space-x-2 rounded-lg px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-sm text-gray-900 dark:text-gray-100"
+							on:click={() => {
+								showCreateFolderModal = true;
+							}}
+						>
+							<div class="self-center">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray-900 dark:text-gray-100">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"></path>
+								</svg>
+							</div>
+							<div class="self-center">
+								{$i18n.t('Create New Folder')}
+							</div>
+						</button>
+					</div>
 						<Folders
 							bind:folderRegistry
 							{folders}
@@ -1228,107 +1246,6 @@
 					}}
 				>
 					{#if $pinnedChats.length > 0}
-						<div class="flex flex-col space-y-1 rounded-xl">
-							<Folder
-								className=""
-								bind:open={showPinnedChat}
-								on:change={(e) => {
-									localStorage.setItem('showPinnedChat', e.detail);
-									console.log(e.detail);
-								}}
-								on:import={(e) => {
-									importChatHandler(e.detail, true);
-								}}
-								on:drop={async (e) => {
-									const { type, id, item } = e.detail;
-
-									if (type === 'chat') {
-										let chat = await getChatById(localStorage.token, id).catch((error) => {
-											return null;
-										});
-										if (!chat && item) {
-											chat = await importChat(
-												localStorage.token,
-												item.chat,
-												item?.meta ?? {},
-												false,
-												null,
-												item?.created_at ?? null,
-												item?.updated_at ?? null
-											);
-										}
-
-										if (chat) {
-											console.log(chat);
-											if (chat.folder_id) {
-												const res = await updateChatFolderIdById(
-													localStorage.token,
-													chat.id,
-													null
-												).catch((error) => {
-													toast.error(`${error}`);
-													return null;
-												});
-											}
-
-											if (!chat.pinned) {
-												const res = await toggleChatPinnedStatusById(localStorage.token, chat.id);
-											}
-
-											initChatList();
-										}
-									}
-								}}
-								name={$i18n.t('Pinned')}
-							>
-								<div
-									class="ml-3 pl-1 mt-[1px] flex flex-col overflow-y-auto scrollbar-hidden border-s border-gray-100 dark:border-gray-900"
-								>
-									{#each $pinnedChats as chat, idx (`pinned-chat-${chat?.id ?? idx}`)}
-										<ChatItem
-											className=""
-											id={chat.id}
-											title={chat.title}
-											{shiftKey}
-											selected={selectedChatId === chat.id}
-											on:select={() => {
-												selectedChatId = chat.id;
-											}}
-											on:unselect={() => {
-												selectedChatId = null;
-											}}
-											on:change={async () => {
-												initChatList();
-											}}
-											on:tag={(e) => {
-												const { type, name } = e.detail;
-												tagEventHandler(type, name, chat.id);
-											}}
-										/>
-									{/each}
-								</div>
-							</Folder>
-						</div>
-					{/if}
-				<!-- 새폴더 생성 버튼 -->
-				<div class="px-2 mt-1">
-					<button
-						class="w-full flex items-center space-x-2 rounded-lg px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-sm text-gray-900 dark:text-gray-100"
-						on:click={() => {
-							showCreateFolderModal = true;
-						}}
-					>
-						<div class="self-center">
-							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-gray-900 dark:text-gray-100">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"></path>
-							</svg>
-						</div>
-						<div class="self-center">
-							{$i18n.t('Create New Folder')}
-						</div>
-					</button>
-				</div>
-					{#if folders}
 						<div class="mb-1">
 							<div class="flex flex-col space-y-1 rounded-xl">
 								<Folder
@@ -1475,7 +1392,7 @@
 												loadMoreChats();
 											}
 										}}
-									>			
+									>
 										<div
 											class="w-full flex justify-center py-1 text-xs animate-pulse items-center gap-2"
 										>
