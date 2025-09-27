@@ -1830,19 +1830,28 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                     tool_result = str(e)
 
             # Normalize result to string
+            normalized_tool_result = tool_result
+
+            # Some tool implementations return (payload, response) tuples.
+            # We only want the payload portion in citations.
+            if isinstance(normalized_tool_result, tuple):
+                normalized_tool_result = normalized_tool_result[0]
+
             tool_result_files = []
-            if isinstance(tool_result, list):
+            if isinstance(normalized_tool_result, list):
                 # Extract any data: URIs as files (consistent with non-native handler)
-                tool_result = list(tool_result)
-                for item in list(tool_result):
+                normalized_tool_result = list(normalized_tool_result)  # shallow copy
+                for item in list(normalized_tool_result):
                     if isinstance(item, str) and item.startswith("data:"):
                         tool_result_files.append(item)
-                        tool_result.remove(item)
+                        normalized_tool_result.remove(item)
 
-            if isinstance(tool_result, (dict, list)):
-                tool_result_str = json.dumps(tool_result, indent=2, ensure_ascii=False)
+            if isinstance(normalized_tool_result, (dict, list)):
+                tool_result_str = json.dumps(
+                    normalized_tool_result, indent=2, ensure_ascii=False
+                )
             else:
-                tool_result_str = str(tool_result)
+                tool_result_str = str(normalized_tool_result)
 
             # Compose a user-visible tool output message and append to messages
             tool_id = forced_tool.get("tool_id", "")
