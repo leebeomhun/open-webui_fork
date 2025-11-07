@@ -1526,100 +1526,7 @@
 
 									{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
 										<div class="ml-1 flex gap-1.5">
-                                            <Tooltip content={$i18n.t('Valves')} placement="top">
-                                                <button
-                                                    id="model-valves-button"
-                                                    class="bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-8 flex justify-center items-center outline-hidden focus:outline-hidden"
-                                                    on:click={() => {
-                                                        selectedValvesType = 'function';
-                                                        selectedValvesItemId = selectedModelIds[0]?.split('.')[0];
-                                                        showValvesModal = true;
-                                                    }}
-                                                >
-                                                    <Knobs className="size-4" strokeWidth="1.5" />
-                                                </button>
-                                            </Tooltip>
-                                        </div>
-                                    {/if}
-
-                                    <div class="ml-1 flex gap-1.5">
-                                        {#if (selectedToolIds ?? []).length > 0}
-                                            <Tooltip
-                                                content={$i18n.t('{{COUNT}} Available Tools', {
-                                                    COUNT: selectedToolIds.length
-                                                })}
-                                            >
-                                                <button
-                                                    class="translate-y-[0.5px] px-1 flex gap-1 items-center text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:bg-gray-800 rounded-lg self-center transition"
-                                                    aria-label="Available Tools"
-                                                    type="button"
-                                                    on:click={() => {
-                                                        showTools = !showTools;
-                                                    }}
-                                                >
-                                                    <Wrench className="size-4" strokeWidth="1.75" />
-
-                                                    <span class="text-sm">
-                                                        {selectedToolIds.length}
-                                                    </span>
-                                                </button>
-                                            </Tooltip>
-                                        {/if}
-
-                                        {#if isKcdToolEnabled}
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 dark:bg-sky-200/10 dark:text-sky-300">
-                                                KCD 자료 검색도구 사용중
-                                            </span>
-                                        {:else if isKcdToolAvailable}
-                                            <button
-                                                class="px-2 py-1 text-xs font-medium rounded-full bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 transition"
-                                                on:click={addKcdTool}
-                                                type="button"
-                                                aria-label="KCD 자료 검색도구 사용추가"
-                                            >
-                                                KCD 자료 검색도구 사용추가
-                                            </button>
-                                        {/if}
-
-                                        {#each selectedFilterIds as filterId}
-                                            {@const filter = toggleFilters.find((f) => f.id === filterId)}
-                                            {#if filter}
-                                                <Tooltip content={filter?.name} placement="top">
-                                                    <button
-                                                        on:click|preventDefault={() => {
-                                                            selectedFilterIds = selectedFilterIds.filter(
-                                                                (id) => id !== filterId
-                                                            );
-                                                        }}
-                                                        type="button"
-                                                        class="group p-[7px] flex gap-1.5 items-center text-sm rounded-full transition-colors duration-300 focus:outline-hidden max-w-full overflow-hidden {selectedFilterIds.includes(
-                                                            filterId
-                                                        )
-                                                            ? 'text-sky-500 dark:text-sky-300 bg-sky-50 hover:bg-sky-100 dark:bg-sky-400/10 dark:hover:bg-sky-600/10 border border-sky-200/40 dark:border-sky-500/20'
-                                                            : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 '} capitalize"
-                                                    >
-                                                        {#if filter?.icon}
-                                                            <div class="size-4 items-center flex justify-center">
-                                                                <img
-                                                                    src={filter.icon}
-                                                                    class="size-3.5 {filter.icon.includes('svg')
-                                                                        ? 'dark:invert-[80%]'
-                                                                        : ''}"
-                                                                    style="fill: currentColor;"
-                                                                    alt={filter.name}
-                                                                />
-                                                            </div>
-                                                        {:else}
-                                                            <Sparkles className="size-4" strokeWidth="1.75" />
-                                                        {/if}
-                                                        <div class="hidden group-hover:block">
-                                                            <XMark className="size-4" strokeWidth="1.75" />
-                                                        </div>
-                                                    </button>
-                                                </Tooltip>
-                                            {/if}
-                                        {/each}
- (KCD 자료 검색도구가 활성화되면 입력창에 KCD 자료 검색도구 사용중배지가 표시됩니다.)
+											<Tooltip content={$i18n.t('Valves')} placement="top">
 												<button
 													id="model-valves-button"
 													class="bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-8 flex justify-center items-center outline-hidden focus:outline-hidden"
@@ -1657,6 +1564,21 @@
 													</span>
 												</button>
 											</Tooltip>
+										{/if}
+
+										{#if isKcdToolEnabled}
+											<span class="px-2 py-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 dark:bg-sky-200/10 dark:text-sky-300">
+												KCD 자료 검색도구 사용중
+											</span>
+										{:else if isKcdToolAvailable}
+											<button
+												class="px-2 py-1 text-xs font-medium rounded-full bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 transition"
+												on:click={addKcdTool}
+												type="button"
+												aria-label="KCD 자료 검색도구 사용추가"
+											>
+												KCD 자료 검색도구 사용추가
+											</button>
 										{/if}
 
 										{#each selectedFilterIds as filterId}
