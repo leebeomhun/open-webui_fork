@@ -1599,6 +1599,7 @@ def process_file(
     if file:
         try:
             collection_name = form_data.collection_name
+            is_default_collection = collection_name is None
 
             if collection_name is None:
                 collection_name = f'file-{file.id}'
@@ -1734,8 +1735,22 @@ def process_file(
             )
             hash = calculate_sha256_string(text_content)
 
-            if request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
-                Files.update_file_data_by_id(file.id, {'status': 'completed'}, db=db)
+            file_meta = file.meta or {}
+            meta_data = file_meta.get("data", {}) if isinstance(file_meta, dict) else {}
+            full_context_mode = (
+                request.app.state.config.RAG_FULL_CONTEXT
+                or meta_data.get("context") == "full"
+                or meta_data.get("full_context") is True
+                or meta_data.get("mode") == "full"
+                or is_default_collection  # chat attachments default to full context
+            )
+
+            if request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL or full_context_mode:
+                log.info(
+                    "Skipping embedding for %s (full context mode)",
+                    file.id,
+                )
+                Files.update_file_data_by_id(file.id, {"status": "completed"}, db=db)
                 Files.update_file_hash_by_id(file.id, hash, db=db)
                 return {
                     'status': True,
