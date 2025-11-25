@@ -324,72 +324,73 @@
 													<ul class="list-disc pl-5">
 														{#each parsed.results.pathogen as p}
 															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof p === 'string' ? p : p?.text ?? JSON.stringify(p))}</li>
-														{/each}
-													</ul>
-												</div>
-											{/if}
-											{#if Array.isArray(parsed.results?.resistance) && parsed.results.resistance.length}
-												<div>
-													<div class="font-medium dark:text-gray-300">항생제내성 추가정보</div>
-													<ul class="list-disc pl-5">
-														{#each parsed.results.resistance as r}
-															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof r === 'string' ? r : r?.text ?? JSON.stringify(r))}</li>
-														{/each}
-													</ul>
-												</div>
-											{/if}
-											{#if Array.isArray(parsed.results?.external) && parsed.results.external.length}
-												<div>
-													<div class="font-medium dark:text-gray-300">외인 추가정보</div>
-													<ul class="list-disc pl-5">
-														{#each parsed.results.external as e}
-															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof e === 'string' ? e : e?.text ?? JSON.stringify(e))}</li>
-														{/each}
-													</ul>
-													{#if parsed?.external_note}
-														<div class="mt-1 text-xs dark:text-gray-500">외인 3,4단위 적용정보:</div>
-														<pre class="whitespace-pre-line mt-1 text-xs dark:text-gray-500">{formatContent(parsed.external_note)}</pre>
-													{/if}
-												</div>
-											{/if}
+													{/each}
+												</ul>
 											</div>
 										{/if}
-								{:else}
-									{@const rawContent = document.document.trim().replace(/\n\n+/g, '\n\n')}
-									{@const isTruncated =
-										($settings?.renderMarkdownInPreviews ?? true) &&
-										rawContent.length > CONTENT_PREVIEW_LIMIT &&
-										!expandedDocs.has(documentIdx)}
-									{#if $settings?.renderMarkdownInPreviews ?? true}
-										<div class="text-sm prose dark:prose-invert max-w-full">
-											<Markdown
-												content={isTruncated
-													? rawContent.slice(0, CONTENT_PREVIEW_LIMIT)
-													: rawContent}
-												id="citation-{documentIdx}"
-											/>
-										</div>
-										{#if isTruncated}
-											<button
-												class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-												on:click={() => {
-													expandedDocs.add(documentIdx);
-													expandedDocs = expandedDocs;
-											}}
-											>
-												{$i18n.t('Show all ({{COUNT}} characters)', {
-													COUNT: rawContent.length.toLocaleString()
-												})}
-											</button>
+										{#if Array.isArray(parsed.results?.resistance) && parsed.results.resistance.length}
+											<div>
+												<div class="font-medium dark:text-gray-300">항생제내성 추가정보</div>
+												<ul class="list-disc pl-5">
+													{#each parsed.results.resistance as r}
+														<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof r === 'string' ? r : r?.text ?? JSON.stringify(r))}</li>
+												{/each}
+												</ul>
+											</div>
 										{/if}
-									{:else}
-										<pre class="text-sm dark:text-gray-400 whitespace-pre-line">{rawContent}</pre>
+										{#if Array.isArray(parsed.results?.external) && parsed.results.external.length}
+											<div>
+												<div class="font-medium dark:text-gray-300">외인 추가정보</div>
+												<ul class="list-disc pl-5">
+													{#each parsed.results.external as e}
+														<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof e === 'string' ? e : e?.text ?? JSON.stringify(e))}</li>
+												{/each}
+												</ul>
+												{#if parsed?.external_note}
+													<div class="mt-1 text-xs dark:text-gray-500">외인 3,4단위 적용정보:</div>
+													<pre class="whitespace-pre-line mt-1 text-xs dark:text-gray-500">{formatContent(parsed.external_note)}</pre>
+												{/if}
+											</div>
+										{/if}
+										</div>
 									{/if}
+							{:else}
+								{@const rawContent = document.document.trim().replace(/\n\n+/g, '\n\n')}
+								{@const isTruncated =
+									($settings?.renderMarkdownInPreviews ?? true) &&
+									rawContent.length > CONTENT_PREVIEW_LIMIT &&
+									!expandedDocs.has(documentIdx)}
+								{#if $settings?.renderMarkdownInPreviews ?? true}
+									<div class="text-sm prose dark:prose-invert max-w-full">
+										<Markdown
+											content={isTruncated
+												? rawContent.slice(0, CONTENT_PREVIEW_LIMIT)
+												: rawContent}
+											id="citation-{documentIdx}"
+										/>
+									</div>
+									{#if isTruncated}
+										<button
+											class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+											on:click={() => {
+												expandedDocs.add(documentIdx);
+												expandedDocs = expandedDocs;
+										}}
+										>
+											{$i18n.t('Show all ({{COUNT}} characters)', {
+												COUNT: rawContent.length.toLocaleString()
+											})}
+										</button>
+									{/if}
+								{:else}
+									<pre class="text-sm dark:text-gray-400 whitespace-pre-line">{rawContent}</pre>
 								{/if}
 							{/if}
+						{/if}
 						</div>
+					</div>
 					{/each}
+				</div>
 			</div>
 		</div>
-	</div>
-</Modal>
+	</Modal>
