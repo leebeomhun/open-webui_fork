@@ -275,86 +275,86 @@
 							{:else if isStructuredContent(parseContent(document.document))}
 								{@const parsed = parseContent(document.document)}
 								<!-- structured content -->
-									{#if Array.isArray(parsed?.expanded_queries) && parsed.expanded_queries.length}
-										<div class="text-sm font-medium dark:text-gray-300 mt-2">확장된 쿼리</div>
-										<ul class="list-disc pl-5 dark:text-gray-400">
-											{#each parsed.expanded_queries as q}
-												<li>{q}</li>
-											{/each}
-										</ul>
-									{/if}
+								{#if Array.isArray(parsed?.expanded_queries) && parsed.expanded_queries.length}
+									<div class="text-sm font-medium dark:text-gray-300 mt-2">확장된 쿼리</div>
+									<ul class="list-disc pl-5 dark:text-gray-400">
+										{#each parsed.expanded_queries as q}
+											<li>{q}</li>
+										{/each}
+									</ul>
+								{/if}
 
-									{#if parsed?.kcd_by_query}
-										{@const kcdList = flattenKcd(parsed.kcd_by_query)}
-										{#if kcdList.length}
-											<div class="text-sm font-medium dark:text-gray-300 mt-3">검색 결과</div>
-											<div class="space-y-3">
-												{#each kcdList as item}
-													<div class="rounded-md border border-gray-200 dark:border-gray-800 p-3">
-														<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm dark:text-gray-400">
-															<div><span class="font-medium">출처:</span> {item?.file_name ?? '-'}</div>
-															{#if item?.score !== undefined}
-																<div><span class="font-medium">관련도:</span> {toPercentStr(item.score)}</div>
-															{/if}
-														</div>
-														{#if item?.text}
-															<div class="mt-2 text-sm dark:text-gray-300">
-																<div class="font-medium mb-1">내용</div>
-																<pre class="whitespace-pre-line text-[13px] leading-5 dark:text-gray-400">{formatContent(item.text)}</pre>
-															</div>
+								{#if parsed?.kcd_by_query}
+									{@const kcdList = flattenKcd(parsed.kcd_by_query)}
+									{#if kcdList.length}
+										<div class="text-sm font-medium dark:text-gray-300 mt-3">검색 결과</div>
+										<div class="space-y-3">
+											{#each kcdList as item}
+												<div class="rounded-md border border-gray-200 dark:border-gray-800 p-3">
+													<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm dark:text-gray-400">
+														<div><span class="font-medium">출처:</span> {item?.file_name ?? '-'}</div>
+														{#if item?.score !== undefined}
+															<div><span class="font-medium">관련도:</span> {toPercentStr(item.score)}</div>
 														{/if}
 													</div>
-												{/each}
-											</div>
-										{/if}
-									{/if}
-
-									{#if parsed?.results}
-										<div class="text-sm font-medium dark:text-gray-300 mt-3">추가 정보</div>
-										<div class="space-y-2 text-sm dark:text-gray-400">
-											{#if Array.isArray(parsed.results?.pathogen) && parsed.results.pathogen.length}
-												<div>
-													<div class="font-medium dark:text-gray-300">원인균 추가정보</div>
-													<ul class="list-disc pl-5">
-														{#each parsed.results.pathogen as p}
-															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof p === 'string' ? p : p?.text ?? JSON.stringify(p))}</li>
-														{/each}
-													</ul>
-												</div>
-											{/if}
-											{#if Array.isArray(parsed.results?.resistance) && parsed.results.resistance.length}
-												<div>
-													<div class="font-medium dark:text-gray-300">항생제내성 추가정보</div>
-													<ul class="list-disc pl-5">
-														{#each parsed.results.resistance as r}
-															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof r === 'string' ? r : r?.text ?? JSON.stringify(r))}</li>
-														{/each}
-													</ul>
-												</div>
-											{/if}
-											{#if Array.isArray(parsed.results?.external) && parsed.results.external.length}
-												<div>
-													<div class="font-medium dark:text-gray-300">외인 추가정보</div>
-													<ul class="list-disc pl-5">
-														{#each parsed.results.external as e}
-															<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof e === 'string' ? e : e?.text ?? JSON.stringify(e))}</li>
-														{/each}
-													</ul>
-													{#if parsed?.external_note}
-														<div class="mt-1 text-xs dark:text-gray-500">외인 3,4단위 적용정보:</div>
-														<pre class="whitespace-pre-line mt-1 text-xs dark:text-gray-500">{formatContent(parsed.external_note)}</pre>
+													{#if item?.text}
+														<div class="mt-2 text-sm dark:text-gray-300">
+															<div class="font-medium mb-1">내용</div>
+															<pre class="whitespace-pre-line text-[13px] leading-5 dark:text-gray-400">{formatContent(item.text)}</pre>
+														</div>
 													{/if}
 												</div>
-											{/if}
+											{/each}
+										</div>
+									{/if}
+								{/if}
+
+								{#if parsed?.results}
+									<div class="text-sm font-medium dark:text-gray-300 mt-3">추가 정보</div>
+									<div class="space-y-2 text-sm dark:text-gray-400">
+										{#if Array.isArray(parsed.results?.pathogen) && parsed.results.pathogen.length}
+											<div>
+												<div class="font-medium dark:text-gray-300">원인균 추가정보</div>
+												<ul class="list-disc pl-5">
+													{#each parsed.results.pathogen as p}
+														<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof p === 'string' ? p : p?.text ?? JSON.stringify(p))}</li>
+													{/each}
+												</ul>
 											</div>
 										{/if}
-
-								{:else}
-									<pre class="text-sm dark:text-gray-400 whitespace-pre-line">{formatContent(document.document)}</pre>
+										{#if Array.isArray(parsed.results?.resistance) && parsed.results.resistance.length}
+											<div>
+												<div class="font-medium dark:text-gray-300">항생제내성 추가정보</div>
+												<ul class="list-disc pl-5">
+													{#each parsed.results.resistance as r}
+														<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof r === 'string' ? r : r?.text ?? JSON.stringify(r))}</li>
+													{/each}
+												</ul>
+											</div>
+										{/if}
+										{#if Array.isArray(parsed.results?.external) && parsed.results.external.length}
+											<div>
+												<div class="font-medium dark:text-gray-300">외인 추가정보</div>
+												<ul class="list-disc pl-5">
+													{#each parsed.results.external as e}
+														<li class="whitespace-pre-line text-[12px] leading-5 dark:text-gray-400">{formatContent(typeof e === 'string' ? e : e?.text ?? JSON.stringify(e))}</li>
+													{/each}
+												</ul>
+												{#if parsed?.external_note}
+													<div class="mt-1 text-xs dark:text-gray-500">외인 3,4단위 적용정보:</div>
+													<pre class="whitespace-pre-line mt-1 text-xs dark:text-gray-500">{formatContent(parsed.external_note)}</pre>
+												{/if}
+											</div>
+										{/if}
+									</div>
 								{/if}
+							{:else}
+								<pre class="text-sm dark:text-gray-400 whitespace-pre-line">{formatContent(document.document)}</pre>
+							{/if}
 						</div>
+					</div>
 					{/each}
+				</div>
 			</div>
 		</div>
-	</div>
-</Modal>
+	</Modal>
