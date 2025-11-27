@@ -1853,17 +1853,11 @@ async def process_chat_payload(request, form_data, user, metadata, model):
             else:
                 tool_result_str = str(normalized_tool_result)
 
-            # Compose a user-visible tool output message and append to messages
+            # Also append as a citation-like source for UI rendering (optional)
             tool_id = forced_tool.get("tool_id", "")
             tool_name = (
                 f"{tool_id}/{FORCED_TOOL_FUNCTION}" if tool_id else FORCED_TOOL_FUNCTION
             )
-            form_data["messages"] = add_or_update_user_message(
-                f"\nTool `{tool_name}` Output: {tool_result_str}",
-                form_data["messages"],
-            )
-
-            # Also append as a citation-like source for UI rendering (optional)
             sources.append(
                 {
                     "source": {"name": f"TOOL:{tool_name}"},
