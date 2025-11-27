@@ -1631,7 +1631,7 @@
 
 										{#if isKcdToolEnabled}
 											<span
-												class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 border border-sky-200/60 dark:bg-sky-400/10 dark:text-sky-300 dark:border-sky-500/30"
+												class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 border border-sky-200/60 dark:bg-sky-400/10 dark:text-sky-300 dark:border-sky-500/30 whitespace-nowrap"
 											>
 												<Sparkles className="size-4" strokeWidth="1.75" />
 												KCD 자료 검색도구 사용중
@@ -1639,7 +1639,7 @@
 										{:else if isKcdToolAvailable}
 											<Tooltip content={$i18n.t('KCD 검색을 쓰려면 먼저 활성화하세요')} placement="top">
 												<button
-													class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-semibold rounded-full text-white bg-sky-600 hover:bg-sky-700 shadow-sm ring-1 ring-sky-200/90 dark:bg-sky-500 dark:hover:bg-sky-400 dark:ring-sky-500/50 transition"
+													class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-semibold rounded-full text-white bg-sky-600 hover:bg-sky-700 shadow-sm ring-1 ring-sky-200/90 dark:bg-sky-500 dark:hover:bg-sky-400 dark:ring-sky-500/50 transition whitespace-nowrap"
 													on:click={addKcdTool}
 													type="button"
 													aria-label="KCD 자료 검색도구 사용추가"
