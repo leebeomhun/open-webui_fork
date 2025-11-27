@@ -509,6 +509,11 @@
 		isKcdToolAvailable = available?.some((id) => isKcdId(id));
 	}
 
+	let kcdActiveLabel = 'KCD 자료 검색도구 사용중';
+	let kcdAddLabel = 'KCD 자료 검색도구 사용추가';
+	$: kcdActiveLabel = $mobile ? 'KCD' : 'KCD 자료 검색도구 사용중';
+	$: kcdAddLabel = $mobile ? 'KCD' : 'KCD 자료 검색도구 사용추가';
+
 	function findKcdToolId(): string | undefined {
 		const modelIds = atSelectedModel?.id ? [atSelectedModel.id] : selectedModels;
 		const available = Array.from(
@@ -571,6 +576,14 @@
 			top: element.scrollHeight,
 			behavior: 'smooth'
 		});
+	};
+
+	const submitMessage = () => {
+		if (isKcdToolAvailable && !isKcdToolEnabled) {
+			toast.info($i18n.t('모델이 KCD 자료 검색도구를 지원합니다. 메세지 박스에서 "KCD 필수" or "KCD 자료 검색도구 사용추가 필수" 버튼을 클릭해서 KCD 도구를 추가해주세요.'));
+			return;
+		}
+		dispatch('submit', prompt);
 	};
 
 	const screenCaptureHandler = async () => {
@@ -1244,7 +1257,7 @@
 								document.getElementById('chat-input')?.focus();
 
 								if ($settings?.speechAutoSend ?? false) {
-									dispatch('submit', prompt);
+									submitMessage();
 								}
 							}}
 						/>
@@ -1253,7 +1266,7 @@
 						class="w-full flex flex-col gap-1.5 {recording ? 'hidden' : ''}"
 						on:submit|preventDefault={() => {
 							// check if selectedModels support image input
-							dispatch('submit', prompt);
+							submitMessage();
 						}}
 					>
 						<button
@@ -1545,7 +1558,7 @@
 																if (enterPressed) {
 																	e.preventDefault();
 																	if (prompt !== '' || files.length > 0) {
-																		dispatch('submit', prompt);
+																		submitMessage();
 																	}
 																}
 															}
@@ -1755,7 +1768,7 @@
 												class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 border border-sky-200/60 dark:bg-sky-400/10 dark:text-sky-300 dark:border-sky-500/30 whitespace-nowrap"
 											>
 												<Sparkles className="size-4" strokeWidth="1.75" />
-												KCD 자료 검색도구 사용중
+												{kcdActiveLabel}
 											</span>
 										{:else if isKcdToolAvailable}
 											<Tooltip content={$i18n.t('KCD 검색을 쓰려면 먼저 활성화하세요')} placement="top">
@@ -1766,7 +1779,7 @@
 													aria-label="KCD 자료 검색도구 사용추가"
 												>
 													<Sparkles className="size-4" strokeWidth="1.75" />
-													<span>KCD 자료 검색도구 사용추가</span>
+													<span>{kcdAddLabel}</span>
 													<span class="text-[9px] uppercase tracking-wide bg-white/25 text-white px-1 py-[2px] rounded-full">
 														필수
 													</span>
