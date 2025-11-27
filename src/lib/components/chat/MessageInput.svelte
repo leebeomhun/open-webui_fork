@@ -1631,19 +1631,26 @@
 
 										{#if isKcdToolEnabled}
 											<span
-												class="px-2 py-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 dark:bg-sky-200/10 dark:text-sky-300"
+												class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-medium rounded-full bg-sky-50 text-sky-700 border border-sky-200/60 dark:bg-sky-400/10 dark:text-sky-300 dark:border-sky-500/30"
 											>
+												<Sparkles className="size-4" strokeWidth="1.75" />
 												KCD 자료 검색도구 사용중
 											</span>
 										{:else if isKcdToolAvailable}
-											<button
-												class="px-2 py-1 text-xs font-medium rounded-full bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 transition"
-												on:click={addKcdTool}
-												type="button"
-												aria-label="KCD 자료 검색도구 사용추가"
-											>
-												KCD 자료 검색도구 사용추가
-											</button>
+											<Tooltip content={$i18n.t('KCD 검색을 쓰려면 먼저 활성화하세요')} placement="top">
+												<button
+													class="self-center inline-flex h-7 items-center px-2.5 gap-1 text-xs font-semibold rounded-full text-white bg-sky-600 hover:bg-sky-700 shadow-sm ring-1 ring-sky-200/90 dark:bg-sky-500 dark:hover:bg-sky-400 dark:ring-sky-500/50 transition"
+													on:click={addKcdTool}
+													type="button"
+													aria-label="KCD 자료 검색도구 사용추가"
+												>
+													<Sparkles className="size-4" strokeWidth="1.75" />
+													<span>KCD 자료 검색도구 사용추가</span>
+													<span class="text-[9px] uppercase tracking-wide bg-white/25 text-white px-1 py-[2px] rounded-full">
+														필수
+													</span>
+												</button>
+											</Tooltip>
 										{/if}
 
 										{#each selectedFilterIds as filterId}
