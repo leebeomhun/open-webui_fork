@@ -47,3 +47,5 @@
 # Misc
 *.env text eol=lf
 *.lock text eol=lf
+
+backend/open_webui/retrieval/utils.py merge=ours
