@@ -61,6 +61,7 @@ class FolderNameIdResponse(BaseModel):
     is_expanded: bool = False
     created_at: int
     updated_at: int
+    last_chat_updated_at: Optional[int] = None  # 폴더 내 최신 채팅 시간
 
 
 ####################
