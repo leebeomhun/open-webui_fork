@@ -69,6 +69,12 @@ async def get_folders(
 
     folders = Folders.get_folders_by_user_id(user.id, db=db)
 
+    # 각 폴더의 최신 채팅 시간을 조회
+    folder_ids = [folder.id for folder in folders]
+    latest_chat_times = Chats.get_latest_chat_updated_at_by_folder_ids_and_user_id(
+        folder_ids, user.id
+    )
+
     # Verify folder data integrity
     folder_list = []
     for folder in folders:
@@ -91,7 +97,10 @@ async def get_folders(
                 folder.data['files'] = valid_files
                 Folders.update_folder_by_id_and_user_id(folder.id, user.id, FolderUpdateForm(data=folder.data), db=db)
 
-        folder_list.append(FolderNameIdResponse(**folder.model_dump()))
+        folder_list.append(FolderNameIdResponse(
+            **folder.model_dump(),
+            last_chat_updated_at=latest_chat_times.get(folder.id)
+        ))
 
     return folder_list
 

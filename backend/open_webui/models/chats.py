@@ -1359,6 +1359,35 @@ class ChatTable:
             log.info(f"Count of chats for folder '{folder_id}': {count}")
             return count
 
+    def get_latest_chat_updated_at_by_folder_ids_and_user_id(
+        self, folder_ids: list[str], user_id: str
+    ) -> dict[str, Optional[int]]:
+        """
+        각 폴더에 대해 가장 최근에 업데이트된 채팅의 updated_at 값을 반환합니다.
+        Returns a dict mapping folder_id -> latest chat updated_at (or None if no chats)
+        """
+        result = {folder_id: None for folder_id in folder_ids}
+        
+        if not folder_ids:
+            return result
+            
+        with get_db() as db:
+            # folder_id별로 가장 최근 updated_at을 가져옴
+            query = (
+                db.query(Chat.folder_id, func.max(Chat.updated_at))
+                .filter(
+                    Chat.folder_id.in_(folder_ids),
+                    Chat.user_id == user_id,
+                    Chat.archived == False
+                )
+                .group_by(Chat.folder_id)
+            )
+            
+            for folder_id, max_updated_at in query.all():
+                result[folder_id] = max_updated_at
+                
+        return result
+
     def delete_tag_by_id_and_user_id_and_tag_name(
         self, id: str, user_id: str, tag_name: str, db: Optional[Session] = None
     ) -> bool:
