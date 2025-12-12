@@ -1104,7 +1104,7 @@
 						<!-- 새폴더 생성 버튼 -->
 						<div class="px-2 mt-1">
 							<button
-								class="w-full flex items-center space-x-2 rounded-lg px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-sm text-gray-900 dark:text-gray-100"
+								class="w-full flex items-center space-x-2 rounded-lg py-2 hover:bg-gray-100 dark:hover:bg-gray-900 transition text-sm text-gray-900 dark:text-gray-100"
 								on:click={() => {
 									showCreateFolderModal = true;
 								}}
