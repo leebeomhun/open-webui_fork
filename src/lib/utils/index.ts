@@ -93,11 +93,20 @@ export const sanitizeResponseContent = (content: string) => {
 
 export const processResponseContent = (content: string) => {
 	content = processChineseContent(content);
+	content = processEmphasisPunctuation(content);
 	return content.trim();
 };
 
 function isChineseChar(char: string): boolean {
 	return /\p{Script=Han}/u.test(char);
+}
+
+function isWordChar(char: string): boolean {
+	return /[\p{L}\p{N}]/u.test(char);
+}
+
+function isPunctuationChar(char: string): boolean {
+	return /[\p{P}\p{S}]/u.test(char);
 }
 
 // Tackle "Model output issue not following the standard Markdown/LaTeX format" in Chinese.
@@ -140,6 +149,34 @@ function processChineseContent(content: string): string {
 	return content;
 }
 
+// Tackle markdown emphasis edge cases with punctuation next to delimiters.
+// Example: `**[text]**을`, `**foo)**bar`, `foo**[text]**bar` where marked doesn't apply emphasis
+// unless there are word-boundary spaces around the delimiter run.
+function processEmphasisPunctuation(content: string): string {
+	if (!content.includes('*')) return content;
+
+	const processOutsideCodeBlocks = (text: string, replacementFn: (segment: string) => string) => {
+		return text
+			.split(/(```[\s\S]*?```|`[\s\S]*?`)/)
+			.map((segment) => {
+				return segment.startsWith('```') || segment.startsWith('`')
+					? segment
+					: replacementFn(segment);
+			})
+			.join('');
+	};
+
+	return processOutsideCodeBlocks(content, (segment) => {
+		const lines = segment.split('\n');
+		const processedLines = lines.map((line) => {
+			line = processPunctuationDelimiters(line, '**');
+			line = processPunctuationDelimiters(line, '*');
+			return line;
+		});
+		return processedLines.join('\n');
+	});
+}
+
 // Helper function for `processChineseContent`
 function processChineseDelimiters(
 	line: string,
@@ -163,6 +200,33 @@ function processChineseDelimiters(
 		} else {
 			return match;
 		}
+	});
+}
+
+// Helper function for `processEmphasisPunctuation`
+function processPunctuationDelimiters(line: string, symbol: string): string {
+	const escapedSymbol = escapeRegExp(symbol);
+	const regex = new RegExp(
+		`(.?)(?<!${escapedSymbol})(${escapedSymbol})([^${escapedSymbol}]+)(${escapedSymbol})(?!${escapedSymbol})(.)`,
+		'gu'
+	);
+
+	return line.replace(regex, (match, l, left, content, right, r) => {
+		const firstChar = content?.[0];
+		const lastChar = content?.[content.length - 1];
+
+		const needsSpaceBefore =
+			l && l.length > 0 && firstChar && isWordChar(l[l.length - 1]) && isPunctuationChar(firstChar);
+		const needsSpaceAfter =
+			r && r.length > 0 && lastChar && isWordChar(r[0]) && isPunctuationChar(lastChar);
+
+		if (needsSpaceBefore || needsSpaceAfter) {
+			return `${l}${needsSpaceBefore ? ' ' : ''}${left}${content}${right}${
+				needsSpaceAfter ? ' ' : ''
+			}${r}`;
+		}
+
+		return match;
 	});
 }
 
