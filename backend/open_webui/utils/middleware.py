@@ -2453,6 +2453,10 @@ async def process_chat_payload(request, form_data, user, metadata, model):
     }
     form_data['metadata'] = metadata
 
+    # Resolved server-side tools and MCP clients used for this turn.
+    tools_dict = {}
+    mcp_clients = {}
+
     # When the caller provides an explicit OpenAI-style `tools` array in the
     # request body, skip all server-side tool resolution and pass the caller's
     # tools through to the model unchanged.
@@ -2465,9 +2469,6 @@ async def process_chat_payload(request, form_data, user, metadata, model):
         log.debug(f'{tool_ids=}')
         log.debug(f'{direct_tool_servers=}')
 
-        tools_dict = {}
-
-        mcp_clients = {}
         mcp_tools_dict = {}
 
         if tool_ids:
@@ -2648,9 +2649,13 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                         'server': tool_server,
                     }
 
+    if mcp_clients:
+        metadata["mcp_clients"] = mcp_clients
+
     # Force a specific tool function when available: tool_kcd_query_post
     # If present, pre-execute it on the server so results are always injected
     # into the conversation, regardless of provider tool-calling support.
+    forced_tool_executed = False
     try:
         FORCED_TOOL_FUNCTION = "tool_kcd_query_post"
         if FORCED_TOOL_FUNCTION in tools_dict:
@@ -2719,52 +2724,44 @@ async def process_chat_payload(request, form_data, user, metadata, model):
             # We already injected results; disable downstream tool processing to avoid
             # double execution or provider-side tool calls
             tools_dict = {}
+            forced_tool_executed = True
             if "tool_choice" in form_data:
                 del form_data["tool_choice"]
     except Exception:
         # Do not block chat on enforcement errors; fall back to normal behavior.
         pass
 
-        # Inject builtin tools for native function calling based on enabled features and model capability
-        # Check if builtin_tools capability is enabled for this model (defaults to True if not specified)
-        builtin_tools_enabled = (model.get('info', {}).get('meta', {}).get('capabilities') or {}).get(
-            'builtin_tools', True
+    # Inject builtin tools for native function calling based on enabled features and model capability
+    # Check if builtin_tools capability is enabled for this model (defaults to True if not specified)
+    builtin_tools_enabled = (
+        model.get("info", {}).get("meta", {}).get("capabilities") or {}
+    ).get("builtin_tools", True)
+    if (
+        metadata.get("params", {}).get("function_calling") == "native"
+        and builtin_tools_enabled
+        and not forced_tool_executed
+    ):
+        # Add file context to user messages
+        chat_id = metadata.get("chat_id")
+        form_data["messages"] = add_file_context(
+            form_data.get("messages", []), chat_id, user
         )
-        if metadata.get('params', {}).get('function_calling') == 'native' and builtin_tools_enabled:
-            # Add file context to user messages
-            chat_id = metadata.get('chat_id')
-            form_data['messages'] = add_file_context(form_data.get('messages', []), chat_id, user)
-            builtin_tools = get_builtin_tools(
-                request,
-                {
-                    **extra_params,
-                    '__event_emitter__': event_emitter,
-                    '__skill_ids__': [s.id for s in available_skills if s.id not in user_skill_ids],
-                },
-                features,
-                model,
-            )
-            for name, tool_dict in builtin_tools.items():
-                if name not in tools_dict:
-                    tools_dict[name] = tool_dict
+        builtin_tools = get_builtin_tools(
+            request,
+            {
+                **extra_params,
+                "__event_emitter__": event_emitter,
+                "__skill_ids__": [
+                    s.id for s in available_skills if s.id not in user_skill_ids
+                ],
+            },
+            features,
+            model,
+        )
+        for name, tool_dict in builtin_tools.items():
+            if name not in tools_dict:
+                tools_dict[name] = tool_dict
 
-        if tools_dict:
-            if metadata.get('params', {}).get('function_calling') == 'native':
-                # If the function calling is native, then call the tools function calling handler
-                metadata['tools'] = tools_dict
-                form_data['tools'] = [
-                    {'type': 'function', 'function': tool.get('spec', {})} for tool in tools_dict.values()
-                ]
-
-        else:
-            # If the function calling is not native, then call the tools function calling handler
-            try:
-                form_data, flags = await chat_completion_tools_handler(
-                    request, form_data, extra_params, user, models, tools_dict
-                )
-                sources.extend(flags.get("sources", []))
-            except Exception as e:
-                log.exception(e)
     # Check if file context extraction is enabled for this model (default True)
     file_context_enabled = (model.get('info', {}).get('meta', {}).get('capabilities') or {}).get('file_context', True)
 
@@ -2783,19 +2780,42 @@ async def process_chat_payload(request, form_data, user, metadata, model):
     metadata['user_prompt'] = get_last_user_message(form_data['messages'])
     metadata['sources'] = sources[:] if sources else []
 
-    # If context is not empty, insert it into the messages
-    if sources and prompt:
-        form_data['messages'] = apply_source_context_to_messages(request, form_data['messages'], sources, prompt)
+    # After RAG injection, optionally process tools so that
+    # tool outputs are appended after RAG context.
+    if tools_dict:
+        if metadata.get("params", {}).get("function_calling") == "native":
+            # Native function calling: attach tool specs for the provider.
+            metadata["tools"] = tools_dict
+            form_data["tools"] = [
+                {"type": "function", "function": tool.get("spec", {})}
+                for tool in tools_dict.values()
+            ]
+        else:
+            # Non-native: execute tools now so outputs appear after RAG context.
+            try:
+                form_data, _flags = await chat_completion_tools_handler(
+                    request, form_data, extra_params, user, models, tools_dict
+                )
+                tool_sources = _flags.get("sources", [])
+                if tool_sources:
+                    sources.extend(tool_sources)
+            except Exception as e:
+                log.exception(e)
 
-    # If there are citations, add them to the data_items
+    # If there are citations, add them to the data_items and message context.
     sources = [
         source
         for source in sources
         if source.get('source', {}).get('name', '') or source.get('source', {}).get('id', '')
     ]
 
-    if len(sources) > 0:
-        events.append({'sources': sources})
+    if sources and prompt:
+        form_data["messages"] = apply_source_context_to_messages(
+            request, form_data["messages"], sources, prompt
+        )
+
+    if sources:
+        events.append({"sources": sources})
 
     if model_knowledge:
         await event_emitter(
@@ -2809,46 +2829,6 @@ async def process_chat_payload(request, form_data, user, metadata, model):
                 },
             }
         )
-        
-    if mcp_clients:
-        metadata["mcp_clients"] = mcp_clients
-    # After RAG injection, optionally process tools so that
-    # tool outputs are appended after RAG context.
-    if tools_dict:
-        if metadata.get("function_calling") == "native":
-            # Native function calling: attach tool specs for the provider.
-            metadata["tools"] = tools_dict
-            form_data["tools"] = [
-                {"type": "function", "function": tool.get("spec", {})}
-                for tool in tools_dict.values()
-            ]
-        else:
-            # Non-native: execute tools now so outputs appear after RAG context.
-            try:
-                form_data, _flags = await chat_completion_tools_handler(
-                    request, form_data, extra_params, user, models, tools_dict
-                )
-                # Merge tool-derived sources with RAG sources for unified citation display
-                tool_sources = _flags.get("sources", [])
-                if tool_sources:
-                    sources.extend(tool_sources)
-                    # Update or append the unified sources event
-                    unified_sources = [
-                        source
-                        for source in sources
-                        if source.get("source", {}).get("name", "")
-                        or source.get("source", {}).get("id", "")
-                    ]
-                    updated = False
-                    for idx, ev in enumerate(events):
-                        if isinstance(ev, dict) and "sources" in ev:
-                            events[idx] = {"sources": unified_sources}
-                            updated = True
-                            break
-                    if not updated and len(unified_sources) > 0:
-                        events.append({"sources": unified_sources})
-            except Exception as e:
-                log.exception(e)
 
     return form_data, metadata, events
 
