@@ -436,27 +436,26 @@
 		</div>
 	</DropdownMenu.Trigger>
 
-	<DropdownMenu.Portal>
-		<DropdownMenu.Content
-			forceMount
-			trapFocus={false}
-			preventScroll={false}
-			side="bottom"
-			align={$mobile ? 'center' : 'start'}
-			sideOffset={2}
-			alignOffset={-1}
-		>
-			{#snippet child({ wrapperProps, props, open })}
-				{#if open}
-					<div {...wrapperProps}>
-						<div
-							{...props}
-							class="{props.class} z-40 {$mobile
-								? `w-full`
-								: `${className}`} max-w-[calc(100vw-1rem)] justify-start rounded-2xl bg-white dark:bg-gray-850 dark:text-white shadow-lg outline-hidden"
-							transition:flyAndScale
-						>
-							<slot>
+	<DropdownMenu.Content
+		forceMount
+		trapFocus={false}
+		preventScroll={false}
+		side="bottom"
+		align={$mobile ? 'center' : 'start'}
+		sideOffset={2}
+		alignOffset={-1}
+	>
+		{#snippet child({ wrapperProps, props, open })}
+			{#if open}
+				<div {...wrapperProps}>
+					<div
+						{...props}
+						class="{props.class} z-40 {$mobile
+							? `w-full`
+							: `${className}`} max-w-[calc(100vw-1rem)] justify-start rounded-2xl bg-white dark:bg-gray-850 dark:text-white shadow-lg outline-hidden"
+						transition:flyAndScale
+					>
+						<slot>
 								{#if searchEnabled}
 									<div class="flex items-center gap-2.5 px-4.5 pt-3.5 mb-1.5">
 										<Search className="size-4" strokeWidth="2.5" />
@@ -747,11 +746,10 @@
 
 								<div class="hidden w-[42rem]" />
 								<div class="hidden w-[32rem]" />
-							</slot>
-						</div>
+						</slot>
 					</div>
-				{/if}
-			{/snippet}
-		</DropdownMenu.Content>
-	</DropdownMenu.Portal>
+				</div>
+			{/if}
+		{/snippet}
+	</DropdownMenu.Content>
 </DropdownMenu.Root>

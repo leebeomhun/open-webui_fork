@@ -1337,6 +1337,7 @@ async def agenerate_ollama_batch_embeddings(
     if ENABLE_FORWARD_USER_INFO_HEADERS and user:
         headers = include_user_info_headers(headers, user)
 
+    try:
         async with aiohttp.ClientSession(
             trust_env=True, timeout=aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT)
         ) as session:
@@ -1355,7 +1356,7 @@ async def agenerate_ollama_batch_embeddings(
     except Exception as e:
         log.exception(f"Error generating ollama batch embeddings: {e}")
         return None
-    
+
 def get_embedding_function(
     embedding_engine,
     embedding_model,
